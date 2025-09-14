@@ -1,9 +1,11 @@
 
+
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import { Instructor, AvailableSlots } from '../lib/database.types';
+// FIX: Added .ts extension to resolve module error.
+import { Instructor, AvailableSlots } from '../lib/database.types.ts';
 import { daysInMonth, firstDayOfMonth } from '../utils/helpers';
-import { useAdmin } from '../contexts/AdminContext';
+import { useCreativeWritingAdmin } from '../contexts/admin/CreativeWritingAdminContext';
 
 interface BookingCalendarProps {
     instructor: Instructor;
@@ -11,7 +13,7 @@ interface BookingCalendarProps {
 }
 
 const BookingCalendar: React.FC<BookingCalendarProps> = ({ instructor, onDateTimeSelect }) => {
-    const { loading } = useAdmin();
+    const { loading } = useCreativeWritingAdmin();
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDay, setSelectedDay] = useState<number | null>(null);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);

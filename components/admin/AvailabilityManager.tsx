@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Plus, Trash2, Loader2 } from 'lucide-react';
-import { useAdmin } from '../../contexts/AdminContext';
+import { useCreativeWritingAdmin } from '../../contexts/admin/CreativeWritingAdminContext';
 import { useToast } from '../../contexts/ToastContext';
-import { Instructor, AvailableSlots } from '../../lib/database.types';
+// FIX: Added .ts extension to resolve module error.
+import { Instructor, AvailableSlots } from '../../lib/database.types.ts';
 import { daysInMonth, firstDayOfMonth } from '../../utils/helpers';
 
-const AvailabilityManager: React.FC = () => {
-    const { instructors, updateInstructorAvailability, loading } = useAdmin();
+interface AvailabilityManagerProps {
+    instructorId?: number;
+}
+
+const AvailabilityManager: React.FC<AvailabilityManagerProps> = ({ instructorId }) => {
+    const { instructors, updateInstructorAvailability, loading } = useCreativeWritingAdmin();
     const { addToast } = useToast();
     const [selectedInstructor, setSelectedInstructor] = useState<Instructor | null>(null);
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -14,10 +19,13 @@ const AvailabilityManager: React.FC = () => {
     const [newTime, setNewTime] = useState('');
 
     useEffect(() => {
-        if (!selectedInstructor && instructors.length > 0) {
+        if (instructorId) {
+            const instructor = instructors.find(i => i.id === instructorId);
+            setSelectedInstructor(instructor || null);
+        } else if (!selectedInstructor && instructors.length > 0) {
             setSelectedInstructor(instructors[0]);
         }
-    }, [instructors, selectedInstructor]);
+    }, [instructors, selectedInstructor, instructorId]);
 
     const availableSlots = (selectedInstructor?.availability as AvailableSlots) || {};
 
@@ -106,28 +114,30 @@ const AvailabilityManager: React.FC = () => {
 
     return (
         <div className="p-4 bg-gray-100 rounded-2xl shadow-inner border">
-             <div className="mb-4">
-                <label htmlFor="instructor-select" className="block text-sm font-bold text-gray-700 mb-2">
-                    اختر مدربًا لإدارة مواعيده:
-                </label>
-                <select
-                    id="instructor-select"
-                    value={selectedInstructor?.id || ''}
-                    onChange={(e) => {
-                        const newId = Number(e.target.value);
-                        setSelectedInstructor(instructors.find(i => i.id === newId) || null);
-                        setSelectedDay(null);
-                    }}
-                    className="w-full max-w-sm px-4 py-2 border border-gray-300 rounded-lg bg-white"
-                    disabled={loading || instructors.length === 0}
-                >
-                    {instructors.length > 0 ? (
-                      instructors.map(i => <option key={i.id} value={i.id}>{i.name}</option>)
-                    ) : (
-                      <option>لا يوجد مدربون</option>
-                    )}
-                </select>
-            </div>
+            {!instructorId && (
+                <div className="mb-4">
+                    <label htmlFor="instructor-select" className="block text-sm font-bold text-gray-700 mb-2">
+                        اختر مدربًا لإدارة مواعيده:
+                    </label>
+                    <select
+                        id="instructor-select"
+                        value={selectedInstructor?.id || ''}
+                        onChange={(e) => {
+                            const newId = Number(e.target.value);
+                            setSelectedInstructor(instructors.find(i => i.id === newId) || null);
+                            setSelectedDay(null);
+                        }}
+                        className="w-full max-w-sm px-4 py-2 border border-gray-300 rounded-lg bg-white"
+                        disabled={loading || instructors.length === 0}
+                    >
+                        {instructors.length > 0 ? (
+                        instructors.map(i => <option key={i.id} value={i.id}>{i.name}</option>)
+                        ) : (
+                        <option>لا يوجد مدربون</option>
+                        )}
+                    </select>
+                </div>
+            )}
             {loading ? <Loader2 className="animate-spin text-blue-500"/> : !selectedInstructor ? (
                 <p className="text-center py-8 text-gray-500">الرجاء اختيار مدرب.</p>
             ) : (

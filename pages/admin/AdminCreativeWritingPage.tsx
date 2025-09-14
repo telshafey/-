@@ -1,14 +1,17 @@
 
 
+
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Save, Calendar, CheckSquare, Package, Settings, Loader2, Video } from 'lucide-react';
-import { useAdmin, CreativeWritingPackage, CreativeWritingBooking, AdditionalService } from '../../contexts/AdminContext';
+import { useCreativeWritingAdmin, CreativeWritingPackage, CreativeWritingBooking, AdditionalService } from '../../contexts/admin/CreativeWritingAdminContext';
 import { getStatusColor } from '../../utils/helpers';
 import AdminSection from '../../components/admin/AdminSection';
 import PageLoader from '../../components/ui/PageLoader';
 import { useToast } from '../../contexts/ToastContext';
-import { Instructor } from '../../lib/database.types';
+// FIX: Added .ts extension to resolve module error.
+import { Instructor } from '../../lib/database.types.ts';
 
 const bookingStatusOptions: CreativeWritingBooking['status'][] = ['بانتظار الدفع', 'بانتظار المراجعة', 'مؤكد', 'مكتمل', 'ملغي'];
 
@@ -18,7 +21,7 @@ const AdminCreativeWritingPage: React.FC = () => {
         creativeWritingBookings, updateBookingStatus, generateAndSetSessionId,
         additionalServices, updateAdditionalServices,
         loading, error
-    } = useAdmin();
+    } = useCreativeWritingAdmin();
     const navigate = useNavigate();
     const { addToast } = useToast();
 

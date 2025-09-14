@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UserPlus, Eye, Link as LinkIcon } from 'lucide-react';
-import { useAdmin, JoinRequest } from '../../contexts/AdminContext';
+import { useCommunication, JoinRequest } from '../../contexts/admin/CommunicationContext';
 import { formatDate } from '../../utils/helpers';
 import AdminSection from '../../components/admin/AdminSection';
 import PageLoader from '../../components/ui/PageLoader';
@@ -40,7 +40,7 @@ const ViewRequestModal: React.FC<{
 };
 
 const AdminJoinRequestsPage: React.FC = () => {
-    const { joinRequests, updateJoinRequestStatus, loading, error } = useAdmin();
+    const { joinRequests, updateJoinRequestStatus, loading, error } = useCommunication();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedRequest, setSelectedRequest] = useState<JoinRequest | null>(null);
 

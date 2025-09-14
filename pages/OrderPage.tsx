@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Send, Camera, Trash2, Loader2, AlertCircle, Sparkles } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useAdmin } from '../contexts/AdminContext';
 import { useProduct } from '../contexts/ProductContext';
-import { useAuth } from '../contexts/AuthContext';
-import { useAdmin, PersonalizedProduct } from '../contexts/AdminContext';
+// FIX: Added .tsx extension to resolve module error.
+import { useAuth } from '../contexts/AuthContext.tsx';
 import { useToast } from '../contexts/ToastContext';
 import PageLoader from '../components/ui/PageLoader';
+import { Loader2, Send, User, BookHeart, Camera, Sparkles, Package, Check, PlusCircle, Award, Target } from 'lucide-react';
 import InteractivePreview from '../components/order/InteractivePreview';
-import Accordion from '../components/ui/Accordion';
 
 const storyValues = [
     { key: 'courage', title: 'الشجاعة' },
@@ -15,64 +15,65 @@ const storyValues = [
     { key: 'honesty', title: 'الصدق' },
     { key: 'kindness', title: 'العطف' },
     { key: 'perseverance', title: 'المثابرة' },
-    { key: 'custom', title: 'قيمة أخرى (حددها بنفسك)' },
+    { key: 'custom', title: 'قيمة أخرى (أحددها بنفسي)' },
+];
+
+const valuesStoryOptions = [
+    { key: 'respect', title: 'الاستئذان والاحترام' },
+    { key: 'cooperation', title: 'التعاون والمشاركة' },
+    { key: 'honesty', title: 'الصدق والأمانة' },
+    { key: 'cleanliness', title: 'النظافة والترتيب' },
+    { key: 'custom', title: 'اكتب هدفك' },
+];
+
+const skillsStoryOptions = [
+    { key: 'time_management', title: 'تنظيم الوقت' },
+    { key: 'emotion_management', title: 'إدارة العواطف' },
+    { key: 'problem_solving', title: 'حل المشكلات' },
+    { key: 'creative_thinking', title: 'التفكير الإبداعي' },
+    { key: 'custom', title: 'اكتب هدفك' },
 ];
 
 
-const FileUpload: React.FC<{ label: string; description: string; required?: boolean; file: File | null; setFile: (file: File | null) => void; id: string; disabled?: boolean;}> = ({ label, description, required, file, setFile, id, disabled }) => {
+const Section: React.FC<{title: string, icon: React.ReactNode, children: React.ReactNode}> = ({title, icon, children}) => (
+    <div className="bg-white p-8 rounded-2xl shadow-lg">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3 border-b-2 border-blue-100 pb-3">
+            {icon} {title}
+        </h2>
+        <div className="space-y-6">{children}</div>
+    </div>
+);
+
+const FileUpload: React.FC<{ name: string, label: string, file: File | null, onFileChange: (name: string, file: File | null) => void }> = ({ name, label, file, onFileChange }) => {
     const [preview, setPreview] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!file) {
-            setPreview(null);
-            return;
+        if (file) {
+            const objectUrl = URL.createObjectURL(file);
+            setPreview(objectUrl);
+            return () => URL.revokeObjectURL(objectUrl);
         }
-        const objectUrl = URL.createObjectURL(file);
-        setPreview(objectUrl);
-        return () => URL.revokeObjectURL(objectUrl);
+        setPreview(null);
     }, [file]);
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFile(e.target.files ? e.target.files[0] : null);
-    };
-    
-    const removeFile = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setFile(null);
-    }
 
     return (
         <div>
-            <label htmlFor={id} className="block text-sm font-bold text-gray-700">
-                {label}{required && <span className="text-red-500 ms-1">*</span>}
-            </label>
-            <p className="text-xs text-gray-500 mb-2">{description}</p>
-            <div className={`mt-1 flex items-center justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md transition-colors ${!disabled && 'hover:border-blue-400'} ${preview ? 'relative p-2' : ''} ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}>
-                <input id={id} name={id} type="file" className="sr-only" onChange={handleFileChange} accept="image/*" required={required} disabled={disabled} />
-                {preview ? (
-                   <label htmlFor={id} className={disabled ? 'cursor-not-allowed' : 'cursor-pointer'}>
-                        <img src={preview} alt="Preview" className="h-32 w-auto rounded-md object-cover" />
-                        {!disabled && 
-                            <button onClick={removeFile} className="absolute top-2 right-2 bg-white/70 backdrop-blur-sm rounded-full p-1 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all">
-                                <Trash2 size={20} />
-                            </button>
-                        }
-                    </label>
-                ) : (
-                    <label htmlFor={id} className={`w-full h-full text-center ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
-                        <div className="space-y-1 text-center py-4">
-                            <Camera className="mx-auto h-12 w-12 text-gray-400" />
-                            <div className="flex text-sm text-gray-600 justify-center">
-                                <span className={`font-medium ${!disabled ? 'text-blue-600 hover:text-blue-500' : ''}`}>
-                                    اختر ملفًا
-                                </span>
-                                <p className="ps-1">أو اسحبه هنا</p>
-                            </div>
-                             <p className="text-xs text-gray-500">PNG, JPG up to 10MB</p>
-                        </div>
-                    </label>
-                )}
+            <label className="block text-sm font-bold text-gray-700 mb-2">{label}</label>
+            <div className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md transition-colors hover:border-blue-400`}>
+                <div className="space-y-1 text-center">
+                    {preview ? (
+                         <img src={preview} alt="Preview" className="h-24 w-auto mx-auto rounded-md object-cover" />
+                    ) : (
+                        <Camera className="mx-auto h-12 w-12 text-gray-400" />
+                    )}
+                    <div className="flex text-sm text-gray-600 justify-center">
+                        <label htmlFor={name} className={`relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500`}>
+                            <span>{file ? 'تغيير الصورة' : 'اختر صورة'}</span>
+                            <input id={name} name={name} type="file" className="sr-only" onChange={(e) => onFileChange(name, e.target.files ? e.target.files[0] : null)} accept="image/*" />
+                        </label>
+                    </div>
+                    <p className="text-xs text-gray-500">{file ? file.name : 'PNG, JPG'}</p>
+                </div>
             </div>
         </div>
     );
@@ -81,326 +82,355 @@ const FileUpload: React.FC<{ label: string; description: string; required?: bool
 
 const OrderPage: React.FC = () => {
     const { productKey } = useParams<{ productKey: string }>();
-    const { prices, loading: pricesLoading } = useProduct();
-    const { isLoggedIn, currentUser, loading: authLoading } = useAuth();
-    const { createOrder, personalizedProducts, loading: adminLoading } = useAdmin();
-    const { addToast } = useToast();
     const navigate = useNavigate();
+    const { addToast } = useToast();
+    const { personalizedProducts, loading: productsLoading, createOrder } = useAdmin();
+    const { prices, loading: pricesLoading } = useProduct();
+    const { currentUser, isLoggedIn, childProfiles } = useAuth();
 
-    const [product, setProduct] = useState<PersonalizedProduct | null>(null);
-    const [formError, setFormError] = useState<string | null>(null);
-
+    const [selectedChildId, setSelectedChildId] = useState<string>('');
     const [formData, setFormData] = useState({
         childName: '',
         childAge: '',
-        childGender: 'ولد',
-        familyNames: '',
+        childGender: 'ذكر' as 'ذكر' | 'أنثى',
         childTraits: '',
-        characterDescription: '',
-        storyValue: '',
-        storyCustomValue: '',
-        productOptions: {
-            storyType: 'printed' as 'printed' | 'electronic',
-        },
-        shipping: {
-            type: 'own', // 'own' or 'gift'
-            address: '',
-            city: '',
-            zip: '',
-        }
+        familyNames: '',
+        storyValue: 'courage',
+        valuesStoryOption: 'respect',
+        skillsStoryOption: 'time_management',
+        customGoal: '',
     });
-
     const [files, setFiles] = useState<{ [key: string]: File | null }>({
-        face: null,
-        full: null,
-        extra1: null,
-        extra2: null,
+        mainPhoto: null,
+        extraPhoto1: null,
+        extraPhoto2: null,
     });
-    
-    const [totalPrice, setTotalPrice] = useState(0);
+    const [orderOptions, setOrderOptions] = useState({
+        format: 'printed',
+        addons: [] as string[],
+    });
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const product = useMemo(() => 
+        personalizedProducts.find(p => p.key === productKey), 
+    [personalizedProducts, productKey]);
+
+    useEffect(() => {
+        if (!productsLoading && !product) {
+            addToast('المنتج المطلوب غير موجود.', 'error');
+            navigate('/store');
+        }
+    }, [productsLoading, product, navigate, addToast]);
     
     useEffect(() => {
-        const foundProduct = personalizedProducts.find(p => p.key === productKey);
-        if (foundProduct) {
-            setProduct(foundProduct);
-            setFormError(null);
-        } else if (!adminLoading) {
-            setFormError(`المنتج المطلوب (${productKey}) غير موجود أو غير متوفر حاليًا.`);
+        if (selectedChildId) {
+            const child = childProfiles.find(c => c.id.toString() === selectedChildId);
+            if (child) {
+                setFormData(prev => ({
+                    ...prev,
+                    childName: child.name,
+                    childAge: child.age.toString(),
+                    childGender: child.gender,
+                }));
+            }
         }
-    }, [productKey, personalizedProducts, adminLoading]);
+    }, [selectedChildId, childProfiles]);
 
+    const addonsAvailable = useMemo(() => {
+        return personalizedProducts.filter(p => ['coloring_book', 'dua_booklet', 'values_story', 'skills_story'].includes(p.key));
+    }, [personalizedProducts]);
 
-    useEffect(() => {
-        if (!prices || !product) {
-            setTotalPrice(0);
-            return;
-        };
+    const totalPrice = useMemo(() => {
+        if (!prices || !product) return 0;
         let total = 0;
-        switch(product.key) {
-            case 'custom_story':
-                total = formData.productOptions.storyType === 'printed' ? prices.story.printed : prices.story.electronic;
-                break;
-            case 'coloring_book':
-                total = prices.coloringBook;
-                break;
-            case 'dua_booklet':
-                total = prices.duaBooklet;
-                break;
-            case 'values_story':
-                total = prices.valuesStory;
-                break;
-            case 'skills_story':
-                total = prices.skillsStory;
-                break;
-            case 'gift_box':
-                total = prices.giftBox;
-                break;
+        if (product.key === 'custom_story') {
+            total = orderOptions.format === 'printed' ? prices.story.printed : prices.story.electronic;
+        } else if (product.key === 'gift_box') {
+            total = prices.giftBox;
+        } else if (['coloring_book', 'dua_booklet', 'values_story', 'skills_story'].includes(product.key)) {
+            total = (prices as any)[product.key];
         }
-        setTotalPrice(total);
-    }, [formData.productOptions.storyType, product, prices]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-      const { name, value } = e.target;
-      setFormData(prev => ({ ...prev, [name]: value }));
-    };
+        if(product.key === 'custom_story') {
+            orderOptions.addons.forEach(addonKey => {
+                if (addonKey in prices) {
+                    total += (prices as any)[addonKey];
+                }
+            });
+        }
+        return total;
+    }, [prices, product, orderOptions]);
+    
+    const showFullCustomization = product?.key === 'custom_story' || product?.key === 'gift_box';
+    const showValuesCustomization = product?.key === 'values_story';
+    const showSkillsCustomization = product?.key === 'skills_story';
+    const showImageUpload = true; 
+    const showOptions = product?.key === 'custom_story';
+    const isCustomGoalSelected = (showFullCustomization && formData.storyValue === 'custom') ||
+                                (showValuesCustomization && formData.valuesStoryOption === 'custom') ||
+                                (showSkillsCustomization && formData.skillsStoryOption === 'custom');
 
-    const handleShippingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = e.target;
-      const [field, subfield] = name.split('.');
-      if (subfield) {
-        setFormData(prev => ({ ...prev, shipping: { ...prev.shipping, [subfield]: value } }));
-      } else {
-        setFormData(prev => ({ ...prev, shipping: { ...prev.shipping, [field]: value } }));
-      }
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
     
-    const handleProductOptionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      const { name, value } = e.target;
-      setFormData(prev => ({
-          ...prev,
-          productOptions: {
-              ...prev.productOptions,
-              [name]: value,
-          }
-      }));
-    }
+    const handleFileChange = (name: string, file: File | null) => {
+        setFiles(prev => ({ ...prev, [name]: file }));
+    };
+
+    const handleAddonChange = (addonKey: string) => {
+        setOrderOptions(prev => {
+            const newAddons = prev.addons.includes(addonKey)
+                ? prev.addons.filter(a => a !== addonKey)
+                : [...prev.addons, addonKey];
+            return { ...prev, addons: newAddons };
+        });
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!isLoggedIn || !currentUser) {
-            addToast('يجب تسجيل الدخول أولاً لإرسال الطلب.', 'error');
+            addToast('يجب تسجيل الدخول أولاً لإتمام الطلب.', 'error');
             navigate('/account');
             return;
         }
-        if (!product) {
-            addToast('لا يمكن إرسال الطلب لمنتج غير موجود.', 'error');
+        if (!formData.childName || !formData.childAge) {
+            addToast('يرجى ملء بيانات الطفل.', 'warning');
+            return;
+        }
+        if (!files.mainPhoto) {
+            addToast('يرجى رفع صورة رئيسية واضحة للطفل.', 'warning');
             return;
         }
 
         setIsSubmitting(true);
         try {
+            const baseItem = product?.title || 'منتج';
+            const formatText = showOptions ? (orderOptions.format === 'printed' ? ' (مطبوعة)' : ' (إلكترونية)') : '';
+            const addonsText = showOptions ? orderOptions.addons.map(key => addonsAvailable.find(p => p.key === key)?.title).join('، ') : '';
+            const itemSummary = `${baseItem}${formatText}${addonsText ? ` + ${addonsText}` : ''}`;
+
+            const details: any = {
+                productKey: product!.key,
+                productTitle: product!.title,
+                childName: formData.childName,
+                childAge: parseInt(formData.childAge),
+                childGender: formData.childGender,
+                products: itemSummary,
+            };
+
+            if (showFullCustomization) {
+                details.childTraits = formData.childTraits;
+                details.familyNames = formData.familyNames;
+                details.storyValue = formData.storyValue === 'custom' ? formData.customGoal : storyValues.find(v => v.key === formData.storyValue)?.title;
+            }
+            if (showValuesCustomization) {
+                details.storyGoal = formData.valuesStoryOption === 'custom' ? formData.customGoal : valuesStoryOptions.find(v => v.key === formData.valuesStoryOption)?.title;
+            }
+            if (showSkillsCustomization) {
+                details.storyGoal = formData.skillsStoryOption === 'custom' ? formData.customGoal : skillsStoryOptions.find(v => v.key === formData.skillsStoryOption)?.title;
+            }
+            if (showOptions) {
+                details.format = orderOptions.format;
+                details.addons = orderOptions.addons;
+            }
+            
             await createOrder({
                 currentUser,
-                formData,
+                formData: details,
                 files,
                 totalPrice,
-                itemSummary: product.title,
+                itemSummary,
             });
-            
-            addToast('تم إرسال طلبك بنجاح. يرجى إكمال عملية الدفع من صفحة طلباتي.', 'success');
+            addToast('تم إنشاء طلبك بنجاح! سيتم توجيهك لصفحة حسابك لإتمام الدفع.', 'success');
             navigate('/account');
-
         } catch (error: any) {
             addToast(`حدث خطأ: ${error.message}`, 'error');
-            console.error("Order submission error:", error);
-        } finally {
             setIsSubmitting(false);
         }
     };
-        
-    const isLoading = pricesLoading || authLoading || adminLoading;
-
-    if (isLoading) {
+    
+    if (productsLoading || pricesLoading || !product || !prices) {
         return <PageLoader text="جاري تحميل صفحة الطلب..." />;
     }
 
-    if (formError) {
-        return <div className="min-h-screen flex justify-center items-center text-red-500 text-xl bg-red-50 p-8 rounded-lg">{formError}</div>
-    }
-
-    if (!prices || !product) {
-        return <PageLoader text="جاري تهيئة المنتج..." />;
-    }
-
-    const showChildInfo = ['custom_story', 'coloring_book', 'dua_booklet', 'values_story', 'skills_story', 'gift_box'].includes(product.key);
-    const showAdvancedChildInfo = ['custom_story', 'coloring_book', 'dua_booklet', 'values_story', 'skills_story', 'gift_box'].includes(product.key);
-    const showStoryValueCustomization = ['custom_story', 'values_story', 'skills_story', 'gift_box'].includes(product.key);
-    const showPhotos = ['custom_story', 'coloring_book', 'dua_booklet', 'values_story', 'skills_story', 'gift_box'].includes(product.key);
+    const OrderSummary = () => (
+        <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-blue-100 flex items-center gap-3">
+                <Package className="text-blue-500" /> ملخص الطلب
+            </h2>
+            <div className="space-y-3">
+                <div className="flex justify-between">
+                    <span className="text-gray-600">{product.title}{showOptions && ` (${orderOptions.format === 'printed' ? 'مطبوعة' : 'إلكترونية'})`}</span>
+                    <span className="font-semibold">
+                        {product.key === 'custom_story' ? (orderOptions.format === 'printed' ? prices.story.printed : prices.story.electronic) : (prices as any)[product.key]} ج.م
+                    </span>
+                </div>
+                {showOptions && orderOptions.addons.map(key => {
+                     const addon = addonsAvailable.find(p => p.key === key);
+                     return (
+                         <div key={key} className="flex justify-between text-sm">
+                            <span className="text-gray-500">إضافة: {addon?.title}</span>
+                            <span className="font-semibold">{(prices as any)[key]} ج.م</span>
+                        </div>
+                     )
+                })}
+            </div>
+            <div className="mt-6 pt-4 border-t-2 border-dashed">
+                <div className="flex justify-between items-center">
+                    <p className="text-lg font-bold text-gray-800">الإجمالي</p>
+                    <p className="text-3xl font-extrabold text-blue-600">{totalPrice} ج.م</p>
+                </div>
+            </div>
+        </div>
+    );
 
     return (
-        <div className="bg-gray-50 py-12 sm:py-16 animate-fadeIn">
+        <div className="bg-gray-50 py-16 sm:py-20 animate-fadeIn">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-12">
-                        <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-600">اطلب: {product.title}</h1>
-                        <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">املأ البيانات المطلوبة لإتمام طلبك لهذا المنتج.</p>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-                        <div className="lg:col-span-1 order-last lg:order-first">
-                            <div className="sticky top-24">
-                                <InteractivePreview formData={formData} product={product} />
-                            </div>
-                        </div>
+                <div className="text-center mb-12">
+                    <h1 className="text-4xl font-extrabold text-blue-600">طلب {product.title}</h1>
+                    <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">{product.description}</p>
+                </div>
+                
+                <form onSubmit={handleSubmit}>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                        <div className="lg:col-span-2 space-y-8">
+                            <Section title="الخطوة 1: اختيار ملف الطفل" icon={<User size={22} />}>
+                                <div>
+                                    <label htmlFor="child-select" className="block text-sm font-bold text-gray-700 mb-2">اختر طفلاً محفوظاً (اختياري)</label>
+                                    <select 
+                                        id="child-select"
+                                        value={selectedChildId} 
+                                        onChange={(e) => setSelectedChildId(e.target.value)} 
+                                        className="w-full mt-1 p-2 border border-gray-300 rounded-lg bg-white" 
+                                    >
+                                        <option value="">-- اختر لملء البيانات تلقائياً --</option>
+                                        {childProfiles.map(child => (
+                                            <option key={child.id} value={child.id}>{child.name}</option>
+                                        ))}
+                                    </select>
+                                    <p className="text-xs text-gray-500 mt-2">
+                                        أو يمكنك <Link to="/account" target="_blank" className="text-blue-600 hover:underline">إضافة ملف طفل جديد</Link> من صفحة حسابك.
+                                    </p>
+                                </div>
+                            </Section>
 
-                        <form className="lg:col-span-2" onSubmit={handleSubmit}>
-                            {!isLoggedIn && (
-                                <div className="p-4 mb-8 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800">
-                                <div className="flex items-center gap-3">
-                                    <AlertCircle/>
-                                    <div className="font-bold">
-                                        يرجى <a href="#/account" className="underline">تسجيل الدخول</a> أو <a href="#/account" className="underline">إنشاء حساب</a> أولاً لتتمكن من إرسال طلبك.
+                             <Section title="الخطوة 2: بيانات بطل القصة" icon={<BookHeart size={22}/>}>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div>
+                                        <label htmlFor="childName" className="block text-sm font-bold text-gray-700 mb-2">اسم الطفل*</label>
+                                        <input type="text" name="childName" value={formData.childName} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-lg" required />
+                                    </div>
+                                     <div>
+                                        <label htmlFor="childAge" className="block text-sm font-bold text-gray-700 mb-2">عمر الطفل*</label>
+                                        <input type="number" name="childAge" value={formData.childAge} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-lg" required />
                                     </div>
                                 </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 mb-2">جنس الطفل*</label>
+                                    <div className="flex gap-4">
+                                        <label className="flex items-center"><input type="radio" name="childGender" value="ذكر" checked={formData.childGender === 'ذكر'} onChange={handleChange} className="h-4 w-4 text-blue-600"/> <span className="ms-2">ذكر</span></label>
+                                        <label className="flex items-center"><input type="radio" name="childGender" value="أنثى" checked={formData.childGender === 'أنثى'} onChange={handleChange} className="h-4 w-4 text-pink-600"/> <span className="ms-2">أنثى</span></label>
+                                    </div>
                                 </div>
+                            </Section>
+                             
+                            {showFullCustomization && (
+                                <Section title="الخطوة 3: تخصيص القصة" icon={<Sparkles size={22} />}>
+                                    <div>
+                                        <label htmlFor="childTraits" className="block text-sm font-bold text-gray-700 mb-2">صفات الطفل وهواياته</label>
+                                        <textarea name="childTraits" value={formData.childTraits} onChange={handleChange} rows={3} className="w-full p-2 border border-gray-300 rounded-lg" placeholder="مثال: يحب الديناصورات، ذكي، خجول قليلاً"></textarea>
+                                    </div>
+                                     <div>
+                                        <label htmlFor="familyNames" className="block text-sm font-bold text-gray-700 mb-2">أسماء أفراد العائلة أو الأصدقاء (اختياري)</label>
+                                        <input type="text" name="familyNames" value={formData.familyNames} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-lg" placeholder="مثال: أخوه علي، صديقته المقربة فاطمة"/>
+                                    </div>
+                                     <div>
+                                        <label htmlFor="storyValue" className="block text-sm font-bold text-gray-700 mb-2">القيمة التربوية الأساسية للقصة*</label>
+                                        <select name="storyValue" value={formData.storyValue} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-lg bg-white">
+                                            {storyValues.map(v => <option key={v.key} value={v.key}>{v.title}</option>)}
+                                        </select>
+                                    </div>
+                                </Section>
+                            )}
+                            
+                            {showValuesCustomization && (
+                                <Section title="الخطوة 3: اختيار القيمة التربوية" icon={<Award size={22} />}>
+                                    <div>
+                                        <label htmlFor="valuesStoryOption" className="block text-sm font-bold text-gray-700 mb-2">اختر القيمة أو الأدب من القائمة*</label>
+                                        <select name="valuesStoryOption" value={formData.valuesStoryOption} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-lg bg-white">
+                                            {valuesStoryOptions.map(v => <option key={v.key} value={v.key}>{v.title}</option>)}
+                                        </select>
+                                    </div>
+                                </Section>
                             )}
 
-                            <div className="space-y-6">
-                                {showChildInfo && (
-                                    <Accordion title="1. بيانات الطفل">
-                                        <div className="p-6 space-y-6 bg-gray-50/50">
-                                            <div>
-                                                <label htmlFor="childName" className="block text-sm font-bold text-gray-700 mb-2">اسم الطفل*</label>
-                                                <input type="text" id="childName" name="childName" onChange={handleInputChange} value={formData.childName} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="مثال: أحمد" required />
-                                            </div>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                                <div>
-                                                    <label htmlFor="childAge" className="block text-sm font-bold text-gray-700 mb-2">العمر*</label>
-                                                    <input type="number" id="childAge" name="childAge" onChange={handleInputChange} value={formData.childAge} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="8" required />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-sm font-bold text-gray-700 mb-2">الجنس*</label>
-                                                    <select id="childGender" name="childGender" onChange={handleInputChange} value={formData.childGender} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white" required>
-                                                        <option>ولد</option>
-                                                        <option>بنت</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            {showAdvancedChildInfo && (
-                                                <>
-                                                    <div className="pt-4 border-t">
-                                                        <label htmlFor="characterDescription" className="block text-sm font-bold text-gray-700 mb-2">وصف شكل شخصية الطفل (اختياري)</label>
-                                                        <textarea id="characterDescription" name="characterDescription" onChange={handleInputChange} value={formData.characterDescription} rows={3} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="مثال: شعر بني قصير ومموج، عينان بنيتان، يرتدي نظارة حمراء..."></textarea>
-                                                    </div>
-                                                    
-                                                    <div className="pt-4 border-t">
-                                                        <label htmlFor="familyNames" className="block text-sm font-bold text-gray-700 mb-2">أسماء العائلة والأصدقاء (اختياري)</label>
-                                                        <input type="text" id="familyNames" name="familyNames" onChange={handleInputChange} value={formData.familyNames} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="الأم: فاطمة، الأخ: علي..."/>
-                                                    </div>
-                                                    <div>
-                                                        <label htmlFor="childTraits" className="block text-sm font-bold text-gray-700 mb-2">صفات الطفل وهواياته</label>
-                                                        <textarea id="childTraits" name="childTraits" onChange={handleInputChange} value={formData.childTraits} rows={3} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="يحب كرة القدم، لطيف، ويساعد أصدقاءه..."></textarea>
-                                                    </div>
-                                                </>
-                                            )}
-                                        </div>
-                                    </Accordion>
-                                )}
-                                
-                                {showStoryValueCustomization && (
-                                    <Accordion title="2. تخصيص القصة">
-                                        <div className="p-6 space-y-8 bg-gray-50/50">
-                                            <div>
-                                                <label htmlFor="storyValue" className="block text-md font-bold text-gray-700 mb-2">اختر قيمة لغرسها في القصة*</label>
-                                                 <p className="text-xs text-gray-500 mb-2">سيتم نسج القيمة التي تختارها بذكاء داخل أحداث القصة.</p>
-                                                <select id="storyValue" name="storyValue" onChange={handleInputChange} value={formData.storyValue} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white" required>
-                                                    <option value="" disabled>اختر قيمة أساسية</option>
-                                                    {storyValues.map(v => <option key={v.key} value={v.key}>{v.title}</option>)}
-                                                </select>
-                                            </div>
-                                            {formData.storyValue === 'custom' && (
-                                                <div>
-                                                    <label htmlFor="storyCustomValue" className="block text-sm font-bold text-gray-700 mb-2">القيمة المخصصة*</label>
-                                                    <input type="text" id="storyCustomValue" name="storyCustomValue" onChange={handleInputChange} value={formData.storyCustomValue} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="مثال: حب مساعدة كبار السن" required/>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </Accordion>
-                                )}
-
-                                {showPhotos && (
-                                    <Accordion title="3. صور الطفل">
-                                        <div className="p-6 bg-gray-50/50">
-                                            <p className="text-gray-600 mb-6 text-sm">يرجى رفع 2-4 صور واضحة للطفل من زوايا مختلفة لضمان أفضل نتيجة في الرسومات.</p>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                                <FileUpload id="face" label="صورة الوجه" description="صورة واضحة للوجه من الأمام" required file={files.face} setFile={(f) => setFiles(p => ({...p, face: f}))} />
-                                                <FileUpload id="full" label="صورة كاملة" description="صورة كاملة للطفل" required file={files.full} setFile={(f) => setFiles(p => ({...p, full: f}))} />
-                                                <FileUpload id="extra1" label="صورة من الجانب (اختياري)" description="لزيادة دقة الرسم" file={files.extra1} setFile={(f) => setFiles(p => ({...p, extra1: f}))} />
-                                                <FileUpload id="extra2" label="صورة أخرى (اختياري)" description="صورة وهو يمارس هوايته مثلاً" file={files.extra2} setFile={(f) => setFiles(p => ({...p, extra2: f}))} />
-                                            </div>
-                                        </div>
-                                    </Accordion>
-                                )}
-                                
-                                <Accordion title="4. اختيار المنتج والشحن">
-                                    <div className="p-6 space-y-8 bg-gray-50/50">
-                                        <div className="bg-gray-100 p-6 rounded-lg">
-                                            <h3 className="text-xl font-bold text-gray-800">{product.title}</h3>
-                                            <p className="text-gray-600 mt-2 text-sm">{product.description}</p>
-                                            
-                                            {product.key === 'custom_story' && (
-                                                <div className="mt-4 space-y-2 pt-4 border-t">
-                                                    <label className="block text-sm font-bold text-gray-700">اختر نوع النسخة:</label>
-                                                    <div className="flex flex-col sm:flex-row sm:gap-6">
-                                                    <label className="flex items-center"><input type="radio" name="storyType" value="printed" checked={formData.productOptions.storyType === 'printed'} onChange={handleProductOptionChange} className="text-blue-600 focus:ring-blue-500"/><span className="ms-2">مطبوعة + إلكترونية ({prices.story.printed} جنيه)</span></label>
-                                                    <label className="flex items-center"><input type="radio" name="storyType" value="electronic" checked={formData.productOptions.storyType === 'electronic'} onChange={handleProductOptionChange} className="text-blue-600 focus:ring-blue-500"/><span className="ms-2">إلكترونية فقط ({prices.story.electronic} جنيه)</span></label>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div className="space-y-4 pt-6 border-t">
-                                            <h3 className="text-lg font-bold text-gray-700">الشحن والتوصيل</h3>
-                                            <div className="space-y-2">
-                                                <label className="flex items-center p-4 border rounded-lg has-[:checked]:bg-blue-50 has-[:checked]:border-blue-300">
-                                                    <input type="radio" name="shipping.type" value="own" checked={formData.shipping.type === 'own'} onChange={handleShippingChange} className="text-blue-600 focus:ring-blue-500"/>
-                                                    <span className="ms-3 font-bold">الشحن إلى عنواني</span>
-                                                </label>
-                                                <label className="flex items-center p-4 border rounded-lg has-[:checked]:bg-blue-50 has-[:checked]:border-blue-300">
-                                                    <input type="radio" name="shipping.type" value="gift" checked={formData.shipping.type === 'gift'} onChange={handleShippingChange} className="text-blue-600 focus:ring-blue-500"/>
-                                                    <span className="ms-3 font-bold">إرسال كهدية إلى عنوان آخر</span>
-                                                </label>
-                                            </div>
-                                            <div className="p-4 border-t pt-6 space-y-4">
-                                                <h3 className="font-bold text-gray-700">{formData.shipping.type === 'gift' ? 'عنوان المستلم:' : 'عنوان الشحن:'}</h3>
-                                                <input type="text" name="shipping.address" onChange={handleShippingChange} placeholder="العنوان بالتفصيل" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" required/>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                    <input type="text" name="shipping.city" onChange={handleShippingChange} placeholder="المدينة" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" required/>
-                                                    <input type="text" name="shipping.zip" onChange={handleShippingChange} placeholder="الرمز البريدي" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" />
-                                                </div>
-                                            </div>
-                                        </div>
+                             {showSkillsCustomization && (
+                                <Section title="الخطوة 3: اختيار المهارة الحياتية" icon={<Target size={22} />}>
+                                    <div>
+                                        <label htmlFor="skillsStoryOption" className="block text-sm font-bold text-gray-700 mb-2">اختر المهارة من القائمة*</label>
+                                        <select name="skillsStoryOption" value={formData.skillsStoryOption} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-lg bg-white">
+                                            {skillsStoryOptions.map(v => <option key={v.key} value={v.key}>{v.title}</option>)}
+                                        </select>
                                     </div>
-                                </Accordion>
-
+                                </Section>
+                            )}
+                            
+                             {isCustomGoalSelected && (
                                 <div>
-                                    <div className="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg text-center">
-                                        <p className="text-lg font-semibold text-gray-700">الإجمالي المطلوب للدفع</p>
-                                        <p className="text-4xl font-extrabold text-blue-600 tracking-tight">{totalPrice} جنيه مصري</p>
-                                    </div>
-                                    
-                                    <div className="mt-6">
-                                        <button type="submit" disabled={isSubmitting || !isLoggedIn} className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white font-bold py-3 px-4 rounded-full hover:bg-blue-700 transition-colors transform hover:scale-105 shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed">
-                                            <Send size={18} />
-                                            <span>{isSubmitting ? 'جاري إنشاء الطلب...' : 'المتابعة للدفع'}</span>
-                                        </button>
-                                    </div>
+                                    <label htmlFor="customGoal" className="block text-sm font-bold text-gray-700 mb-2">حدد هدفك أو القيمة التي تريدها*</label>
+                                    <input type="text" name="customGoal" value={formData.customGoal} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-lg" required />
                                 </div>
-                            </div>
-                        </form>
+                             )}
+
+                            {showImageUpload && (
+                                <Section title="الخطوة 4: رفع الصور" icon={<Camera size={22} />}>
+                                    <p className="text-sm text-gray-600 -mt-4 mb-4">لأفضل نتيجة، يرجى رفع صور واضحة وعالية الجودة للطفل.</p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                        <FileUpload name="mainPhoto" label="صورة رئيسية (واضحة للوجه)*" file={files.mainPhoto} onFileChange={handleFileChange} />
+                                        <FileUpload name="extraPhoto1" label="صورة إضافية 1" file={files.extraPhoto1} onFileChange={handleFileChange} />
+                                        <FileUpload name="extraPhoto2" label="صورة إضافية 2" file={files.extraPhoto2} onFileChange={handleFileChange} />
+                                    </div>
+                                </Section>
+                            )}
+                             
+                            {showOptions && (
+                                 <Section title="الخطوة 5: خيارات إضافية" icon={<PlusCircle size={22} />}>
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-700 mb-2">اختر نسخة القصة*</label>
+                                        <div className="flex gap-4">
+                                            <label className="flex items-center"><input type="radio" name="format" value="printed" checked={orderOptions.format === 'printed'} onChange={e => setOrderOptions(p => ({...p, format: e.target.value}))} className="h-4 w-4"/> <span className="ms-2">مطبوعة (+ نسخة إلكترونية مجانية) - {prices.story.printed} ج.م</span></label>
+                                            <label className="flex items-center"><input type="radio" name="format" value="electronic" checked={orderOptions.format === 'electronic'} onChange={e => setOrderOptions(p => ({...p, format: e.target.value}))} className="h-4 w-4"/> <span className="ms-2">إلكترونية فقط - {prices.story.electronic} ج.م</span></label>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-700 mb-2">أضف لطلبك (اختياري)</label>
+                                        <div className="space-y-2">
+                                            {addonsAvailable.map(addon => (
+                                                 <label key={addon.key} className="flex items-center"><input type="checkbox" checked={orderOptions.addons.includes(addon.key)} onChange={() => handleAddonChange(addon.key)} className="h-4 w-4 rounded"/> <span className="ms-2">{addon.title} - {(prices as any)[addon.key]} ج.م</span></label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                 </Section>
+                            )}
+                        </div>
+                        <div className="lg:col-span-1 sticky top-24 space-y-6">
+                           <InteractivePreview 
+                                formData={formData}
+                                product={product} 
+                           />
+                           <OrderSummary />
+                        </div>
                     </div>
-                </div>
+                    <div className="mt-10 text-center">
+                        <button type="submit" disabled={isSubmitting} className="inline-flex items-center justify-center gap-3 px-12 py-4 bg-blue-600 text-white font-bold text-lg rounded-full hover:bg-blue-700 disabled:bg-gray-400 shadow-lg transform hover:scale-105 transition-transform">
+                             {isSubmitting ? <Loader2 className="animate-spin" /> : <Send />}
+                            <span>{isSubmitting ? 'جاري إرسال الطلب...' : `إتمام الطلب والدفع`}</span>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     );

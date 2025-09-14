@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Users, Loader2 } from 'lucide-react';
-import { useAdmin } from '../contexts/AdminContext';
+import { useCreativeWritingAdmin } from '../contexts/admin/CreativeWritingAdminContext';
 
 const CreativeWritingInstructorsPage: React.FC = () => {
-    const { instructors, loading, error } = useAdmin();
+    const { instructors, loading, error } = useCreativeWritingAdmin();
 
     return (
          <div className="bg-gray-50 py-16 sm:py-20 animate-fadeIn">

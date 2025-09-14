@@ -1,5 +1,5 @@
 import React from 'react';
-import { Package, User, Palette, Sparkles, BookOpen } from 'lucide-react';
+import { Package, User, Palette, Sparkles, BookOpen, Award, Target } from 'lucide-react';
 import { PersonalizedProduct } from '../../contexts/AdminContext';
 
 const storyValues = [
@@ -10,32 +10,64 @@ const storyValues = [
     { key: 'perseverance', title: 'المثابرة' },
 ];
 
+const valuesStoryOptions = [
+    { key: 'respect', title: 'الاستئذان والاحترام' },
+    { key: 'cooperation', title: 'التعاون والمشاركة' },
+    { key: 'honesty', title: 'الصدق والأمانة' },
+    { key: 'cleanliness', title: 'النظافة والترتيب' },
+];
+
+const skillsStoryOptions = [
+    { key: 'time_management', title: 'تنظيم الوقت' },
+    { key: 'emotion_management', title: 'إدارة العواطف' },
+    { key: 'problem_solving', title: 'حل المشكلات' },
+    { key: 'creative_thinking', title: 'التفكير الإبداعي' },
+];
+
 interface InteractivePreviewProps {
     formData: {
         childName: string;
-        characterDescription: string;
+        childTraits: string;
         storyValue: string;
-        storyCustomValue: string;
+        valuesStoryOption: string;
+        skillsStoryOption: string;
+        customGoal: string;
     };
     product: PersonalizedProduct | null;
 }
 
 const InteractivePreview: React.FC<InteractivePreviewProps> = ({ formData, product }) => {
-    const { childName, characterDescription, storyValue, storyCustomValue } = formData;
+    const { childName, childTraits, storyValue, valuesStoryOption, skillsStoryOption, customGoal } = formData;
     
     if (!product) {
         return null; 
     }
 
     const showFullCustomization = product.key === 'custom_story' || product.key === 'gift_box';
+    const showValuesCustomization = product.key === 'values_story';
+    const showSkillsCustomization = product.key === 'skills_story';
     
-    const valueTitle = storyValue === 'custom' ? storyCustomValue : storyValues.find(v => v.key === storyValue)?.title;
+    const getGoalTitle = () => {
+        if (showFullCustomization) {
+            return storyValue === 'custom' ? customGoal : storyValues.find(v => v.key === storyValue)?.title;
+        }
+        if (showValuesCustomization) {
+            return valuesStoryOption === 'custom' ? customGoal : valuesStoryOptions.find(v => v.key === valuesStoryOption)?.title;
+        }
+        if (showSkillsCustomization) {
+            return skillsStoryOption === 'custom' ? customGoal : skillsStoryOptions.find(v => v.key === skillsStoryOption)?.title;
+        }
+        return null;
+    };
+
+    const goalTitle = getGoalTitle();
+    const goalIcon = showValuesCustomization ? <Award size={18}/> : showSkillsCustomization ? <Target size={18}/> : <Sparkles size={18}/>;
 
     return (
         <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
             <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-blue-100 flex items-center gap-3">
                 <Package className="text-blue-500" />
-                ملخص طلبك
+                معاينة طلبك
             </h2>
 
             <div className="space-y-6">
@@ -63,28 +95,26 @@ const InteractivePreview: React.FC<InteractivePreviewProps> = ({ formData, produ
                     </div>
                 </div>
 
-                {showFullCustomization && (
-                    <>
-                        {characterDescription && (
-                             <div>
-                                <h3 className="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Palette size={18} />
-                                    وصف الشخصية
-                                </h3>
-                                <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">{characterDescription}</p>
-                            </div>
-                        )}
-                        
-                        <div>
-                            <h3 className="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                <Sparkles size={18} />
-                                القيمة التربوية
-                            </h3>
-                            <ul className="space-y-2 text-sm text-gray-600 ps-4">
-                                <li>القيمة الأساسية: <span className="font-semibold">{valueTitle || 'لم تختر بعد'}</span></li>
-                            </ul>
-                        </div>
-                    </>
+                {showFullCustomization && childTraits && (
+                     <div>
+                        <h3 className="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                            <Palette size={18} />
+                            وصف الشخصية
+                        </h3>
+                        <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">{childTraits}</p>
+                    </div>
+                )}
+                
+                {goalTitle && (
+                    <div>
+                        <h3 className="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                            {goalIcon}
+                            الهدف من القصة
+                        </h3>
+                        <p className="text-md text-gray-800 font-semibold bg-gray-50 p-3 rounded-lg text-center">
+                           {goalTitle}
+                        </p>
+                    </div>
                 )}
             </div>
 

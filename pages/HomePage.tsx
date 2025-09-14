@@ -1,14 +1,13 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, Gift, BookHeart, BookOpen, Award, ArrowLeft, ClipboardPen, HeartHandshake, PackageCheck, Star, Quote, Zap, Shield, Globe, Feather, Users } from 'lucide-react';
+import { Sparkles, Gift, BookHeart, BookOpen, Award, ArrowLeft, ClipboardPen, HeartHandshake, PackageCheck, Star, Quote, Zap, Shield, Globe, Feather, Users, Smile, Rocket, Heart } from 'lucide-react';
 import { useProduct } from '../contexts/ProductContext';
 import { useAdmin } from '../contexts/AdminContext';
 import PageLoader from '../components/ui/PageLoader';
 
 const heroContent = {
-    title: 'اجعل طفلك بطل قصته: مع مشروع :إنها لك:',
-    subtitle: 'نحن لا نكتب قصصًا، بل نصنع ذكريات. حوّل طفلك إلى بطل حكايته الخاصة مع قصة فريدة ومخصصة بالكامل تعزز هويته وتغرس فيه أسمى القيم.',
+    title: 'اجعل طفلك بطل قصته التي لا تُنسى',
+    subtitle: 'حوّل طفلك إلى نجم حكايته الخاصة مع قصة فريدة ومخصصة بالكامل تعزز ثقته بنفسه وتغرس فيه أسمى القيم.',
 };
 
 const ProductShowcaseCard: React.FC<{ icon: React.ReactNode, title: string, description: string }> = ({ icon, title, description }) => (
@@ -59,6 +58,16 @@ const FeatureHighlightCard: React.FC<{ icon: React.ReactNode, title: string, des
     </div>
 );
 
+const ValuePropCard: React.FC<{ icon: React.ReactNode, title: string, description: string }> = ({ icon, title, description }) => (
+    <div className="bg-white p-8 rounded-2xl shadow-lg text-center transform hover:-translate-y-2 transition-transform duration-300">
+        <div className="flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-green-100 text-green-600 mb-6 mx-auto">
+            {icon}
+        </div>
+        <h3 className="text-2xl font-bold text-gray-800">{title}</h3>
+        <p className="mt-4 text-gray-600">{description}</p>
+    </div>
+);
+
 const HomePage: React.FC = () => {
   const { siteBranding, loading: brandingLoading } = useProduct();
   const { personalizedProducts, loading: productsLoading } = useAdmin();
@@ -81,7 +90,7 @@ const HomePage: React.FC = () => {
       <section className="relative bg-cover bg-center py-20 sm:py-24 lg:py-40" style={{backgroundImage: `url('${siteBranding.heroImageUrl}')`}}>
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="container mx-auto px-4 text-center relative z-10">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight" dangerouslySetInnerHTML={{ __html: heroContent.title.replace(/:([^:]+):/, '<span class="text-blue-300">$1</span>') }} />
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight">{heroContent.title}</h1>
           <p className="mt-6 max-w-3xl mx-auto text-lg sm:text-xl text-gray-200">
             {heroContent.subtitle}
           </p>
@@ -111,7 +120,7 @@ const HomePage: React.FC = () => {
       <section className="bg-white py-16 sm:py-20 lg:py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800">أبرز مميزاتنا</h2>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800">لماذا قصص "إنها لك"؟</h2>
             <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">نقدم تجربة فريدة تجمع بين الإبداع، التربية، والأصالة.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -198,6 +207,39 @@ const HomePage: React.FC = () => {
               </div>
           </div>
       </section>
+
+      {/* New Value Props Section */}
+      <section className="bg-gray-50 py-16 sm:py-20 lg:py-24">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800">لمن هذه القصة؟</h2>
+            <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">قصصنا مصممة لتلبية احتياجات متنوعة، وتقديم حلول تربوية مبتكرة.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <ValuePropCard 
+              icon={<Smile size={32} />}
+              title="لتعزيز الهوية"
+              description="للطفل الذي يحتاج لرؤية نفسه بطلاً، مما يبني ثقته بنفسه ويعزز صورته الذاتية الإيجابية."
+            />
+             <ValuePropCard 
+              icon={<Rocket size={32} />}
+              title="لتنمية الخيال"
+              description="للطفل المبدع الذي يحب المغامرات، قصصنا تفتح له آفاقًا جديدة من الخيال والابتكار."
+            />
+             <ValuePropCard 
+              icon={<Heart size={32} />}
+              title="لغرس القيم"
+              description="للطفل الذي يتعلم مفاهيم جديدة، نقدم القيم التربوية في سياق قصصي محبب ومؤثر."
+            />
+             <ValuePropCard 
+              icon={<Gift size={32} />}
+              title="كهدية لا تُنسى"
+              description="للباحثين عن هدية فريدة وشخصية تترك أثراً دائماً في ذاكرة الطفل وعائلته."
+            />
+          </div>
+        </div>
+      </section>
+
 
       {/* Creative Writing Program CTA Section */}
       <section className="bg-gradient-to-br from-purple-50 via-white to-blue-50 py-16 sm:py-20 lg:py-24">

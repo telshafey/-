@@ -1,10 +1,10 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';
-import { AuthProvider } from './contexts/AuthContext';
+// FIX: Added .tsx extension to resolve module error.
+import App from './App.tsx';
+// FIX: Added .tsx extension to resolve module error.
+import { AuthProvider } from './contexts/AuthContext.tsx';
 import { ProductProvider } from './contexts/ProductContext';
-import { AdminProvider } from './contexts/AdminContext';
 import { ToastProvider } from './contexts/ToastContext';
 
 const rootElement = document.getElementById('root');
@@ -18,9 +18,7 @@ root.render(
     <ToastProvider>
       <AuthProvider>
         <ProductProvider>
-          <AdminProvider>
-            <App />
-          </AdminProvider>
+          <App />
         </ProductProvider>
       </AuthProvider>
     </ToastProvider>

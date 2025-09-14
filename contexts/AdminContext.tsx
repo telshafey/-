@@ -1,7 +1,10 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
 import { useToast } from './ToastContext';
-import { Database, SocialLinks, PersonalizedProduct, Json, Instructor, CreativeWritingPackage, AdditionalService, CreativeWritingBooking, AvailableSlots, SupportTicket, JoinRequest } from '../lib/database.types';
-import { UserProfile } from './AuthContext';
+// FIX: Added .ts extension to resolve module error.
+// FIX: Import BlogPost type.
+import { Database, SocialLinks, PersonalizedProduct, Json, BlogPost } from '../lib/database.types.ts';
+// FIX: Added .tsx extension to resolve module error.
+import { UserProfile } from './AuthContext.tsx';
 
 
 // --- Re-defining types locally since DB connection is removed ---
@@ -32,7 +35,8 @@ export interface TextContent {
   };
 }
 
-export type { Instructor, CreativeWritingPackage, AdditionalService, CreativeWritingBooking, AvailableSlots, PersonalizedProduct, SupportTicket, JoinRequest };
+// FIX: Re-export BlogPost type.
+export type { PersonalizedProduct, BlogPost };
 
 // --- Mock Data Generation ---
 
@@ -49,6 +53,7 @@ const MOCK_ORDERS: IOrderDetails[] = [
         order_date: new Date('2024-07-15T12:00:00Z').toISOString(),
         item_summary: 'القصة (مطبوعة)، دفتر تلوين',
         total: '850 ج.م',
+        // FIX: Added missing 'status' property to satisfy the IOrderDetails type.
         status: 'تم التسليم',
         details: { childName: 'سارة', childAge: '5', products: 'قصة ودفتر تلوين' } as any,
         user_id: 'f1e2d3c4-b5a6-9870-4321-098765fedcba',
@@ -71,23 +76,95 @@ const MOCK_ORDERS: IOrderDetails[] = [
     },
 ];
 
-const MOCK_SUPPORT_TICKETS: SupportTicket[] = [
-    { id: 'TKT-1', name: 'سارة إبراهيم', email: 'sara@example.com', subject: 'استفسار عن الشحن', message: 'مرحباً، أود أن أسأل عن مدة الشحن لمدينة الإسكندرية. شكراً لكم.', created_at: new Date('2024-07-20T10:00:00Z').toISOString(), status: 'جديدة' },
-    { id: 'TKT-2', name: 'محمد حسن', email: 'mohamed@example.com', subject: 'مشكلة في الدفع', message: 'أواجه مشكلة عند محاولة الدفع باستخدام بطاقة الائتمان، هل هناك طريقة أخرى؟', created_at: new Date('2024-07-19T14:20:00Z').toISOString(), status: 'تمت المراجعة' },
-];
-
-const MOCK_JOIN_REQUESTS: JoinRequest[] = [
-    { id: 'JOIN-1', name: 'نور الهدى', email: 'nour@artist.com', role: 'رسام/مصمم جرافيك', portfolio_url: 'https://portfolio.example.com/nour', message: 'أنا رسامة متخصصة في كتب الأطفال وأحببت مشروعكم كثيراً. أتمنى أن تتاح لي فرصة التعاون معكم. هذا رابط أعمالي.', created_at: new Date('2024-07-18T09:00:00Z').toISOString(), status: 'جديد' },
-];
-
-
 const MOCK_PERSONALIZED_PRODUCTS: PersonalizedProduct[] = [
-    { id: 1, key: 'custom_story', title: 'القصة المخصصة', description: "عندما يكون الطفل هو الشخصية الرئيسية في قصة تعكس اسمه وسماته، فإن ذلك يخلق 'تأثير المرآة' القوي الذي يعزز إدراكه الإيجابي لذاته، يزيد ثقته بنفسه، ويعمق استيعاب القيم، مما يحول المنتج من مجرد ترفيه إلى أداة مهمة لتكوين الهوية.", image_url: 'https://i.ibb.co/P9tGk1X/product-custom-story.png', features: ['تدمج اسم الطفل وصفاته وقيمه', 'رسومات كرتونية احترافية', 'أداة قوية لتكوين الهوية وبناء الثقة'], sort_order: 1 },
-    { id: 2, key: 'coloring_book', title: 'دفتر التلوين', description: 'دع طفلك يطلق العنان لإبداعه مع دفتر تلوين يحتوي على شخصيات من قصته المخصصة، مطبوع على ورق عالي الجودة لمتعة لا تنتهي.', image_url: 'https://i.ibb.co/m9xG3yS/product-coloring-book.png', features: ['شخصيات من قصة طفلك', 'ورق عالي الجودة', 'يطلق العنان للإبداع'], sort_order: 2 },
-    { id: 3, key: 'dua_booklet', title: 'كتيب الأذكار والأدعية', description: 'محتوى متخصص ومصمم بشكل محبب للأطفال، يشمل الأدعية والأذكار اليومية وقصصاً قصيرة تعزز الهوية الدينية والثقافية لطفلك.', image_url: 'https://i.ibb.co/R4k5p1S/product-dua-booklet.png', features: ['محتوى متخصص يشمل الأدعية اليومية', 'قصص تعزز الهوية الدينية والثقافية', 'تصاميم محببة للأطفال'], sort_order: 3 },
-    { id: 4, key: 'values_story', title: 'قصة الآداب والقيم', description: "مجموعة من القصص التربوية العامة التي تركز على غرس الآداب والقيم الأساسية مثل الاستئذان، والتعاون، والصدق، والنظافة بأسلوب قصصي ممتع ومؤثر يميل الأطفال لتقليد شخصياته المحببة.", image_url: 'https://i.ibb.co/kH7X6tT/product-values-story.png', features: ['تركز على غرس الآداب والقيم الأساسية', 'موضوعات مثل الصدق، التعاون، والاحترام', 'أسلوب قصصي ممتع ومؤثر'], sort_order: 4 },
-    { id: 5, key: 'skills_story', title: 'قصة المهارات الحياتية', description: "قصص موجهة لتعليم الأطفال مهارات حياتية أساسية، مثل تنظيم الوقت، إدارة العواطف، وحل المشكلات، وهي ضرورية لتكيف الطفل مع عالم معقد ونجاحه في المستقبل.", image_url: 'https://i.ibb.co/2d1h4fS/product-skills-story.png', features: ['تعليم مهارات حياتية قيمة للأطفال', 'مواضيع مثل تنظيم الوقت وإدارة العواطف', 'تساعد على النجاح والتكيف في المستقبل'], sort_order: 5 },
-    { id: 6, key: 'gift_box', title: 'بوكس الهدية', description: 'الهدية المتكاملة التي لا تنسى، في صندوق أنيق يجمع بين القصة المخصصة المطبوعة ودفتر التلوين وكتيب الأدعية وهدية إضافية مميزة.', image_url: 'https://i.ibb.co/dK5zZ7s/product-gift-box.png', features: ['المجموعة الكاملة في صندوق أنيق', 'يشمل القصة ودفتر التلوين والكتيب', 'هدية متكاملة لا تنسى'], sort_order: 6 }
+    { 
+        id: 1, 
+        key: 'custom_story', 
+        title: 'القصة المخصصة', 
+        description: "قصة فريدة من 20 صفحة تجعل طفلك بطل الحكاية، مع دمج اسمه وصورته وتفاصيل من عالمه الخاص في مغامرة شيقة ومصورة خصيصًا له.",
+        image_url: 'https://i.ibb.co/P9tGk1X/product-custom-story.png', 
+        features: [
+            '20 صفحة مع الغلاف',
+            'ورق مقوى عالي الجودة مقاس A5',
+            'رسومات تحتوي على صورة طفلك',
+            'اسم الطفل وعائلته في القصة',
+            'متوفر كنسخة إلكترونية أو مطبوعة',
+            'تسليم خلال 5-7 أيام عمل'
+        ], 
+        sort_order: 1 
+    },
+    { 
+        id: 2, 
+        key: 'coloring_book', 
+        title: 'دفتر التلوين', 
+        description: "دفتر تلوين فريد يحتوي على شخصيات مصممة بصورة طفلك واسمه، مأخوذة من قصته المخصصة. يتضمن 20 صفحة من الرسومات الملونة وغير الملونة للتفاعل والإبداع.",
+        image_url: 'https://i.ibb.co/m9xG3yS/product-coloring-book.png', 
+        features: [
+            '20 صفحة تلوين مقاس A5',
+            'يحتوي على شخصيات من قصة طفلك',
+            'ورق عالي الجودة مناسب للتلوين',
+            'يعزز التفاعل والإبداع'
+        ], 
+        sort_order: 2 
+    },
+    { 
+        id: 4, 
+        key: 'values_story', 
+        title: 'قصص الآداب والقيم', 
+        description: "قصة مخصصة من 20 صفحة، مصممة بصورة واسم طفلك، لغرس قيمة أو أدب محدد. اختر قيمة من قائمتنا أو حدد هدفك التربوي الخاص لنجعل التعلم تجربة شخصية ومؤثرة.",
+        image_url: 'https://i.ibb.co/kH7X6tT/product-values-story.png', 
+        features: [
+            'الاستئذان والاحترام',
+            'التعاون والمشاركة',
+            'الصدق والأمانة',
+            'النظافة والترتيب',
+            'إمكانية تحديد هدفك الخاص'
+        ], 
+        sort_order: 3
+    },
+    { 
+        id: 5, 
+        key: 'skills_story', 
+        title: 'قصة المهارات الحياتية', 
+        description: "قصة مخصصة من 20 صفحة، مصممة بصورة واسم طفلك، لتنمية مهارة حياتية أساسية. اختر مهارة من قائمتنا أو حدد هدفك الخاص لنجعل اكتساب المهارات رحلة ممتعة وشخصية.",
+        image_url: 'https://i.ibb.co/2d1h4fS/product-skills-story.png', 
+        features: [
+            'تنظيم الوقت',
+            'إدارة العواطف',
+            'حل المشكلات',
+            'التفكير الإبداعي',
+            'إمكانية تحديد هدفك الخاص'
+        ], 
+        sort_order: 4
+    },
+    { 
+        id: 3, 
+        key: 'dua_booklet', 
+        title: 'كتيب الأذكار والأدعية', 
+        description: "كتيب من 40 صفحة يحتوي على الأدعية والأذكار اليومية، مع رسومات مخصصة تضم صورة واسم طفلك لتعزيز ارتباطه بالهوية الدينية بأسلوب محبب وشخصي.",
+        image_url: 'https://i.ibb.co/R4k5p1S/product-dua-booklet.png', 
+        features: [
+            '40 صفحة مقاس A5',
+            'ورق مقوى متين ومناسب للأطفال',
+            'رسومات مخصصة تشبه طفلك',
+            'محتوى متخصص من الأدعية والأذكار اليومية'
+        ], 
+        sort_order: 5
+    },
+    { 
+        id: 6, 
+        key: 'gift_box', 
+        title: 'بوكس الهدية', 
+        description: "الهدية المتكاملة التي لا تُنسى. صندوق أنيق يجمع منتجاتنا المخصصة بصورة واسم طفلك، ويشمل القصة المطبوعة، دفتر التلوين، كتيب الأدعية، وهدية إضافية مميزة.",
+        image_url: 'https://i.ibb.co/dK5zZ7s/product-gift-box.png', 
+        features: [
+            'قصة طفلك المخصصة (مطبوعة)',
+            'دفتر التلوين الخاص بالقصة',
+            'كتيب الأذكار والأدعية',
+            'هدية مفاجأة من اختيارنا'
+        ], 
+        sort_order: 6 
+    }
 ];
 
 const MOCK_SITE_CONTENT: TextContent = {
@@ -137,33 +214,49 @@ const MOCK_SITE_CONTENT: TextContent = {
 };
 
 const MOCK_SOCIAL_LINKS: SocialLinks = {
+    id: 1,
     facebook_url: 'https://facebook.com',
     twitter_url: 'https://twitter.com',
     instagram_url: 'https://instagram.com',
 };
 
-const MOCK_INSTRUCTORS: Instructor[] = [
-    { id: 1, name: 'أحمد المصري', specialty: 'متخصص في كتابة القصة القصيرة', slug: 'ahmed-masri', bio: 'كاتب ومحرر شغوف، متخصص في مساعدة الأطفال على اكتشاف أصواتهم الإبداعية من خلال القصص. لديه خبرة 5 سنوات في ورش عمل الكتابة الإبداعية.', avatar_url: 'https://i.ibb.co/2S4xT8w/male-avatar.png', availability: { '15': ['10:00 ص', '11:00 ص'], '17': ['02:00 م'] } },
-    { id: 2, name: 'نورة خالد', specialty: 'خبيرة في الشعر والنصوص الحرة', slug: 'noura-khaled', bio: 'شاعرة وفنانة، تؤمن بأن لكل طفل قصة تستحق أن تروى. تستخدم أساليب مبتكرة لإطلاق العنان لخيال الأطفال وتحويل أفكارهم إلى كلمات.', avatar_url: 'https://i.ibb.co/yYg5b1c/alrehlah-logo.png', availability: { '16': ['09:00 ص', '12:00 م'], '18': ['03:00 م'] } },
+// FIX: Add mock data for blog posts.
+const MOCK_BLOG_POSTS: BlogPost[] = [
+    {
+        id: 1,
+        created_at: new Date('2024-07-20T10:00:00Z').toISOString(),
+        title: 'أهمية القصة المخصصة في تنمية شخصية الطفل',
+        slug: 'importance-of-personalized-stories',
+        content: 'تعتبر القصة المخصصة أداة تربوية فعالة... عندما يرى الطفل نفسه بطلاً للقصة، يزداد ارتباطه بها وتأثيرها الإيجابي عليه. هذا يعزز ثقته بنفسه ويساعده على استيعاب القيم التربوية بشكل أعمق. في منصة "إنها لك"، نصنع كل قصة بحب لتكون تجربة فريدة لطفلك.',
+        author_name: 'فريق المنصة',
+        status: 'published',
+        image_url: 'https://i.ibb.co/RzJzQhL/hero-image-new.jpg',
+        published_at: new Date('2024-07-21T12:00:00Z').toISOString(),
+    },
+    {
+        id: 2,
+        created_at: new Date('2024-07-15T11:00:00Z').toISOString(),
+        title: 'كيف تشجع طفلك على الكتابة الإبداعية؟',
+        slug: 'encourage-creative-writing',
+        content: 'الكتابة الإبداعية هي مهارة أساسية تساعد الطفل على التعبير عن أفكاره ومشاعره. يمكنك تشجيعه بتوفير بيئة داعمة، والاحتفاء بمحاولاته، والمشاركة في برنامج متخصص مثل "بداية الرحلة" الذي نقدمه.',
+        author_name: 'أحمد المصري',
+        status: 'published',
+        image_url: 'https://i.ibb.co/Xz9d9J2/creative-writing-promo.jpg',
+        published_at: new Date('2024-07-18T09:00:00Z').toISOString(),
+    },
+    {
+        id: 3,
+        created_at: new Date('2024-07-22T09:00:00Z').toISOString(),
+        title: 'أفكار جديدة لأنشطة صيفية (مسودة)',
+        slug: 'summer-activities-draft',
+        content: 'الصيف فرصة رائعة للتعلم والمرح. يمكنكم تجربة صناعة مجسمات، أو كتابة يوميات مصورة، أو حتى تأليف قصة قصيرة معًا.',
+        author_name: 'فريق المنصة',
+        status: 'draft',
+        image_url: null,
+        published_at: null,
+    },
 ];
 
-const MOCK_CW_PACKAGES: CreativeWritingPackage[] = [
-    { id: 1, name: 'الباقة التأسيسية', sessions: '3 جلسات فردية', price: 1200, features: ['جلسة تعريفية', '3 جلسات فردية', 'متابعة عبر البريد'], popular: false },
-    { id: 2, name: 'الباقة التطويرية', sessions: '8 جلسات فردية', price: 2800, features: ['8 جلسات فردية', 'ملف إنجاز رقمي', 'جلسة ختامية مع ولي الأمر'], popular: true },
-    { id: 3, name: 'الباقة المتقدمة', sessions: '12 جلسة فردية', price: 4000, features: ['12 جلسة فردية', 'مشروع كتابي متكامل', 'نشر القصة في مدونة المنصة'], popular: false },
-    { id: 4, name: 'جلسة استشارية', sessions: 'جلسة واحدة', price: 500, features: ['تقييم مستوى', 'خطة تطوير شخصية', 'إجابة على الاستفسارات'], popular: false },
-];
-
-const MOCK_ADDITIONAL_SERVICES: AdditionalService[] = [
-    { id: 1, name: 'جلسة متابعة إضافية', price: 450, description: 'جلسة فردية إضافية بعد انتهاء الباقة.' },
-    { id: 2, name: 'تحرير وتدقيق لغوي', price: 200, description: 'مراجعة احترافية لنصوص الطالب.' },
-    { id: 3, name: 'نشر إلكتروني', price: 300, description: 'تصميم ونشر عمل الطالب ككتاب إلكتروني.' },
-];
-
-const MOCK_CW_BOOKINGS: (CreativeWritingBooking & { instructors: Instructor | null })[] = [
-    { id: 'BK-1', user_id: 'f1e2d3c4-b5a6-9870-4321-098765fedcba', user_name: 'فاطمة علي', instructor_id: 1, package_id: 2, package_name: 'الباقة التطويرية', booking_date: '2024-07-25', booking_time: '10:00 ص', status: 'مؤكد', total: 2800, session_id: 'abc-123', receipt_url: 'https://example.com/receipt.jpg', admin_comment: null, instructors: MOCK_INSTRUCTORS[0] },
-    { id: 'BK-2', user_id: '12345678-abcd-efgh-ijkl-mnopqrstuvwx', user_name: 'أحمد محمود', instructor_id: 2, package_id: 1, package_name: 'الباقة التأسيسية', booking_date: '2024-07-26', booking_time: '09:00 ص', status: 'بانتظار الدفع', total: 1200, session_id: null, receipt_url: null, admin_comment: null, instructors: MOCK_INSTRUCTORS[1] },
-];
 
 // --- Context Definition ---
 
@@ -182,10 +275,6 @@ interface UpdateProductPayload {
     features: string[] | null;
     imageFile: File | null;
 }
-
-interface CreateSupportTicketPayload { name: string; email: string; subject: string; message: string; }
-interface CreateJoinRequestPayload { name: string; email: string; role: string; portfolio_url: string | null; message: string; }
-
 
 interface AdminContextType {
     orders: IOrderDetails[];
@@ -209,27 +298,12 @@ interface AdminContextType {
 
     personalizedProducts: PersonalizedProduct[];
     updatePersonalizedProduct: (payload: UpdateProductPayload) => Promise<void>;
-    
-    instructors: Instructor[];
-    addInstructor: (payload: { name: string; specialty: string; slug: string; bio: string; avatarFile: File | null; }) => Promise<void>;
-    updateInstructor: (payload: { id: number; name: string; specialty: string; slug: string; bio: string; avatarFile: File | null; }) => Promise<void>;
-    updateInstructorAvailability: (instructorId: number, availability: AvailableSlots) => Promise<void>;
-    creativeWritingPackages: CreativeWritingPackage[];
-    updateCreativeWritingPackages: (packages: CreativeWritingPackage[]) => Promise<void>;
-    additionalServices: AdditionalService[];
-    updateAdditionalServices: (services: AdditionalService[]) => Promise<void>;
-    creativeWritingBookings: (CreativeWritingBooking & { instructors: Instructor | null })[];
-    updateBookingStatus: (bookingId: string, newStatus: CreativeWritingBooking['status']) => Promise<void>;
-    createBooking: (payload: any) => Promise<void>;
-    generateAndSetSessionId: (bookingId: string) => Promise<string | null>;
 
-    supportTickets: SupportTicket[];
-    createSupportTicket: (payload: CreateSupportTicketPayload) => Promise<void>;
-    updateSupportTicketStatus: (ticketId: string, newStatus: SupportTicket['status']) => Promise<void>;
-
-    joinRequests: JoinRequest[];
-    createJoinRequest: (payload: CreateJoinRequestPayload) => Promise<void>;
-    updateJoinRequestStatus: (requestId: string, newStatus: JoinRequest['status']) => Promise<void>;
+    // FIX: Add blog post properties to the context type.
+    blogPosts: BlogPost[];
+    createBlogPost: (payload: any) => Promise<void>;
+    updateBlogPost: (payload: any) => Promise<void>;
+    deleteBlogPost: (postId: number) => Promise<void>;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -239,14 +313,10 @@ export const AdminProvider: React.FC<{children: ReactNode}> = ({ children }) => 
     const [users, setUsers] = useState<User[]>([]);
     const [personalizedProducts, setPersonalizedProducts] = useState<PersonalizedProduct[]>([]);
     const [siteContent, setSiteContent] = useState<TextContent>({});
-    const [socialLinks, setSocialLinks] = useState<SocialLinks>({});
-    const [instructors, setInstructors] = useState<Instructor[]>([]);
-    const [creativeWritingPackages, setCreativeWritingPackages] = useState<CreativeWritingPackage[]>([]);
-    const [additionalServices, setAdditionalServices] = useState<AdditionalService[]>([]);
-    const [creativeWritingBookings, setCreativeWritingBookings] = useState<(CreativeWritingBooking & { instructors: Instructor | null })[]>([]);
-    const [supportTickets, setSupportTickets] = useState<SupportTicket[]>([]);
-    const [joinRequests, setJoinRequests] = useState<JoinRequest[]>([]);
-
+    const [socialLinks, setSocialLinks] = useState<SocialLinks>(MOCK_SOCIAL_LINKS);
+    // FIX: Add state for blog posts.
+    const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+    
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { addToast } = useToast();
@@ -260,12 +330,8 @@ export const AdminProvider: React.FC<{children: ReactNode}> = ({ children }) => 
         setPersonalizedProducts(MOCK_PERSONALIZED_PRODUCTS);
         setSiteContent(MOCK_SITE_CONTENT);
         setSocialLinks(MOCK_SOCIAL_LINKS);
-        setInstructors(MOCK_INSTRUCTORS);
-        setCreativeWritingPackages(MOCK_CW_PACKAGES);
-        setAdditionalServices(MOCK_ADDITIONAL_SERVICES);
-        setCreativeWritingBookings(MOCK_CW_BOOKINGS);
-        setSupportTickets(MOCK_SUPPORT_TICKETS);
-        setJoinRequests(MOCK_JOIN_REQUESTS);
+        // FIX: Load mock blog posts into state.
+        setBlogPosts(MOCK_BLOG_POSTS);
         setLoading(false);
     }, []);
     
@@ -276,12 +342,22 @@ export const AdminProvider: React.FC<{children: ReactNode}> = ({ children }) => 
     const createOrder = async ({ currentUser, formData, files, totalPrice, itemSummary }: CreateOrderPayload) => {
         const orderId = `ORD-${Date.now()}`;
         
+        const imageUrls: { [key: string]: string | null } = {};
+        for (const key in files) {
+            const file = files[key];
+            if (file) {
+                // In a real app, this would be an upload function returning a URL.
+                // For mock, we'll use a local blob URL.
+                imageUrls[key] = URL.createObjectURL(file);
+            }
+        }
+
         const newOrder: IOrderDetails = {
             id: orderId,
             customer_name: currentUser.name,
             item_summary: itemSummary,
             total: `${totalPrice} ج.م`,
-            details: { ...formData, images: {} } as any, // Mock images
+            details: { ...formData, images: imageUrls } as any,
             user_id: currentUser.id,
             status: 'بانتظار الدفع',
             order_date: new Date().toISOString(),
@@ -300,9 +376,8 @@ export const AdminProvider: React.FC<{children: ReactNode}> = ({ children }) => 
         
         if (itemType === 'order') {
           setOrders(prev => prev.map(o => o.id === itemId ? { ...o, status: 'بانتظار المراجعة', receipt_url } : o));
-        } else if (itemType === 'booking') {
-            setCreativeWritingBookings(prev => prev.map(b => b.id === itemId ? { ...b, status: 'بانتظار المراجعة', receipt_url } : b));
         }
+        // Booking logic is now in CreativeWritingAdminContext
     };
 
     const updateOrderStatus = async (orderId: string, newStatus: IOrderDetails['status']) => {
@@ -344,113 +419,42 @@ export const AdminProvider: React.FC<{children: ReactNode}> = ({ children }) => 
         addToast('تم تحديث المنتج بنجاح (تجريبي)!', 'success');
     };
 
-    const addInstructor = async (payload: { name: string; specialty: string; slug: string; bio: string; avatarFile: File | null; }) => {
-        const newId = Math.max(...instructors.map(i => i.id), 0) + 1;
-        const newInstructor: Instructor = {
-            id: newId,
-            name: payload.name,
-            specialty: payload.specialty,
-            slug: payload.slug,
-            bio: payload.bio,
-            avatar_url: payload.avatarFile ? URL.createObjectURL(payload.avatarFile) : null,
-            availability: {}
+    // FIX: Implement blog post management functions.
+    const createBlogPost = async (payload: any) => {
+        const newPost: BlogPost = {
+            id: Date.now(),
+            created_at: new Date().toISOString(),
+            published_at: payload.status === 'published' ? new Date().toISOString() : null,
+            image_url: payload.imageFile ? URL.createObjectURL(payload.imageFile) : null,
+            ...payload
         };
-        setInstructors(prev => [...prev, newInstructor]);
-        addToast('تمت إضافة المدرب بنجاح (تجريبيًا).', 'success');
+        setBlogPosts(prev => [newPost, ...prev]);
+        addToast('تم إنشاء المقال بنجاح!', 'success');
     };
 
-    const updateInstructor = async (payload: { id: number; name: string; specialty: string; slug: string; bio: string; avatarFile: File | null; }) => {
-        setInstructors(prev => prev.map(i => {
-            if (i.id === payload.id) {
-                return {
-                    ...i,
-                    name: payload.name,
-                    specialty: payload.specialty,
-                    slug: payload.slug,
-                    bio: payload.bio,
-                    avatar_url: payload.avatarFile ? URL.createObjectURL(payload.avatarFile) : i.avatar_url,
-                };
+    const updateBlogPost = async (payload: any) => {
+        setBlogPosts(prev => prev.map(p => {
+            if (p.id === payload.id) {
+                const updatedPost = { ...p, ...payload };
+                if (payload.imageFile) {
+                    updatedPost.image_url = URL.createObjectURL(payload.imageFile);
+                }
+                if(payload.status === 'published' && !p.published_at) {
+                    updatedPost.published_at = new Date().toISOString();
+                } else if(payload.status === 'draft') {
+                    updatedPost.published_at = null;
+                }
+                delete (updatedPost as any).imageFile;
+                return updatedPost as BlogPost;
             }
-            return i;
+            return p;
         }));
-        addToast('تم تحديث بيانات المدرب بنجاح (تجريبيًا).', 'success');
+        addToast('تم تحديث المقال بنجاح!', 'success');
     };
 
-    const updateInstructorAvailability = async (instructorId: number, availability: AvailableSlots) => {
-        setInstructors(prev => prev.map(i => i.id === instructorId ? { ...i, availability: availability as Json } : i));
-        // No toast here to avoid clutter during frequent updates. Toast is in the component.
-    };
-
-    const updateCreativeWritingPackages = async (packages: CreativeWritingPackage[]) => {
-        setCreativeWritingPackages(packages);
-        addToast('تم تحديث الباقات بنجاح (تجريبيًا).', 'success');
-    };
-
-    const updateAdditionalServices = async (services: AdditionalService[]) => {
-        setAdditionalServices(services);
-        addToast('تم تحديث الخدمات الإضافية بنجاح (تجريبيًا).', 'success');
-    };
-    
-    const createBooking = async (payload: any) => {
-        const newBooking: CreativeWritingBooking & { instructors: Instructor | null } = {
-            id: `BK-${Date.now()}`,
-            user_id: payload.currentUser.id,
-            user_name: payload.currentUser.name,
-            instructor_id: payload.instructorId,
-            package_id: payload.selectedPackage.id,
-            package_name: payload.selectedPackage.name,
-            booking_date: payload.selectedDate.toISOString().split('T')[0],
-            booking_time: payload.selectedTime,
-            status: 'بانتظار الدفع',
-            total: payload.selectedPackage.price,
-            session_id: null,
-            receipt_url: null,
-            admin_comment: null,
-            instructors: instructors.find(i => i.id === payload.instructorId) || null,
-        };
-        setCreativeWritingBookings(prev => [newBooking, ...prev]);
-        console.log("Mock Booking Created:", newBooking);
-    };
-
-    const updateBookingStatus = async (bookingId: string, newStatus: CreativeWritingBooking['status']) => {
-        setCreativeWritingBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: newStatus } : b));
-        addToast('تم تحديث حالة الحجز (تجريبيًا).', 'success');
-    };
-
-    const generateAndSetSessionId = async (bookingId: string) => {
-        const newSessionId = `mock-session-${Math.random().toString(36).substring(7)}`;
-        setCreativeWritingBookings(prev => prev.map(b => b.id === bookingId ? { ...b, session_id: newSessionId } : b));
-        return newSessionId;
-    };
-
-    const createSupportTicket = async (payload: CreateSupportTicketPayload) => {
-        const newTicket: SupportTicket = {
-            id: `TKT-${Date.now()}`,
-            ...payload,
-            created_at: new Date().toISOString(),
-            status: 'جديدة',
-        };
-        setSupportTickets(prev => [newTicket, ...prev]);
-    };
-
-    const updateSupportTicketStatus = async (ticketId: string, newStatus: SupportTicket['status']) => {
-        setSupportTickets(prev => prev.map(t => t.id === ticketId ? { ...t, status: newStatus } : t));
-        addToast('تم تحديث حالة الرسالة.', 'success');
-    };
-
-    const createJoinRequest = async (payload: CreateJoinRequestPayload) => {
-        const newRequest: JoinRequest = {
-            id: `JOIN-${Date.now()}`,
-            ...payload,
-            created_at: new Date().toISOString(),
-            status: 'جديد',
-        };
-        setJoinRequests(prev => [newRequest, ...prev]);
-    };
-
-    const updateJoinRequestStatus = async (requestId: string, newStatus: JoinRequest['status']) => {
-        setJoinRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: newStatus } : r));
-        addToast('تم تحديث حالة الطلب.', 'success');
+    const deleteBlogPost = async (postId: number) => {
+        setBlogPosts(prev => prev.filter(p => p.id !== postId));
+        addToast('تم حذف المقال بنجاح.', 'success');
     };
 
 
@@ -463,20 +467,8 @@ export const AdminProvider: React.FC<{children: ReactNode}> = ({ children }) => 
             siteContent, updateSiteContent,
             socialLinks, updateSocialLinks,
             personalizedProducts, updatePersonalizedProduct,
-            instructors,
-            addInstructor,
-            updateInstructor,
-            updateInstructorAvailability,
-            creativeWritingPackages,
-            updateCreativeWritingPackages,
-            additionalServices,
-            updateAdditionalServices,
-            creativeWritingBookings,
-            updateBookingStatus,
-            createBooking,
-            generateAndSetSessionId,
-            supportTickets, createSupportTicket, updateSupportTicketStatus,
-            joinRequests, createJoinRequest, updateJoinRequestStatus,
+            // FIX: Provide blog post state and handlers through the context.
+            blogPosts, createBlogPost, updateBlogPost, deleteBlogPost,
         }}>
             {children}
         </AdminContext.Provider>

@@ -1,13 +1,16 @@
 
+
 import React, { useMemo } from 'react';
 import { User, Package, Calendar, Clock, PlusCircle, CheckCircle } from 'lucide-react';
-import { Instructor, CreativeWritingPackage, AdditionalService } from '../../contexts/AdminContext';
+// FIX: Corrected import path for creative writing types.
+import { Instructor, CreativeWritingPackage, AdditionalService } from '../../contexts/admin/CreativeWritingAdminContext';
 
 interface BookingSummaryProps {
     instructor: Instructor | null;
     selectedPackage: CreativeWritingPackage | null;
     selectedServices: AdditionalService[];
-    selectedDate: Date | null;
+    // FIX: Changed selectedDate: Date | null to selectedDay: string | null to match recurring booking logic.
+    selectedDay: string | null;
     selectedTime: string | null;
 }
 
@@ -15,7 +18,8 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
     instructor, 
     selectedPackage, 
     selectedServices, 
-    selectedDate, 
+    // FIX: Changed selectedDate to selectedDay to align with recurring booking logic.
+    selectedDay, 
     selectedTime 
 }) => {
 
@@ -59,7 +63,8 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
                     </div>
                 )}
                 
-                <SummaryItem icon={<Calendar size={18}/>} label="التاريخ" value={selectedDate ? selectedDate.toLocaleDateString('ar-EG-u-nu-latn', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : null} placeholder="لم يتم الاختيار" isComplete={!!selectedDate}/>
+                {/* FIX: Updated to display recurring day of the week instead of a specific date. */}
+                <SummaryItem icon={<Calendar size={18}/>} label="اليوم الأسبوعي" value={selectedDay ? `كل ${selectedDay}` : null} placeholder="لم يتم الاختيار" isComplete={!!selectedDay}/>
                 <SummaryItem icon={<Clock size={18}/>} label="الوقت" value={selectedTime || null} placeholder="لم يتم الاختيار" isComplete={!!selectedTime}/>
             </div>
             

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Gift, Truck, Image, MessageSquare, Receipt, Save, Loader2 } from 'lucide-react';
 import { useAdmin, IOrderDetails } from '../../contexts/AdminContext';
-import { OrderDetailsJson } from '../../lib/database.types';
+// FIX: Added .ts extension to resolve module error.
+import { OrderDetailsJson } from '../../lib/database.types.ts';
 
 
 interface ViewOrderModalProps {
@@ -43,7 +44,8 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({ order, isOpen, onClose 
 
   if (!isOpen || !order) return null;
   
-  const typedDetails = order.details as any | null;
+  // FIX: Cast to 'unknown' first to satisfy TypeScript's strict type checking when converting from a broad 'Json' type to a specific interface.
+  const typedDetails = order.details as unknown as OrderDetailsJson | null;
 
   const handleSaveComment = async () => {
     setIsSaving(true);
@@ -70,7 +72,7 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({ order, isOpen, onClose 
                     <DetailSection title="بيانات الطفل" icon={<User size={18}/>}>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <DetailItem label="الاسم" value={typedDetails.childName} />
-                            <DetailItem label="العمر" value={typedDetails.childAge} />
+                            <DetailItem label="العمر" value={typedDetails.childAge?.toString()} />
                             <DetailItem label="الجنس" value={typedDetails.childGender} />
                         </div>
                         <DetailItem label="أسماء العائلة والأصدقاء" value={typedDetails.familyNames} />

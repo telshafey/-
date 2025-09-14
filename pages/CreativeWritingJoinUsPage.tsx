@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, Feather, Users, Paintbrush, HeartHandshake } from 'lucide-react';
+import { Send, Feather, Users, BrainCircuit, HeartHandshake } from 'lucide-react';
 import { useCommunication } from '../contexts/admin/CommunicationContext';
 import { useToast } from '../contexts/ToastContext';
 
@@ -16,27 +16,27 @@ const OpportunityCard: React.FC<{ icon: React.ReactNode; title: string; descript
 const opportunities = [
     {
         icon: <Feather size={32} />,
-        title: "كتاب أطفال مبدعون",
-        description: "نبحث عن كتاب لديهم شغف بصناعة حكايات ملهمة ومخصصة للأطفال تعزز هويتهم وقيمهم."
+        title: "مدربون متخصصون",
+        description: "نبحث عن مدربين لديهم خبرة في الكتابة الإبداعية والتعامل مع الأطفال والشباب لإلهام الجيل القادم."
     },
     {
-        icon: <Paintbrush size={32} />,
-        title: "رسامون ومصممون",
-        description: "إذا كان لديك أسلوب فني فريد ومناسب لعالم الأطفال، انضم إلينا لتحويل الكلمات إلى عوالم بصرية ساحرة."
+        icon: <BrainCircuit size={32} />,
+        title: "خبراء مناهج",
+        description: "للمساعدة في تطوير وتحديث محتوانا التعليمي ليتناسب مع مختلف الفئات العمرية والاحتياجات."
     },
     {
         icon: <Users size={32} />,
-        title: "شركاء النجاح",
-        description: "نرحب بالتعاون مع المؤسسات التعليمية، المكتبات، والمبادرات التي تشاركنا رؤيتنا في إثراء محتوى الطفل العربي."
+        title: "شركاء تعليميون",
+        description: "نرحب بالتعاون مع المدارس والمراكز التعليمية والمبادرات التي تشاركنا رؤيتنا في تنمية المواهب الشابة."
     },
     {
         icon: <HeartHandshake size={32} />,
         title: "متطوعون",
-        description: "نؤمن بقوة المجتمع، ونفتح الباب للمتطوعين للمساهمة في مراجعة المحتوى أو تنظيم الفعاليات."
+        description: "نؤمن بقوة المجتمع، ونفتح الباب للمتطوعين للمساهمة في تنظيم الفعاليات أو تقديم الدعم التقني."
     }
 ];
 
-const JoinUsPage: React.FC = () => {
+const CreativeWritingJoinUsPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { createJoinRequest } = useCommunication();
   const { addToast } = useToast();
@@ -71,9 +71,9 @@ const JoinUsPage: React.FC = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-600">انضم إلى فريق "إنها لك"</h1>
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-600">انضم إلى فريق "بداية الرحلة"</h1>
             <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
-             هل أنت كاتب مبدع، رسام موهوب، أو شريك شغوف؟ نبحث دائمًا عن مواهب جديدة للانضمام لرحلتنا في صناعة القصص المخصصة.
+              هل أنت مدرب متخصص، خبير تربوي، أو شغوف بتعليم الأطفال؟ نبحث عن مواهب مثلك للانضمام لبرنامجنا.
             </p>
           </div>
 
@@ -102,9 +102,9 @@ const JoinUsPage: React.FC = () => {
               <div>
                 <label htmlFor="role" className="block text-sm font-bold text-gray-700 mb-2">أنا مهتم بالانضمام كـ*</label>
                 <select id="role" name="role" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white" required>
-                  <option>كاتب أطفال</option>
-                  <option>رسام/مصمم جرافيك</option>
-                  <option>شريك</option>
+                  <option>مدرب كتابة إبداعية</option>
+                  <option>خبير مناهج</option>
+                  <option>شريك تعليمي</option>
                   <option>متطوع</option>
                   <option>أخرى</option>
                 </select>
@@ -114,7 +114,7 @@ const JoinUsPage: React.FC = () => {
                 <input type="url" id="portfolio" name="portfolio" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="https://example.com" />
               </div>
               <div>
-                <label htmlFor="message" className="block text-sm font-bold text-gray-700 mb-2">حدثنا عن نفسك ولماذا تريد الانضمام إلينا*</label>
+                <label htmlFor="message" className="block text-sm font-bold text-gray-700 mb-2">حدثنا عن خبراتك ولماذا تريد الانضمام إلينا*</label>
                 <textarea id="message" name="message" rows={5} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" required></textarea>
               </div>
               <button type="submit" disabled={isSubmitting} className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white font-bold py-3 px-4 rounded-full hover:bg-blue-700 transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed">
@@ -129,4 +129,4 @@ const JoinUsPage: React.FC = () => {
   );
 };
 
-export default JoinUsPage;
+export default CreativeWritingJoinUsPage;

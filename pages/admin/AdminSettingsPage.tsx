@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Image as ImageIcon, X, Loader2, Share2 } from 'lucide-react';
 import { useAdmin, TextContent } from '../../contexts/AdminContext';
-import type { SocialLinks } from '../../lib/database.types';
+// FIX: Added .ts extension to resolve module error.
+import type { SocialLinks } from '../../lib/database.types.ts';
 import { useToast } from '../../contexts/ToastContext';
 import { useProduct, SiteBranding } from '../../contexts/ProductContext';
 
@@ -68,7 +69,7 @@ const AdminSettingsPage: React.FC = () => {
     useEffect(() => { setEditableSocials(socialLinks); }, [socialLinks]);
 
 
-    const handleSocialChange = (key: keyof SocialLinks, value: string) => {
+    const handleSocialChange = (key: keyof Omit<SocialLinks, 'id'>, value: string) => {
         setEditableSocials(prev => ({ ...prev, [key]: value }));
     };
 

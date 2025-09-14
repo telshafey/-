@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Gift, Save, Loader2, Image as ImageIcon } from 'lucide-react';
 import { useAdmin } from '../../contexts/AdminContext';
-import { PersonalizedProduct } from '../../lib/database.types';
+// FIX: Added .ts extension to resolve module error.
+import { PersonalizedProduct } from '../../lib/database.types.ts';
 import AdminSection from '../../components/admin/AdminSection';
 import PageLoader from '../../components/ui/PageLoader';
 

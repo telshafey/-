@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
-import { User, Menu, X, ShieldCheck, Send, HelpCircle, Briefcase, Gift, Home, LogOut, Feather, ArrowRightLeft, LayoutDashboard } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { User, Menu, X, ShieldCheck, Send, HelpCircle, Briefcase, Gift, Home, LogOut, Feather, ArrowRightLeft, LayoutDashboard, BookOpen } from 'lucide-react';
+// FIX: Added .tsx extension to resolve module error.
+import { useAuth } from '../contexts/AuthContext.tsx';
 import { useProduct } from '../contexts/ProductContext';
 
 const enhaLakLinks = [
@@ -9,6 +10,7 @@ const enhaLakLinks = [
   { name: 'المتجر', path: '/store' },
   { name: 'عنا', path: '/about' },
   { name: 'الدعم والمساعدة', path: '/support' },
+  { name: 'انضم إلينا', path: '/join-us' },
 ];
 
 const creativeWritingLinks = [
@@ -17,12 +19,14 @@ const creativeWritingLinks = [
     { name: 'المنهج الدراسي', path: '/creative-writing/curriculum' },
     { name: 'المدربون', path: '/creative-writing/instructors' },
     { name: 'الباقات والحجز', path: '/creative-writing/booking' },
+    { name: 'الدعم والمساعدة', path: '/creative-writing/support' },
+    { name: 'انضم إلينا', path: '/creative-writing/join-us' },
 ];
 
 const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
-  const { isAdmin, currentUser, signOut } = useAuth();
+  const { hasAdminAccess, currentUser, signOut } = useAuth();
   const { siteBranding, loading } = useProduct();
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
@@ -95,7 +99,7 @@ const Header: React.FC = () => {
                             <NavLink to="/account" onClick={() => setIsAccountMenuOpen(false)} className="flex items-center gap-3 w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 <User size={16} /> حسابي
                             </NavLink>
-                            {isAdmin && (
+                            {hasAdminAccess && (
                                 <NavLink to="/admin" onClick={() => setIsAccountMenuOpen(false)} className="flex items-center gap-3 w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-red-50">
                                     <ShieldCheck size={16} /> لوحة التحكم
                                 </NavLink>
@@ -115,8 +119,8 @@ const Header: React.FC = () => {
     </div>
   );
   
-  if (currentSection === 'portal') {
-      return null; // No header on the portal page
+  if (currentSection === 'portal' && location.pathname === '/') {
+      return null; // No header on the portal page, but show on blog
   }
 
   const SwitchSectionButton: React.FC = () => {
@@ -182,7 +186,7 @@ const Header: React.FC = () => {
             ))}
           </nav>
           <div className="hidden md:flex items-center space-x-4 rtl:space-x-reverse">
-            <SwitchSectionButton />
+            {currentSection !== 'portal' && <SwitchSectionButton />}
             <AccountMenu />
           </div>
           <div className="md:hidden flex items-center">
@@ -208,17 +212,18 @@ const Header: React.FC = () => {
               >
                 {link.path.includes('store') && <Gift size={18} />}
                 {link.path.includes('support') && <HelpCircle size={18} />}
+                {link.path.includes('join-us') && <Briefcase size={18} />}
                 <span>{link.name}</span>
               </NavLink>
             ))}
             <div className="border-t my-2"></div>
-            <MobileSwitchButton />
+            {currentSection !== 'portal' && <MobileSwitchButton />}
              <NavLink to="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600">
                 <LayoutDashboard size={18} />
                 <span>البوابة الرئيسية</span>
             </NavLink>
             
-            {isAdmin && (
+            {hasAdminAccess && (
                <>
                 <div className="border-t my-2"></div>
                <NavLink to="/admin" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-700 hover:bg-red-50 hover:text-red-600">

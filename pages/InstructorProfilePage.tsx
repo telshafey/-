@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useAdmin } from '../contexts/AdminContext';
+import { useCreativeWritingAdmin } from '../contexts/admin/CreativeWritingAdminContext';
 import PageLoader from '../components/ui/PageLoader';
 import { ArrowLeft, Calendar } from 'lucide-react';
 
 const InstructorProfilePage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { instructors, loading } = useAdmin();
+  const { instructors, loading } = useCreativeWritingAdmin();
   const navigate = useNavigate();
 
   const instructor = instructors.find(i => i.slug === slug);

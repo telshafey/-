@@ -1,31 +1,18 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutGrid, ShoppingBag, Settings, Home, Users, Gift, Feather, CheckSquare, FileText, MessageSquare, UserPlus } from 'lucide-react';
-import { useAdmin } from '../../contexts/AdminContext';
+import { LayoutGrid, ShoppingBag, Settings, Home, Users, Gift, Feather, CheckSquare, FileText, MessageSquare, UserPlus, DollarSign } from 'lucide-react';
+import { useCommunication } from '../../contexts/admin/CommunicationContext';
+// FIX: Added .tsx extension to resolve module error.
+import { useAuth } from '../../contexts/AuthContext.tsx';
 
-const adminNavLinks = [
-  { name: 'لوحة التحكم', path: '/admin', icon: <LayoutGrid size={20} />, end: true },
-  { name: 'الطلبات', path: '/admin/orders', icon: <ShoppingBag size={20} /> },
-  { name: 'المستخدمون', path: '/admin/users', icon: <Users size={20} /> },
-  { name: 'إدارة المنتجات', path: '/admin/personalized-products', icon: <Gift size={20} /> },
-  { name: 'إدارة المحتوى', path: '/admin/content-management', icon: <FileText size={20} /> },
-];
-
-const AdminSidebar: React.FC = () => {
-  const { supportTickets, joinRequests } = useAdmin();
-    
+const NavItem: React.FC<{ to: string, icon: React.ReactNode, label: string, badgeCount?: number, end?: boolean }> = ({ to, icon, label, badgeCount, end }) => {
   const activeLinkClass = "bg-blue-600 text-white";
   const inactiveLinkClass = "text-gray-300 hover:bg-gray-700 hover:text-white";
-
-  const newTicketsCount = supportTickets.filter(t => t.status === 'جديدة').length;
-  const newRequestsCount = joinRequests.filter(r => r.status === 'جديد').length;
-
-
-  const NavItem: React.FC<{ to: string, icon: React.ReactNode, label: string, badgeCount?: number, end?: boolean }> = ({ to, icon, label, badgeCount, end }) => (
+  return (
      <NavLink
         to={to}
         end={end}
-        className={({ isActive }) => `flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-colors w-full text-right mb-2 ${isActive ? activeLinkClass : inactiveLinkClass}`}
+        className={({ isActive }) => `flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-colors w-full text-right mb-1 ${isActive ? activeLinkClass : inactiveLinkClass}`}
       >
         <div className="flex items-center gap-3">
           {icon}
@@ -38,38 +25,80 @@ const AdminSidebar: React.FC = () => {
         )}
       </NavLink>
   );
+};
+
+const SectionTitle: React.FC<{title: string}> = ({ title }) => (
+    <div className="px-4 pt-4 pb-2 text-xs font-bold uppercase text-gray-500">{title}</div>
+);
+
+const AdminSidebar: React.FC = () => {
+  const { supportTickets, joinRequests } = useCommunication();
+  const { currentUser } = useAuth();
+  const role = currentUser?.role;
+
+  const newTicketsCount = supportTickets.filter(t => t.status === 'جديدة').length;
+  const newRequestsCount = joinRequests.filter(r => r.status === 'جديد').length;
+  
+  const renderInstructorSidebar = () => (
+    <>
+       <NavItem to="/admin" end label="لوحة التحكم" icon={<LayoutGrid size={20} />} />
+    </>
+  );
+
+  const renderAdminSidebar = () => (
+    <>
+      <NavItem to="/admin" end label="لوحة التحكم" icon={<LayoutGrid size={20} />} />
+
+      {role === 'super_admin' && (
+        <>
+          <SectionTitle title="عام" />
+          <NavItem to="/admin/users" label="المستخدمون" icon={<Users size={20} />} />
+        </>
+      )}
+
+      {(role === 'super_admin' || role === 'enha_lak_supervisor') && (
+          <>
+              <SectionTitle title="مشروع إنها لك" />
+              <NavItem to="/admin/orders" label="الطلبات" icon={<ShoppingBag size={20} />} />
+              <NavItem to="/admin/personalized-products" label="إدارة المنتجات" icon={<Gift size={20} />} />
+              <NavItem to="/admin/prices" label="إدارة الأسعار" icon={<DollarSign size={20} />} />
+              <NavItem to="/admin/content-management" label="إدارة المحتوى" icon={<FileText size={20} />} />
+          </>
+      )}
+      
+      {(role === 'super_admin' || role === 'creative_writing_supervisor') && (
+         <>
+              <SectionTitle title="برنامج بداية الرحلة" />
+              <NavItem to="/admin/creative-writing" label="إدارة الحجوزات" icon={<CheckSquare size={20} />} />
+              <NavItem to="/admin/instructors" label="إدارة المدربين" icon={<Feather size={20} />} />
+         </>
+      )}
+      
+       {(role === 'super_admin' || role === 'enha_lak_supervisor' || role === 'creative_writing_supervisor') && (
+         <>
+            <SectionTitle title="التواصل" />
+            <NavItem to="/admin/support" icon={<MessageSquare size={20}/>} label="رسائل الدعم" badgeCount={newTicketsCount}/>
+            <NavItem to="/admin/join-requests" icon={<UserPlus size={20}/>} label="طلبات الانضمام" badgeCount={newRequestsCount}/>
+         </>
+       )}
+
+
+      {role === 'super_admin' && (
+        <>
+          <hr className="my-4 border-gray-700" />
+          <NavItem to="/admin/settings" icon={<Settings size={20}/>} label="إعدادات الموقع"/>
+        </>
+      )}
+    </>
+  );
 
   return (
     <aside className="w-64 bg-gray-800 text-white flex flex-col flex-shrink-0">
       <div className="h-20 flex items-center justify-center px-4 bg-gray-900">
-        <h1 className="text-xl font-bold">لوحة تحكم "إنها لك"</h1>
+        <h1 className="text-xl font-bold">لوحة التحكم</h1>
       </div>
-      <nav className="flex-grow px-2 py-4">
-        {adminNavLinks.map((link) => (
-          <NavItem
-            key={link.name}
-            to={link.path}
-            end={link.end}
-            icon={link.icon}
-            label={link.name}
-          />
-        ))}
-
-        <hr className="my-4 border-gray-700" />
-        <div className="px-2 text-xs font-bold uppercase text-gray-400 mb-2">التواصل</div>
-        <NavItem to="/admin/support" icon={<MessageSquare size={20}/>} label="رسائل الدعم" badgeCount={newTicketsCount}/>
-        <NavItem to="/admin/join-requests" icon={<UserPlus size={20}/>} label="طلبات الانضمام" badgeCount={newRequestsCount}/>
-
-        <hr className="my-4 border-gray-700" />
-        
-        <div className="px-2 text-xs font-bold uppercase text-gray-400 mb-2">برنامج الكتابة الإبداعية</div>
-        <NavItem to="/admin/creative-writing" icon={<CheckSquare size={20} />} label="إدارة الحجوزات" />
-        <NavItem to="/admin/instructors" icon={<Feather size={20} />} label="إدارة المدربين" />
-        
-        <hr className="my-4 border-gray-700" />
-        
-        <NavItem to="/admin/settings" icon={<Settings size={20}/>} label="إعدادات الموقع"/>
-
+      <nav className="flex-grow px-2 py-4 overflow-y-auto">
+        {role === 'instructor' ? renderInstructorSidebar() : renderAdminSidebar()}
       </nav>
        <div className="px-4 py-4 border-t border-gray-700">
          <NavLink to="/" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white">

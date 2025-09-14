@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { MessageSquare, Eye, Inbox } from 'lucide-react';
-import { useAdmin, SupportTicket } from '../../contexts/AdminContext';
+import { useCommunication, SupportTicket } from '../../contexts/admin/CommunicationContext';
 import { formatDate } from '../../utils/helpers';
 import AdminSection from '../../components/admin/AdminSection';
 import PageLoader from '../../components/ui/PageLoader';
@@ -31,7 +31,7 @@ const ViewTicketModal: React.FC<{
 };
 
 const AdminSupportPage: React.FC = () => {
-    const { supportTickets, updateSupportTicketStatus, loading, error } = useAdmin();
+    const { supportTickets, updateSupportTicketStatus, loading, error } = useCommunication();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
 

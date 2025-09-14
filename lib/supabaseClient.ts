@@ -1,6 +1,8 @@
 
+
 import { createClient } from '@supabase/supabase-js';
-import { Database } from './database.types';
+// FIX: Added .ts extension to resolve module error.
+import { Database } from './database.types.ts';
 
 const supabaseUrl = 'https://cqcbyjvtsjzyjjkmttis.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxY2J5anZ0c2p6eWpqa210dGlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3NzQyODUsImV4cCI6MjA3MDM1MDI4NX0.3r1uBBElR1qknlAKFKNLoA8hjkiFd7UEajxBb7xKcNw';
