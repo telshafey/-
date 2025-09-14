@@ -1,5 +1,7 @@
+
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+// FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
+import * as ReactRouterDOM from 'react-router-dom';
 import { useAdmin, PersonalizedProduct } from '../contexts/AdminContext';
 import { useProduct, Prices } from '../contexts/ProductContext';
 import PageLoader from '../components/ui/PageLoader';
@@ -13,10 +15,6 @@ const getPriceForProduct = (productKey: string, prices: Prices) => {
             return `${prices.coloringBook} ج.م`;
         case 'dua_booklet':
             return `${prices.duaBooklet} ج.م`;
-        case 'values_story':
-            return `${prices.valuesStory} ج.م`;
-        case 'skills_story':
-            return `${prices.skillsStory} ج.م`;
         case 'gift_box':
             return `${prices.giftBox} ج.م`;
         default:
@@ -25,7 +23,7 @@ const getPriceForProduct = (productKey: string, prices: Prices) => {
 };
 
 const ProductCard: React.FC<{ product: PersonalizedProduct, price: string }> = ({ product, price }) => {
-    const navigate = useNavigate();
+    const navigate = ReactRouterDOM.useNavigate();
 
     const handleOrderNow = () => {
         navigate(`/order/${product.key}`);

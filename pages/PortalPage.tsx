@@ -1,5 +1,7 @@
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+// FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
+import * as ReactRouterDOM from 'react-router-dom';
 import { BookOpen, Feather } from 'lucide-react';
 import { useProduct } from '../contexts/ProductContext';
 import PageLoader from '../components/ui/PageLoader';
@@ -26,12 +28,12 @@ const PortalCard: React.FC<{
             <p className="mt-4 max-w-sm text-lg text-white/90">
                 {description}
             </p>
-            <Link 
+            <ReactRouterDOM.Link 
                 to={link}
                 className="mt-8 px-10 py-4 border-2 border-white text-lg font-bold rounded-full bg-white/10 backdrop-blur-sm hover:bg-white hover:text-gray-900 transition-all duration-300"
             >
                 {buttonText}
-            </Link>
+            </ReactRouterDOM.Link>
         </div>
     </div>
 );

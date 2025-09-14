@@ -1,5 +1,7 @@
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+// FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
+import * as ReactRouterDOM from 'react-router-dom';
 import { useAdmin } from '../contexts/AdminContext';
 import PageLoader from '../components/ui/PageLoader';
 import { formatDate } from '../utils/helpers';
@@ -31,7 +33,7 @@ const BlogPage: React.FC = () => {
                 {publishedPosts.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {publishedPosts.map(post => (
-                            <Link key={post.id} to={`/blog/${post.slug}`} className="group bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transform hover:-translate-y-2 transition-transform duration-300 border">
+                            <ReactRouterDOM.Link key={post.id} to={`/blog/${post.slug}`} className="group bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transform hover:-translate-y-2 transition-transform duration-300 border">
                                 <div className="h-56 bg-gray-100 flex items-center justify-center overflow-hidden">
                                     <img src={post.image_url || 'https://i.ibb.co/RzJzQhL/hero-image-new.jpg'} alt={post.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
                                 </div>
@@ -48,7 +50,7 @@ const BlogPage: React.FC = () => {
                                         <ArrowLeft size={20} className="ms-2 transition-transform group-hover:-translate-x-1 rtl:group-hover:translate-x-1" />
                                     </div>
                                 </div>
-                            </Link>
+                            </ReactRouterDOM.Link>
                         ))}
                     </div>
                 ) : (

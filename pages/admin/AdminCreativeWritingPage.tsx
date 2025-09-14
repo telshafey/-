@@ -2,8 +2,11 @@
 
 
 
+
+
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+// FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
+import * as ReactRouterDOM from 'react-router-dom';
 import { Save, Calendar, CheckSquare, Package, Settings, Loader2, Video } from 'lucide-react';
 import { useCreativeWritingAdmin, CreativeWritingPackage, CreativeWritingBooking, AdditionalService } from '../../contexts/admin/CreativeWritingAdminContext';
 import { getStatusColor } from '../../utils/helpers';
@@ -22,7 +25,7 @@ const AdminCreativeWritingPage: React.FC = () => {
         additionalServices, updateAdditionalServices,
         loading, error
     } = useCreativeWritingAdmin();
-    const navigate = useNavigate();
+    const navigate = ReactRouterDOM.useNavigate();
     const { addToast } = useToast();
 
     const [editablePackages, setEditablePackages] = useState<CreativeWritingPackage[]>([]);

@@ -6,9 +6,10 @@ export interface Prices {
     story: { printed: number, electronic: number };
     coloringBook: number;
     duaBooklet: number;
+    giftBox: number;
+    // FIX: Added missing price properties to align with AdminProductsPage.tsx.
     valuesStory: number;
     skillsStory: number;
-    giftBox: number;
 }
 
 export interface SiteBranding {
@@ -32,9 +33,10 @@ const MOCK_PRICES: Prices = {
     story: { printed: 700, electronic: 450 },
     coloringBook: 150,
     duaBooklet: 250,
-    valuesStory: 300,
-    skillsStory: 300,
     giftBox: 1200,
+    // FIX: Added mock values for the new price properties.
+    valuesStory: 350,
+    skillsStory: 350,
 };
 
 const MOCK_SITE_BRANDING: SiteBranding = {

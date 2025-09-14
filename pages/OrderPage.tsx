@@ -1,37 +1,27 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+// FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
+import * as ReactRouterDOM from 'react-router-dom';
 import { useAdmin } from '../contexts/AdminContext';
-import { useProduct } from '../contexts/ProductContext';
+// FIX: Imported the `Prices` type to resolve type errors.
+import { useProduct, Prices } from '../contexts/ProductContext';
 // FIX: Added .tsx extension to resolve module error.
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useToast } from '../contexts/ToastContext';
 import PageLoader from '../components/ui/PageLoader';
-import { Loader2, Send, User, BookHeart, Camera, Sparkles, Package, Check, PlusCircle, Award, Target } from 'lucide-react';
+import { Loader2, Send, User, BookHeart, Camera, Sparkles, Package, Check, PlusCircle, Award, Target, Truck } from 'lucide-react';
 import InteractivePreview from '../components/order/InteractivePreview';
 
-const storyValues = [
-    { key: 'courage', title: 'الشجاعة' },
-    { key: 'friendship', title: 'الصداقة' },
-    { key: 'honesty', title: 'الصدق' },
-    { key: 'kindness', title: 'العطف' },
-    { key: 'perseverance', title: 'المثابرة' },
-    { key: 'custom', title: 'قيمة أخرى (أحددها بنفسي)' },
-];
-
-const valuesStoryOptions = [
+const storyGoals = [
     { key: 'respect', title: 'الاستئذان والاحترام' },
     { key: 'cooperation', title: 'التعاون والمشاركة' },
     { key: 'honesty', title: 'الصدق والأمانة' },
     { key: 'cleanliness', title: 'النظافة والترتيب' },
-    { key: 'custom', title: 'اكتب هدفك' },
-];
-
-const skillsStoryOptions = [
     { key: 'time_management', title: 'تنظيم الوقت' },
     { key: 'emotion_management', title: 'إدارة العواطف' },
     { key: 'problem_solving', title: 'حل المشكلات' },
     { key: 'creative_thinking', title: 'التفكير الإبداعي' },
-    { key: 'custom', title: 'اكتب هدفك' },
+    { key: 'custom', title: 'هدف آخر (أحدده بنفسي)' },
 ];
 
 
@@ -81,8 +71,8 @@ const FileUpload: React.FC<{ name: string, label: string, file: File | null, onF
 
 
 const OrderPage: React.FC = () => {
-    const { productKey } = useParams<{ productKey: string }>();
-    const navigate = useNavigate();
+    const { productKey } = ReactRouterDOM.useParams<{ productKey: string }>();
+    const navigate = ReactRouterDOM.useNavigate();
     const { addToast } = useToast();
     const { personalizedProducts, loading: productsLoading, createOrder } = useAdmin();
     const { prices, loading: pricesLoading } = useProduct();
@@ -95,19 +85,22 @@ const OrderPage: React.FC = () => {
         childGender: 'ذكر' as 'ذكر' | 'أنثى',
         childTraits: '',
         familyNames: '',
-        storyValue: 'courage',
-        valuesStoryOption: 'respect',
-        skillsStoryOption: 'time_management',
+        storyValue: 'respect',
         customGoal: '',
     });
     const [files, setFiles] = useState<{ [key: string]: File | null }>({
-        mainPhoto: null,
-        extraPhoto1: null,
-        extraPhoto2: null,
+        facePhoto: null,
+        fullBodyPhoto: null,
+        sidePhoto: null,
+        extraPhoto: null,
     });
     const [orderOptions, setOrderOptions] = useState({
         format: 'printed',
         addons: [] as string[],
+    });
+     const [shippingDetails, setShippingDetails] = useState({
+        address: '',
+        isGift: false,
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -137,7 +130,7 @@ const OrderPage: React.FC = () => {
     }, [selectedChildId, childProfiles]);
 
     const addonsAvailable = useMemo(() => {
-        return personalizedProducts.filter(p => ['coloring_book', 'dua_booklet', 'values_story', 'skills_story'].includes(p.key));
+        return personalizedProducts.filter(p => ['coloring_book', 'dua_booklet'].includes(p.key));
     }, [personalizedProducts]);
 
     const totalPrice = useMemo(() => {
@@ -147,14 +140,16 @@ const OrderPage: React.FC = () => {
             total = orderOptions.format === 'printed' ? prices.story.printed : prices.story.electronic;
         } else if (product.key === 'gift_box') {
             total = prices.giftBox;
-        } else if (['coloring_book', 'dua_booklet', 'values_story', 'skills_story'].includes(product.key)) {
-            total = (prices as any)[product.key];
+        } else if (['coloring_book', 'dua_booklet'].includes(product.key)) {
+            const key = product.key as keyof Omit<Prices, 'story' | 'valuesStory' | 'skillsStory'>;
+            total = prices[key];
         }
 
         if(product.key === 'custom_story') {
             orderOptions.addons.forEach(addonKey => {
-                if (addonKey in prices) {
-                    total += (prices as any)[addonKey];
+                 const key = addonKey as keyof Omit<Prices, 'story' | 'valuesStory' | 'skillsStory'>;
+                if (key in prices) {
+                    total += prices[key];
                 }
             });
         }
@@ -162,17 +157,24 @@ const OrderPage: React.FC = () => {
     }, [prices, product, orderOptions]);
     
     const showFullCustomization = product?.key === 'custom_story' || product?.key === 'gift_box';
-    const showValuesCustomization = product?.key === 'values_story';
-    const showSkillsCustomization = product?.key === 'skills_story';
     const showImageUpload = true; 
     const showOptions = product?.key === 'custom_story';
-    const isCustomGoalSelected = (showFullCustomization && formData.storyValue === 'custom') ||
-                                (showValuesCustomization && formData.valuesStoryOption === 'custom') ||
-                                (showSkillsCustomization && formData.skillsStoryOption === 'custom');
+    const isCustomGoalSelected = showFullCustomization && formData.storyValue === 'custom';
+    const isPhysicalOrder = !showOptions || (showOptions && orderOptions.format === 'printed');
 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+     const handleShippingChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value, type } = e.target;
+        if (type === 'checkbox') {
+            const { checked } = e.target as HTMLInputElement;
+            setShippingDetails(prev => ({ ...prev, [name]: checked }));
+        } else {
+            setShippingDetails(prev => ({ ...prev, [name]: value }));
+        }
     };
     
     const handleFileChange = (name: string, file: File | null) => {
@@ -199,8 +201,12 @@ const OrderPage: React.FC = () => {
             addToast('يرجى ملء بيانات الطفل.', 'warning');
             return;
         }
-        if (!files.mainPhoto) {
-            addToast('يرجى رفع صورة رئيسية واضحة للطفل.', 'warning');
+        if (!files.facePhoto || !files.fullBodyPhoto) {
+            addToast('يرجى رفع صورة الوجه والصورة الكاملة للطفل.', 'warning');
+            return;
+        }
+        if (isPhysicalOrder && !shippingDetails.address.trim()) {
+            addToast('يرجى إدخال عنوان الشحن للمنتجات المطبوعة.', 'warning');
             return;
         }
 
@@ -218,18 +224,14 @@ const OrderPage: React.FC = () => {
                 childAge: parseInt(formData.childAge),
                 childGender: formData.childGender,
                 products: itemSummary,
+                shippingAddress: shippingDetails.address,
+                isGift: shippingDetails.isGift,
             };
 
             if (showFullCustomization) {
                 details.childTraits = formData.childTraits;
                 details.familyNames = formData.familyNames;
-                details.storyValue = formData.storyValue === 'custom' ? formData.customGoal : storyValues.find(v => v.key === formData.storyValue)?.title;
-            }
-            if (showValuesCustomization) {
-                details.storyGoal = formData.valuesStoryOption === 'custom' ? formData.customGoal : valuesStoryOptions.find(v => v.key === formData.valuesStoryOption)?.title;
-            }
-            if (showSkillsCustomization) {
-                details.storyGoal = formData.skillsStoryOption === 'custom' ? formData.customGoal : skillsStoryOptions.find(v => v.key === formData.skillsStoryOption)?.title;
+                details.storyValue = formData.storyValue === 'custom' ? formData.customGoal : storyGoals.find(v => v.key === formData.storyValue)?.title;
             }
             if (showOptions) {
                 details.format = orderOptions.format;
@@ -264,7 +266,7 @@ const OrderPage: React.FC = () => {
                 <div className="flex justify-between">
                     <span className="text-gray-600">{product.title}{showOptions && ` (${orderOptions.format === 'printed' ? 'مطبوعة' : 'إلكترونية'})`}</span>
                     <span className="font-semibold">
-                        {product.key === 'custom_story' ? (orderOptions.format === 'printed' ? prices.story.printed : prices.story.electronic) : (prices as any)[product.key]} ج.م
+                        {product.key === 'custom_story' ? (orderOptions.format === 'printed' ? prices.story.printed : prices.story.electronic) : (prices as any)[product.key as keyof Omit<Prices, 'story' | 'valuesStory' | 'skillsStory'>]} ج.م
                     </span>
                 </div>
                 {showOptions && orderOptions.addons.map(key => {
@@ -272,7 +274,7 @@ const OrderPage: React.FC = () => {
                      return (
                          <div key={key} className="flex justify-between text-sm">
                             <span className="text-gray-500">إضافة: {addon?.title}</span>
-                            <span className="font-semibold">{(prices as any)[key]} ج.م</span>
+                            <span className="font-semibold">{(prices as any)[key as keyof Omit<Prices, 'story' | 'valuesStory' | 'skillsStory'>]} ج.م</span>
                         </div>
                      )
                 })}
@@ -312,7 +314,7 @@ const OrderPage: React.FC = () => {
                                         ))}
                                     </select>
                                     <p className="text-xs text-gray-500 mt-2">
-                                        أو يمكنك <Link to="/account" target="_blank" className="text-blue-600 hover:underline">إضافة ملف طفل جديد</Link> من صفحة حسابك.
+                                        أو يمكنك <ReactRouterDOM.Link to="/account" target="_blank" className="text-blue-600 hover:underline">إضافة ملف طفل جديد</ReactRouterDOM.Link> من صفحة حسابك.
                                     </p>
                                 </div>
                             </Section>
@@ -348,50 +350,29 @@ const OrderPage: React.FC = () => {
                                         <input type="text" name="familyNames" value={formData.familyNames} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-lg" placeholder="مثال: أخوه علي، صديقته المقربة فاطمة"/>
                                     </div>
                                      <div>
-                                        <label htmlFor="storyValue" className="block text-sm font-bold text-gray-700 mb-2">القيمة التربوية الأساسية للقصة*</label>
+                                        <label htmlFor="storyValue" className="block text-sm font-bold text-gray-700 mb-2">الهدف الأساسي للقصة*</label>
                                         <select name="storyValue" value={formData.storyValue} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-lg bg-white">
-                                            {storyValues.map(v => <option key={v.key} value={v.key}>{v.title}</option>)}
-                                        </select>
-                                    </div>
-                                </Section>
-                            )}
-                            
-                            {showValuesCustomization && (
-                                <Section title="الخطوة 3: اختيار القيمة التربوية" icon={<Award size={22} />}>
-                                    <div>
-                                        <label htmlFor="valuesStoryOption" className="block text-sm font-bold text-gray-700 mb-2">اختر القيمة أو الأدب من القائمة*</label>
-                                        <select name="valuesStoryOption" value={formData.valuesStoryOption} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-lg bg-white">
-                                            {valuesStoryOptions.map(v => <option key={v.key} value={v.key}>{v.title}</option>)}
-                                        </select>
-                                    </div>
-                                </Section>
-                            )}
-
-                             {showSkillsCustomization && (
-                                <Section title="الخطوة 3: اختيار المهارة الحياتية" icon={<Target size={22} />}>
-                                    <div>
-                                        <label htmlFor="skillsStoryOption" className="block text-sm font-bold text-gray-700 mb-2">اختر المهارة من القائمة*</label>
-                                        <select name="skillsStoryOption" value={formData.skillsStoryOption} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-lg bg-white">
-                                            {skillsStoryOptions.map(v => <option key={v.key} value={v.key}>{v.title}</option>)}
+                                            {storyGoals.map(v => <option key={v.key} value={v.key}>{v.title}</option>)}
                                         </select>
                                     </div>
                                 </Section>
                             )}
                             
                              {isCustomGoalSelected && (
-                                <div>
+                                <Section title="تحديد الهدف المخصص" icon={<Target size={22}/>}>
                                     <label htmlFor="customGoal" className="block text-sm font-bold text-gray-700 mb-2">حدد هدفك أو القيمة التي تريدها*</label>
                                     <input type="text" name="customGoal" value={formData.customGoal} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-lg" required />
-                                </div>
+                                </Section>
                              )}
 
                             {showImageUpload && (
                                 <Section title="الخطوة 4: رفع الصور" icon={<Camera size={22} />}>
                                     <p className="text-sm text-gray-600 -mt-4 mb-4">لأفضل نتيجة، يرجى رفع صور واضحة وعالية الجودة للطفل.</p>
-                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                        <FileUpload name="mainPhoto" label="صورة رئيسية (واضحة للوجه)*" file={files.mainPhoto} onFileChange={handleFileChange} />
-                                        <FileUpload name="extraPhoto1" label="صورة إضافية 1" file={files.extraPhoto1} onFileChange={handleFileChange} />
-                                        <FileUpload name="extraPhoto2" label="صورة إضافية 2" file={files.extraPhoto2} onFileChange={handleFileChange} />
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <FileUpload name="facePhoto" label="صورة الوجه (واضحة للوجه من الأمام)*" file={files.facePhoto} onFileChange={handleFileChange} />
+                                        <FileUpload name="fullBodyPhoto" label="صورة كاملة للطفل*" file={files.fullBodyPhoto} onFileChange={handleFileChange} />
+                                        <FileUpload name="sidePhoto" label="صورة إضافية (من الجانب - اختياري)" file={files.sidePhoto} onFileChange={handleFileChange} />
+                                        <FileUpload name="extraPhoto" label="صورة أخرى (اختياري)" file={files.extraPhoto} onFileChange={handleFileChange} />
                                     </div>
                                 </Section>
                             )}
@@ -400,21 +381,37 @@ const OrderPage: React.FC = () => {
                                  <Section title="الخطوة 5: خيارات إضافية" icon={<PlusCircle size={22} />}>
                                     <div>
                                         <label className="block text-sm font-bold text-gray-700 mb-2">اختر نسخة القصة*</label>
-                                        <div className="flex gap-4">
-                                            <label className="flex items-center"><input type="radio" name="format" value="printed" checked={orderOptions.format === 'printed'} onChange={e => setOrderOptions(p => ({...p, format: e.target.value}))} className="h-4 w-4"/> <span className="ms-2">مطبوعة (+ نسخة إلكترونية مجانية) - {prices.story.printed} ج.م</span></label>
-                                            <label className="flex items-center"><input type="radio" name="format" value="electronic" checked={orderOptions.format === 'electronic'} onChange={e => setOrderOptions(p => ({...p, format: e.target.value}))} className="h-4 w-4"/> <span className="ms-2">إلكترونية فقط - {prices.story.electronic} ج.م</span></label>
+                                        <div className="flex flex-col sm:flex-row gap-4">
+                                            <label className="flex items-center p-3 border rounded-lg flex-1"><input type="radio" name="format" value="printed" checked={orderOptions.format === 'printed'} onChange={e => setOrderOptions(p => ({...p, format: e.target.value}))} className="h-4 w-4"/> <span className="ms-2">مطبوعة (+ نسخة إلكترونية مجانية) - {prices.story.printed} ج.م</span></label>
+                                            <label className="flex items-center p-3 border rounded-lg flex-1"><input type="radio" name="format" value="electronic" checked={orderOptions.format === 'electronic'} onChange={e => setOrderOptions(p => ({...p, format: e.target.value}))} className="h-4 w-4"/> <span className="ms-2">إلكترونية فقط - {prices.story.electronic} ج.م</span></label>
                                         </div>
                                     </div>
                                     <div>
                                         <label className="block text-sm font-bold text-gray-700 mb-2">أضف لطلبك (اختياري)</label>
                                         <div className="space-y-2">
                                             {addonsAvailable.map(addon => (
-                                                 <label key={addon.key} className="flex items-center"><input type="checkbox" checked={orderOptions.addons.includes(addon.key)} onChange={() => handleAddonChange(addon.key)} className="h-4 w-4 rounded"/> <span className="ms-2">{addon.title} - {(prices as any)[addon.key]} ج.م</span></label>
+                                                 <label key={addon.key} className="flex items-center"><input type="checkbox" checked={orderOptions.addons.includes(addon.key)} onChange={() => handleAddonChange(addon.key)} className="h-4 w-4 rounded"/> <span className="ms-2">{addon.title} - {(prices as any)[addon.key as keyof Omit<Prices, 'story' | 'valuesStory' | 'skillsStory'>]} ج.م</span></label>
                                             ))}
                                         </div>
                                     </div>
                                  </Section>
                             )}
+
+                             {isPhysicalOrder && (
+                                <Section title="الخطوة 6: الشحن والتوصيل" icon={<Truck size={22}/>}>
+                                    <div>
+                                        <label htmlFor="address" className="block text-sm font-bold text-gray-700 mb-2">عنوان الشحن*</label>
+                                        <textarea name="address" id="address" value={shippingDetails.address} onChange={handleShippingChange} rows={3} className="w-full p-2 border border-gray-300 rounded-lg" placeholder="اكتب العنوان بالتفصيل..."></textarea>
+                                    </div>
+                                    <div>
+                                        <label className="flex items-center">
+                                            <input type="checkbox" name="isGift" checked={shippingDetails.isGift} onChange={handleShippingChange} className="h-4 w-4 rounded"/>
+                                            <span className="ms-2">إرسال كهدية (للتغليف الخاص)</span>
+                                        </label>
+                                    </div>
+                                </Section>
+                            )}
+
                         </div>
                         <div className="lg:col-span-1 sticky top-24 space-y-6">
                            <InteractivePreview 

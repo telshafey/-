@@ -1,5 +1,7 @@
+
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { NavLink, Link, useLocation } from 'react-router-dom';
+// FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
+import * as ReactRouterDOM from 'react-router-dom';
 import { User, Menu, X, ShieldCheck, Send, HelpCircle, Briefcase, Gift, Home, LogOut, Feather, ArrowRightLeft, LayoutDashboard, BookOpen } from 'lucide-react';
 // FIX: Added .tsx extension to resolve module error.
 import { useAuth } from '../contexts/AuthContext.tsx';
@@ -29,7 +31,7 @@ const Header: React.FC = () => {
   const { hasAdminAccess, currentUser, signOut } = useAuth();
   const { siteBranding, loading } = useProduct();
   const accountMenuRef = useRef<HTMLDivElement>(null);
-  const location = useLocation();
+  const location = ReactRouterDOM.useLocation();
 
   const getCurrentSection = () => {
       const { pathname } = location;
@@ -96,22 +98,22 @@ const Header: React.FC = () => {
                                 <p className="text-sm font-semibold text-gray-800">{currentUser.name}</p>
                                 <p className="text-xs text-gray-500 truncate">{currentUser.email}</p>
                             </div>
-                            <NavLink to="/account" onClick={() => setIsAccountMenuOpen(false)} className="flex items-center gap-3 w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <ReactRouterDOM.NavLink to="/account" onClick={() => setIsAccountMenuOpen(false)} className="flex items-center gap-3 w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 <User size={16} /> حسابي
-                            </NavLink>
+                            </ReactRouterDOM.NavLink>
                             {hasAdminAccess && (
-                                <NavLink to="/admin" onClick={() => setIsAccountMenuOpen(false)} className="flex items-center gap-3 w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                <ReactRouterDOM.NavLink to="/admin" onClick={() => setIsAccountMenuOpen(false)} className="flex items-center gap-3 w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-red-50">
                                     <ShieldCheck size={16} /> لوحة التحكم
-                                </NavLink>
+                                </ReactRouterDOM.NavLink>
                             )}
                              <button onClick={() => { signOut(); setIsAccountMenuOpen(false); }} className="flex items-center gap-3 w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                <LogOut size={16} /> تسجيل الخروج
                             </button>
                         </>
                     ) : (
-                        <NavLink to="/account" onClick={() => setIsAccountMenuOpen(false)} className="flex items-center gap-3 w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <ReactRouterDOM.NavLink to="/account" onClick={() => setIsAccountMenuOpen(false)} className="flex items-center gap-3 w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             <User size={16} /> تسجيل الدخول
-                        </NavLink>
+                        </ReactRouterDOM.NavLink>
                     )}
                 </div>
             </div>
@@ -126,34 +128,34 @@ const Header: React.FC = () => {
   const SwitchSectionButton: React.FC = () => {
     if (currentSection === 'enha-lak') {
       return (
-        <Link to="/creative-writing" className="flex items-center justify-center gap-2 px-5 py-2 border border-purple-600 text-base font-medium rounded-full text-purple-600 bg-white hover:bg-purple-50 transition-transform transform hover:scale-105">
+        <ReactRouterDOM.Link to="/creative-writing" className="flex items-center justify-center gap-2 px-5 py-2 border border-purple-600 text-base font-medium rounded-full text-purple-600 bg-white hover:bg-purple-50 transition-transform transform hover:scale-105">
           <Feather size={16} />
           <span>الكتابة الإبداعية</span>
-        </Link>
+        </ReactRouterDOM.Link>
       );
     }
     return (
-      <Link to="/enha-lak" className="flex items-center justify-center gap-2 px-5 py-2 border border-blue-600 text-base font-medium rounded-full text-blue-600 bg-white hover:bg-blue-50 transition-transform transform hover:scale-105">
+      <ReactRouterDOM.Link to="/enha-lak" className="flex items-center justify-center gap-2 px-5 py-2 border border-blue-600 text-base font-medium rounded-full text-blue-600 bg-white hover:bg-blue-50 transition-transform transform hover:scale-105">
         <Gift size={16} />
         <span>قصص "إنها لك"</span>
-      </Link>
+      </ReactRouterDOM.Link>
     );
   };
   
   const MobileSwitchButton: React.FC = () => {
     if (currentSection === 'enha-lak') {
         return (
-             <NavLink to="/creative-writing" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-md text-base font-medium text-white bg-purple-600 hover:bg-purple-700">
+             <ReactRouterDOM.NavLink to="/creative-writing" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-md text-base font-medium text-white bg-purple-600 hover:bg-purple-700">
                 <Feather size={18} />
                 <span>الانتقال للكتابة الإبداعية</span>
-            </NavLink>
+            </ReactRouterDOM.NavLink>
         );
     }
     return (
-        <NavLink to="/enha-lak" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700">
+        <ReactRouterDOM.NavLink to="/enha-lak" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700">
             <Gift size={18} />
             <span>تصفح قصص "إنها لك"</span>
-        </NavLink>
+        </ReactRouterDOM.NavLink>
     );
   }
 
@@ -162,27 +164,27 @@ const Header: React.FC = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <div className="flex items-center gap-4">
-            <Link to={homePath}>
+            <ReactRouterDOM.Link to={homePath}>
               {isLoading ? (
                  <div className="h-16 w-32 bg-gray-200 rounded animate-pulse"></div>
               ) : (
                 <img className="h-16 w-auto" src={logoUrl || ''} alt={logoAlt} />
               )}
-            </Link>
-             <Link to="/" className="hidden sm:flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600">
+            </ReactRouterDOM.Link>
+             <ReactRouterDOM.Link to="/" className="hidden sm:flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600">
                 <LayoutDashboard size={16} />
                 <span>البوابة الرئيسية</span>
-            </Link>
+            </ReactRouterDOM.Link>
           </div>
           <nav className="hidden md:flex items-center space-x-6 rtl:space-x-reverse">
             {navLinks.map((link) => (
-              <NavLink
+              <ReactRouterDOM.NavLink
                 key={link.name}
                 to={link.path}
                 className={({ isActive }) => (isActive ? activeLinkClass : inactiveLinkClass)}
               >
                 {link.name}
-              </NavLink>
+              </ReactRouterDOM.NavLink>
             ))}
           </nav>
           <div className="hidden md:flex items-center space-x-4 rtl:space-x-reverse">
@@ -204,7 +206,7 @@ const Header: React.FC = () => {
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             {navLinks.map((link) => (
-              <NavLink
+              <ReactRouterDOM.NavLink
                 key={link.name}
                 to={link.path}
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -214,28 +216,28 @@ const Header: React.FC = () => {
                 {link.path.includes('support') && <HelpCircle size={18} />}
                 {link.path.includes('join-us') && <Briefcase size={18} />}
                 <span>{link.name}</span>
-              </NavLink>
+              </ReactRouterDOM.NavLink>
             ))}
             <div className="border-t my-2"></div>
             {currentSection !== 'portal' && <MobileSwitchButton />}
-             <NavLink to="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600">
+             <ReactRouterDOM.NavLink to="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600">
                 <LayoutDashboard size={18} />
                 <span>البوابة الرئيسية</span>
-            </NavLink>
+            </ReactRouterDOM.NavLink>
             
             {hasAdminAccess && (
                <>
                 <div className="border-t my-2"></div>
-               <NavLink to="/admin" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-700 hover:bg-red-50 hover:text-red-600">
+               <ReactRouterDOM.NavLink to="/admin" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-700 hover:bg-red-50 hover:text-red-600">
                 <ShieldCheck size={18} />
                 <span>لوحة التحكم</span>
-               </NavLink>
+               </ReactRouterDOM.NavLink>
                </>
             )}
-            <NavLink to="/account" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600">
+            <ReactRouterDOM.NavLink to="/account" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600">
                 <User size={18} />
                 <span>حسابي</span>
-            </NavLink>
+            </ReactRouterDOM.NavLink>
           </div>
         </div>
       )}

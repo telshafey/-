@@ -1,23 +1,12 @@
 import React from 'react';
-import { Package, User, Palette, Sparkles, BookOpen, Award, Target } from 'lucide-react';
+import { Package, User, Palette, Sparkles } from 'lucide-react';
 import { PersonalizedProduct } from '../../contexts/AdminContext';
 
-const storyValues = [
-    { key: 'courage', title: 'الشجاعة' },
-    { key: 'friendship', title: 'الصداقة' },
-    { key: 'honesty', title: 'الصدق' },
-    { key: 'kindness', title: 'العطف' },
-    { key: 'perseverance', title: 'المثابرة' },
-];
-
-const valuesStoryOptions = [
+const storyGoals = [
     { key: 'respect', title: 'الاستئذان والاحترام' },
     { key: 'cooperation', title: 'التعاون والمشاركة' },
     { key: 'honesty', title: 'الصدق والأمانة' },
     { key: 'cleanliness', title: 'النظافة والترتيب' },
-];
-
-const skillsStoryOptions = [
     { key: 'time_management', title: 'تنظيم الوقت' },
     { key: 'emotion_management', title: 'إدارة العواطف' },
     { key: 'problem_solving', title: 'حل المشكلات' },
@@ -29,39 +18,29 @@ interface InteractivePreviewProps {
         childName: string;
         childTraits: string;
         storyValue: string;
-        valuesStoryOption: string;
-        skillsStoryOption: string;
         customGoal: string;
     };
     product: PersonalizedProduct | null;
 }
 
 const InteractivePreview: React.FC<InteractivePreviewProps> = ({ formData, product }) => {
-    const { childName, childTraits, storyValue, valuesStoryOption, skillsStoryOption, customGoal } = formData;
+    const { childName, childTraits, storyValue, customGoal } = formData;
     
     if (!product) {
         return null; 
     }
 
     const showFullCustomization = product.key === 'custom_story' || product.key === 'gift_box';
-    const showValuesCustomization = product.key === 'values_story';
-    const showSkillsCustomization = product.key === 'skills_story';
     
     const getGoalTitle = () => {
         if (showFullCustomization) {
-            return storyValue === 'custom' ? customGoal : storyValues.find(v => v.key === storyValue)?.title;
-        }
-        if (showValuesCustomization) {
-            return valuesStoryOption === 'custom' ? customGoal : valuesStoryOptions.find(v => v.key === valuesStoryOption)?.title;
-        }
-        if (showSkillsCustomization) {
-            return skillsStoryOption === 'custom' ? customGoal : skillsStoryOptions.find(v => v.key === skillsStoryOption)?.title;
+            return storyValue === 'custom' ? customGoal : storyGoals.find(v => v.key === storyValue)?.title;
         }
         return null;
     };
 
     const goalTitle = getGoalTitle();
-    const goalIcon = showValuesCustomization ? <Award size={18}/> : showSkillsCustomization ? <Target size={18}/> : <Sparkles size={18}/>;
+    const goalIcon = <Sparkles size={18}/>;
 
     return (
         <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
@@ -73,7 +52,7 @@ const InteractivePreview: React.FC<InteractivePreviewProps> = ({ formData, produ
             <div className="space-y-6">
                 <div>
                     <h3 className="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                        <BookOpen size={18} />
+                        <Package size={18} />
                         المنتج المطلوب
                     </h3>
                     <div className="bg-gray-50 p-4 rounded-lg">

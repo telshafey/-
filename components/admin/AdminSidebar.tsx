@@ -1,5 +1,7 @@
+
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+// FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
+import * as ReactRouterDOM from 'react-router-dom';
 import { LayoutGrid, ShoppingBag, Settings, Home, Users, Gift, Feather, CheckSquare, FileText, MessageSquare, UserPlus, DollarSign } from 'lucide-react';
 import { useCommunication } from '../../contexts/admin/CommunicationContext';
 // FIX: Added .tsx extension to resolve module error.
@@ -9,7 +11,7 @@ const NavItem: React.FC<{ to: string, icon: React.ReactNode, label: string, badg
   const activeLinkClass = "bg-blue-600 text-white";
   const inactiveLinkClass = "text-gray-300 hover:bg-gray-700 hover:text-white";
   return (
-     <NavLink
+     <ReactRouterDOM.NavLink
         to={to}
         end={end}
         className={({ isActive }) => `flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-colors w-full text-right mb-1 ${isActive ? activeLinkClass : inactiveLinkClass}`}
@@ -23,7 +25,7 @@ const NavItem: React.FC<{ to: string, icon: React.ReactNode, label: string, badg
             {badgeCount}
           </span>
         )}
-      </NavLink>
+      </ReactRouterDOM.NavLink>
   );
 };
 
@@ -101,10 +103,10 @@ const AdminSidebar: React.FC = () => {
         {role === 'instructor' ? renderInstructorSidebar() : renderAdminSidebar()}
       </nav>
        <div className="px-4 py-4 border-t border-gray-700">
-         <NavLink to="/" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white">
+         <ReactRouterDOM.NavLink to="/" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white">
             <Home size={20} />
             <span>العودة للموقع</span>
-        </NavLink>
+        </ReactRouterDOM.NavLink>
       </div>
     </aside>
   );

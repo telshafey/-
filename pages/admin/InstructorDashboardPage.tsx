@@ -1,5 +1,7 @@
+
 import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+// FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
+import * as ReactRouterDOM from 'react-router-dom';
 // FIX: Added .tsx extension to resolve module error.
 import { useAuth } from '../../contexts/AuthContext.tsx';
 import { useCreativeWritingAdmin, CreativeWritingBooking } from '../../contexts/admin/CreativeWritingAdminContext';
@@ -20,7 +22,7 @@ interface Student {
 const InstructorDashboardPage: React.FC = () => {
     const { currentUser, loading: authLoading } = useAuth();
     const { instructors, creativeWritingBookings, generateAndSetSessionId, loading: cwLoading } = useCreativeWritingAdmin();
-    const navigate = useNavigate();
+    const navigate = ReactRouterDOM.useNavigate();
     const { addToast } = useToast();
     const [startingSession, setStartingSession] = React.useState<string | null>(null);
     const [dateFrom, setDateFrom] = useState('');
