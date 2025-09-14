@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>منصة إنها لك - قصص مخصصة للأطفال</title>
+    <link rel="icon" href="https://i.ibb.co/C0bSJJT/favicon.png" type="image/png">
+    <link rel="preload" href="https://i.ibb.co/7JdC01C/Enha-Lak-Logo.png" as="image">
+    <link rel="preload" href="https://i.ibb.co/RzJzQhL/hero-image-new.jpg" as="image">
+    <link rel="preload" href="https://i.ibb.co/Xz9d9J2/creative-writing-promo.jpg" as="image">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <script src='https://meet.jit.si/external_api.js'></script>
+    <style>
+      body {
+        font-family: 'Tajawal', sans-serif;
+      }
+      @keyframes pulse-slow {
+        50% {
+          transform: scale(1.05);
+        }
+      }
+      .animate-pulse-slow {
+        animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fadeIn {
+        animation: fadeIn 0.5s ease-out forwards;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.1",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.1/",
+    "react/": "https://esm.sh/react@^19.1.1/",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.8.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.539.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.13.0",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.45.0"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
