@@ -4,7 +4,8 @@ import { useCreativeWritingAdmin } from '../../contexts/admin/CreativeWritingAdm
 import { useToast } from '../../contexts/ToastContext';
 // FIX: Added .ts extension to resolve module error.
 import { Instructor, AvailableSlots } from '../../lib/database.types.ts';
-import { daysInMonth, firstDayOfMonth } from '../../utils/helpers';
+// FIX: Added .ts extension to resolve module error.
+import { daysInMonth, firstDayOfMonth } from '../../utils/helpers.ts';
 
 interface AvailabilityManagerProps {
     instructorId?: number;

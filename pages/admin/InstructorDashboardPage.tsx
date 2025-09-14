@@ -1,4 +1,5 @@
 
+
 import React, { useMemo, useState } from 'react';
 // FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
 import * as ReactRouterDOM from 'react-router-dom';
@@ -7,7 +8,8 @@ import { useAuth } from '../../contexts/AuthContext.tsx';
 import { useCreativeWritingAdmin, CreativeWritingBooking } from '../../contexts/admin/CreativeWritingAdminContext';
 import AdminSection from '../../components/admin/AdminSection';
 import PageLoader from '../../components/ui/PageLoader';
-import { getStatusColor } from '../../utils/helpers';
+// FIX: Added .ts extension to resolve module error.
+import { getStatusColor } from '../../utils/helpers.ts';
 import { Calendar, Video, Loader2, Users, BarChart2, MessageSquare } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import WeeklyScheduleManager from '../../components/admin/WeeklyScheduleManager';

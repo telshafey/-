@@ -1,18 +1,21 @@
+
+
+
 import React, { useState } from 'react';
-import { User, Heart, FileText, Plus, Edit, Trash } from 'lucide-react';
+import { User, Heart, FileText, Plus, Edit, Trash, ChevronDown, ShoppingBag, CheckSquare, Star, Gift } from 'lucide-react';
 // FIX: Added .tsx extension to resolve module error.
 import { useAuth, UserProfile } from '../contexts/AuthContext.tsx';
 // FIX: Import ChildProfile from its source to resolve module export error.
 import type { ChildProfile } from '../lib/database.types';
-import { useAdmin, IOrderDetails } from '../contexts/AdminContext';
+import { useAdmin, IOrderDetails, Subscription } from '../contexts/AdminContext';
 import { useCreativeWritingAdmin, CreativeWritingBooking } from '../contexts/admin/CreativeWritingAdminContext';
-import { getStatusColor } from '../utils/helpers';
+// FIX: Added .ts extension to resolve module error.
+import { getStatusColor, formatDate } from '../utils/helpers.ts';
 import ChildProfileModal from '../components/order/ChildProfileModal';
 import PaymentModal from '../components/PaymentModal';
 
-// Components for Auth (Login/Signup)
+// Auth Components
 const AuthForm: React.FC = () => {
-    // A simplified form
     const { signIn, signUp, loading, error } = useAuth();
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
@@ -64,12 +67,13 @@ const AuthForm: React.FC = () => {
 const DemoLogins: React.FC = () => {
     const { signInAsDemoUser } = useAuth();
 
-    const roles: { role: Exclude<UserProfile['role'], 'student'>; label: string }[] = [
+    const roles: { role: UserProfile['role']; label: string }[] = [
         { role: 'super_admin', label: 'مدير عام' },
         { role: 'enha_lak_supervisor', label: 'مشرف "إنها لك"' },
         { role: 'creative_writing_supervisor', label: 'مشرف "بداية الرحلة"' },
         { role: 'instructor', label: 'مدرب' },
-        { role: 'user', label: 'مستخدم عادي' },
+        { role: 'user', label: 'ولي أمر' },
+        { role: 'student', label: 'طالب' },
     ];
 
     return (
@@ -90,14 +94,74 @@ const DemoLogins: React.FC = () => {
     );
 };
 
+// Child Card Component
+const ChildCard: React.FC<{
+    child: ChildProfile;
+    orders: IOrderDetails[];
+    bookings: CreativeWritingBooking[];
+    onEdit: (child: ChildProfile) => void;
+    onDelete: (childId: number) => void;
+    onPay: (item: { id: string, type: 'order' | 'booking' }) => void;
+}> = ({ child, orders, bookings, onEdit, onDelete, onPay }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    
+    // This is a mock filter. In a real app, orders would be linked by child_id.
+    const childOrders = orders.filter(o => {
+        const details = o.details as any;
+        return details?.childName === child.name;
+    });
+
+    return (
+        <div className="bg-white rounded-2xl shadow-lg border">
+            <div className="p-6 flex justify-between items-center">
+                <div className="flex items-center gap-4">
+                    <img src={child.avatar_url || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} alt={child.name} className="w-16 h-16 rounded-full object-cover"/>
+                    <div>
+                        <h3 className="text-xl font-bold text-gray-800">{child.name}</h3>
+                        <p className="text-sm text-gray-500">{child.age} سنوات</p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-2">
+                    <button onClick={() => onEdit(child)} className="text-gray-500 hover:text-blue-600 p-2"><Edit size={18}/></button>
+                    <button onClick={() => onDelete(child.id)} className="text-gray-500 hover:text-red-600 p-2"><Trash size={18}/></button>
+                    <button onClick={() => setIsExpanded(!isExpanded)} className="p-2 text-gray-500 hover:text-blue-600">
+                        <ChevronDown className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                    </button>
+                </div>
+            </div>
+            {isExpanded && (
+                <div className="border-t p-6 bg-gray-50/50 space-y-4">
+                    <h4 className="font-bold flex items-center gap-2"><ShoppingBag size={16}/> طلبات "إنها لك"</h4>
+                    {childOrders.length > 0 ? childOrders.map(o => (
+                        <div key={o.id} className="text-sm border-b pb-2">
+                             <p>رقم الطلب: {o.id}</p>
+                             <p>الحالة: <span className={`px-2 py-1 text-xs font-bold rounded-full ${getStatusColor(o.status)}`}>{o.status}</span></p>
+                             {o.status === 'بانتظار الدفع' && <button onClick={() => onPay({ id: o.id, type: 'order' })} className="text-blue-600">إتمام الدفع</button>}
+                        </div>
+                    )) : <p className="text-sm text-gray-500">لا توجد طلبات لهذا الطفل.</p>}
+                    
+                    <h4 className="font-bold flex items-center gap-2 pt-4"><CheckSquare size={16}/> حجوزات "بداية الرحلة"</h4>
+                    {bookings.length > 0 ? bookings.map(b => (
+                        <div key={b.id} className="text-sm border-b pb-2">
+                             <p>رقم الحجز: {b.id}</p>
+                             <p>الحالة: <span className={`px-2 py-1 text-xs font-bold rounded-full ${getStatusColor(b.status)}`}>{b.status}</span></p>
+                             {b.status === 'بانتظار الدفع' && <button onClick={() => onPay({ id: b.id, type: 'booking' })} className="text-blue-600">إتمام الدفع</button>}
+                        </div>
+                    )) : <p className="text-sm text-gray-500">لا توجد حجوزات.</p>}
+                </div>
+            )}
+        </div>
+    );
+}
+
 
 // Main Account Page Component
 const AccountPage: React.FC = () => {
     const { isLoggedIn, currentUser, signOut, childProfiles, deleteChildProfile } = useAuth();
-    const { orders } = useAdmin();
+    const { orders, subscriptions } = useAdmin();
     const { creativeWritingBookings } = useCreativeWritingAdmin();
 
-    const [activeTab, setActiveTab] = useState('orders');
+    const [activeTab, setActiveTab] = useState('family');
     const [isChildModalOpen, setIsChildModalOpen] = useState(false);
     const [childToEdit, setChildToEdit] = useState<ChildProfile | null>(null);
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -114,8 +178,8 @@ const AccountPage: React.FC = () => {
         );
     }
     
-    const userOrders = orders.filter(o => o.user_id === currentUser.id);
     const userBookings = creativeWritingBookings.filter(b => b.user_id === currentUser.id);
+    const userSubscriptions = subscriptions.filter(s => s.user_id === currentUser.id);
 
     const handleEditChild = (child: ChildProfile) => {
         setChildToEdit(child);
@@ -136,12 +200,11 @@ const AccountPage: React.FC = () => {
     const handlePaymentSuccess = () => {
         setIsPaymentModalOpen(false);
         setItemToPay(null);
-        // Data will be re-fetched by context
     };
 
     const tabs = [
-        { key: 'orders', label: 'طلباتي', icon: <FileText size={18} /> },
-        { key: 'children', label: 'ملفات أطفالي', icon: <Heart size={18} /> },
+        { key: 'family', label: 'عائلتي', icon: <Heart size={18} /> },
+        { key: 'subscriptions', label: 'اشتراكاتي', icon: <Star size={18} /> },
         { key: 'profile', label: 'ملفي الشخصي', icon: <User size={18} /> },
     ];
 
@@ -152,7 +215,7 @@ const AccountPage: React.FC = () => {
             <div className="bg-gray-50 py-16 sm:py-20 animate-fadeIn">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12">
-                        <h1 className="text-4xl font-extrabold text-blue-600">صفحة حسابي</h1>
+                        <h1 className="text-4xl font-extrabold text-blue-600">المركز العائلي</h1>
                         <p className="mt-2 text-lg text-gray-600">مرحباً بعودتك، {currentUser.name}!</p>
                     </div>
 
@@ -171,53 +234,65 @@ const AccountPage: React.FC = () => {
                             </nav>
                         </div>
 
-                        <div className="bg-white p-8 rounded-2xl shadow-lg">
-                            {activeTab === 'orders' && (
-                                <div>
-                                    <h2 className="text-2xl font-bold mb-4">طلبات "إنها لك"</h2>
-                                    {userOrders.length > 0 ? userOrders.map(o => (
-                                        <div key={o.id} className="border-b py-4">
-                                            <p>رقم الطلب: {o.id}</p>
-                                            <p>الحالة: <span className={`px-2 py-1 text-xs font-bold rounded-full ${getStatusColor(o.status)}`}>{o.status}</span></p>
-                                            {o.status === 'بانتظار الدفع' && <button onClick={() => openPaymentModal({ id: o.id, type: 'order' })} className="text-blue-600">إتمام الدفع</button>}
-                                        </div>
-                                    )) : <p>لا توجد طلبات.</p>}
-
-                                     <h2 className="text-2xl font-bold mb-4 mt-8">حجوزات "بداية الرحلة"</h2>
-                                     {userBookings.length > 0 ? userBookings.map(b => (
-                                        <div key={b.id} className="border-b py-4">
-                                            <p>رقم الحجز: {b.id}</p>
-                                            <p>الحالة: <span className={`px-2 py-1 text-xs font-bold rounded-full ${getStatusColor(b.status)}`}>{b.status}</span></p>
-                                            {b.status === 'بانتظار الدفع' && <button onClick={() => openPaymentModal({ id: b.id, type: 'booking' })} className="text-blue-600">إتمام الدفع</button>}
-                                        </div>
-                                    )) : <p>لا توجد حجوزات.</p>}
+                        <div>
+                            {activeTab === 'family' && (
+                                <div className="space-y-8">
+                                    <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-md">
+                                        <h2 className="text-2xl font-bold">ملفات أطفالي</h2>
+                                        <button onClick={() => { setChildToEdit(null); setIsChildModalOpen(true); }} className="flex items-center gap-2 bg-blue-600 text-white font-bold py-2 px-4 rounded-full hover:bg-blue-700 transition-transform transform hover:scale-105"><Plus size={16}/> إضافة طفل</button>
+                                    </div>
+                                    <div className="space-y-6">
+                                        {childProfiles.map(child => (
+                                            <ChildCard 
+                                                key={child.id} 
+                                                child={child}
+                                                orders={orders}
+                                                bookings={userBookings}
+                                                onEdit={handleEditChild}
+                                                onDelete={handleDeleteChild}
+                                                onPay={openPaymentModal}
+                                            />
+                                        ))}
+                                         {childProfiles.length === 0 && (
+                                            <p className="text-center py-12 text-gray-500 bg-white rounded-2xl shadow-md">
+                                                لم تقم بإضافة أي أطفال بعد.
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
                             )}
 
-                            {activeTab === 'children' && (
-                                <div>
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h2 className="text-2xl font-bold">ملفات أطفالي</h2>
-                                        <button onClick={() => { setChildToEdit(null); setIsChildModalOpen(true); }} className="flex items-center gap-2 bg-blue-600 text-white font-bold py-2 px-4 rounded-full"><Plus size={16}/> إضافة طفل</button>
-                                    </div>
-                                    {childProfiles.map(child => (
-                                        <div key={child.id} className="flex justify-between items-center border-b p-4">
-                                            <p>{child.name} - {child.age} سنوات</p>
-                                            <div>
-                                                <button onClick={() => handleEditChild(child)} className="text-gray-500 hover:text-blue-600 p-2"><Edit size={18}/></button>
-                                                <button onClick={() => handleDeleteChild(child.id)} className="text-gray-500 hover:text-red-600 p-2"><Trash size={18}/></button>
+                             {activeTab === 'subscriptions' && (
+                                <div className="bg-white p-8 rounded-2xl shadow-lg space-y-6">
+                                    <h2 className="text-2xl font-bold mb-4">صندوق الرحلة الشهري</h2>
+                                    {userSubscriptions.length > 0 ? (
+                                        userSubscriptions.map(sub => (
+                                            <div key={sub.id} className="p-4 border rounded-lg bg-orange-50 border-orange-200">
+                                                <div className="flex items-center gap-3">
+                                                    <Gift className="text-orange-500" />
+                                                    <p className="font-bold text-lg text-gray-800">اشتراك نشط للطفل: {sub.child_name}</p>
+                                                </div>
+                                                <p className="text-sm text-gray-600 mt-2">تاريخ التجديد القادم: <span className="font-semibold">{formatDate(sub.next_renewal_date)}</span></p>
+                                                <div className="mt-4">
+                                                    <button className="text-sm text-gray-500 hover:underline">إدارة الاشتراك</button>
+                                                </div>
                                             </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-12">
+                                            <p className="text-gray-500 mb-4">ليس لديك أي اشتراكات نشطة حاليًا.</p>
+                                            <a href="#/subscription" className="text-blue-600 font-bold hover:underline">اكتشف صندوق الرحلة الشهري</a>
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
                             )}
 
                             {activeTab === 'profile' && (
-                                <div>
+                                <div className="bg-white p-8 rounded-2xl shadow-lg">
                                     <h2 className="text-2xl font-bold mb-4">ملفي الشخصي</h2>
-                                    <p>الاسم: {currentUser.name}</p>
-                                    <p>البريد: {currentUser.email}</p>
-                                    <button onClick={signOut} className="mt-6 bg-red-500 text-white py-2 px-4 rounded-lg">تسجيل الخروج</button>
+                                    <p><span className="font-semibold">الاسم:</span> {currentUser.name}</p>
+                                    <p><span className="font-semibold">البريد الإلكتروني:</span> {currentUser.email}</p>
+                                    <button onClick={signOut} className="mt-6 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">تسجيل الخروج</button>
                                 </div>
                             )}
                         </div>

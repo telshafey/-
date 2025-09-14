@@ -1,4 +1,6 @@
 
+
+
 import React, { Suspense } from 'react';
 // FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
 import * as ReactRouterDOM from 'react-router-dom';
@@ -8,18 +10,21 @@ import PageLoader from '../ui/PageLoader';
 import { useAuth, UserProfile } from '../../contexts/AuthContext.tsx';
 
 // Lazy load all admin pages
-const AdminDashboardPage = React.lazy(() => import('../../pages/admin/AdminDashboardPage'));
-const AdminOrdersPage = React.lazy(() => import('../../pages/admin/AdminOrdersPage'));
-const AdminProductsPage = React.lazy(() => import('../../pages/admin/AdminProductsPage'));
-const AdminSettingsPage = React.lazy(() => import('../../pages/admin/AdminSettingsPage'));
-const AdminUsersPage = React.lazy(() => import('../../pages/admin/AdminUsersPage'));
-const AdminPersonalizedProductsPage = React.lazy(() => import('../../pages/admin/AdminPersonalizedProductsPage'));
-const AdminCreativeWritingPage = React.lazy(() => import('../../pages/admin/AdminCreativeWritingPage'));
-const AdminInstructorsPage = React.lazy(() => import('../../pages/admin/AdminInstructorsPage'));
-const AdminContentManagementPage = React.lazy(() => import('../../pages/admin/AdminContentManagementPage'));
-const AdminSupportPage = React.lazy(() => import('../../pages/admin/AdminSupportPage'));
-const AdminJoinRequestsPage = React.lazy(() => import('../../pages/admin/AdminJoinRequestsPage'));
-const InstructorDashboardPage = React.lazy(() => import('../../pages/admin/InstructorDashboardPage'));
+// FIX: Add .tsx extension to all lazy-loaded admin page components to resolve module loading errors.
+const AdminDashboardPage = React.lazy(() => import('../../pages/admin/AdminDashboardPage.tsx'));
+const AdminOrdersPage = React.lazy(() => import('../../pages/admin/AdminOrdersPage.tsx'));
+const AdminProductsPage = React.lazy(() => import('../../pages/admin/AdminProductsPage.tsx'));
+const AdminSettingsPage = React.lazy(() => import('../../pages/admin/AdminSettingsPage.tsx'));
+const AdminUsersPage = React.lazy(() => import('../../pages/admin/AdminUsersPage.tsx'));
+const AdminPersonalizedProductsPage = React.lazy(() => import('../../pages/admin/AdminPersonalizedProductsPage.tsx'));
+const AdminCreativeWritingPage = React.lazy(() => import('../../pages/admin/AdminCreativeWritingPage.tsx'));
+const AdminInstructorsPage = React.lazy(() => import('../../pages/admin/AdminInstructorsPage.tsx'));
+const AdminContentManagementPage = React.lazy(() => import('../../pages/admin/AdminContentManagementPage.tsx'));
+const AdminSupportPage = React.lazy(() => import('../../pages/admin/AdminSupportPage.tsx'));
+const AdminJoinRequestsPage = React.lazy(() => import('../../pages/admin/AdminJoinRequestsPage.tsx'));
+const AdminBlogPage = React.lazy(() => import('../../pages/admin/AdminBlogPage.tsx'));
+const AdminSubscriptionsPage = React.lazy(() => import('../../pages/admin/AdminSubscriptionsPage.tsx'));
+const InstructorDashboardPage = React.lazy(() => import('../../pages/admin/InstructorDashboardPage.tsx'));
 
 
 const RoleBasedRoute: React.FC<{ children: React.ReactElement, allowedRoles: UserProfile['role'][] }> = ({ children, allowedRoles }) => {
@@ -63,9 +68,11 @@ const AdminLayout: React.FC = () => {
             <ReactRouterDOM.Route path="settings" element={<RoleBasedRoute allowedRoles={['super_admin']}><AdminSettingsPage /></RoleBasedRoute>} />
 
             <ReactRouterDOM.Route path="orders" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminOrdersPage /></RoleBasedRoute>} />
+            <ReactRouterDOM.Route path="subscriptions" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminSubscriptionsPage /></RoleBasedRoute>} />
             <ReactRouterDOM.Route path="personalized-products" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminPersonalizedProductsPage /></RoleBasedRoute>} />
             <ReactRouterDOM.Route path="prices" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminProductsPage /></RoleBasedRoute>} />
             <ReactRouterDOM.Route path="content-management" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminContentManagementPage /></RoleBasedRoute>} />
+            <ReactRouterDOM.Route path="blog" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminBlogPage /></RoleBasedRoute>} />
             
             <ReactRouterDOM.Route path="creative-writing" element={<RoleBasedRoute allowedRoles={['super_admin', 'creative_writing_supervisor']}><AdminCreativeWritingPage /></RoleBasedRoute>} />
             <ReactRouterDOM.Route path="instructors" element={<RoleBasedRoute allowedRoles={['super_admin', 'creative_writing_supervisor']}><AdminInstructorsPage /></RoleBasedRoute>} />

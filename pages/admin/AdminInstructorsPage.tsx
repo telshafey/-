@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Users, Plus, Edit, X, Save, Loader2, Calendar, Check, XCircle } from 'lucide-react';
 import { useCreativeWritingAdmin } from '../../contexts/admin/CreativeWritingAdminContext';
 import AdminSection from '../../components/admin/AdminSection';
@@ -21,6 +21,8 @@ const InstructorModal: React.FC<{
     const [bio, setBio] = useState('');
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
+    const modalRef = useRef<HTMLDivElement>(null);
+    const closeButtonRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
         if (instructor) {
@@ -38,6 +40,53 @@ const InstructorModal: React.FC<{
         }
         setAvatarFile(null);
     }, [instructor, isOpen]);
+    
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                onClose();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        const focusableElements = modalRef.current?.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusableElements || focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0] as HTMLElement;
+        const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+        
+        closeButtonRef.current?.focus();
+
+        const handleTabKeyPress = (event: KeyboardEvent) => {
+            if (event.key === 'Tab') {
+                if (event.shiftKey) { 
+                    if (document.activeElement === firstElement) {
+                        lastElement.focus();
+                        event.preventDefault();
+                    }
+                } else {
+                    if (document.activeElement === lastElement) {
+                        firstElement.focus();
+                        event.preventDefault();
+                    }
+                }
+            }
+        };
+        
+        const currentModalRef = modalRef.current;
+        currentModalRef?.addEventListener('keydown', handleTabKeyPress);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            currentModalRef?.removeEventListener('keydown', handleTabKeyPress);
+        };
+    }, [isOpen, onClose]);
+
 
     if (!isOpen) return null;
 
@@ -57,11 +106,11 @@ const InstructorModal: React.FC<{
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center" onClick={onClose}>
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-8 m-4 animate-fadeIn max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="instructor-modal-title">
+            <div ref={modalRef} className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-8 m-4 animate-fadeIn max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800">{instructor ? 'تعديل المدرب' : 'إضافة مدرب جديد'}</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={24} /></button>
+                    <h2 id="instructor-modal-title" className="text-2xl font-bold text-gray-800">{instructor ? 'تعديل المدرب' : 'إضافة مدرب جديد'}</h2>
+                    <button ref={closeButtonRef} onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={24} /></button>
                 </div>
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="flex items-center gap-4">

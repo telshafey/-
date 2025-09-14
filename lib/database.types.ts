@@ -161,6 +161,18 @@ export interface Database {
             progress_notes: string | null
           }
       }
+      subscriptions: {
+        Row: {
+            id: string;
+            user_id: string;
+            user_name: string;
+            child_name: string;
+            status: 'active' | 'paused' | 'cancelled';
+            start_date: string;
+            next_renewal_date: string;
+            price: number;
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -189,6 +201,7 @@ export type Instructor = Database['public']['Tables']['instructors']['Row'];
 export type CreativeWritingPackage = Database['public']['Tables']['creative_writing_packages']['Row'];
 export type AdditionalService = Database['public']['Tables']['additional_services']['Row'];
 export type CreativeWritingBooking = Database['public']['Tables']['creative_writing_bookings']['Row'];
+export type Subscription = Database['public']['Tables']['subscriptions']['Row'];
 
 // Specific JSON types
 export type OrderDetailsJson = {

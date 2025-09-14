@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
 import { useToast } from '../ToastContext';
 // FIX: Added .ts extension to resolve module error.
@@ -30,9 +31,24 @@ const MOCK_ADDITIONAL_SERVICES: AdditionalService[] = [
 const MOCK_CW_BOOKINGS: (CreativeWritingBooking & { instructors: Instructor | null })[] = [
     { id: 'BK-1', user_id: 'f1e2d3c4-b5a6-9870-4321-098765fedcba', user_name: 'فاطمة علي', instructor_id: 1, package_id: 2, package_name: 'الباقة التطويرية', booking_date: new Date('2024-07-25T10:00:00Z').toISOString(), booking_time: '10:00 ص', status: 'مكتمل', total: 2800, session_id: 'abc-123', receipt_url: 'https://example.com/receipt.jpg', admin_comment: null, progress_notes: 'أظهرت سارة تقدماً ملحوظاً في بناء الشخصيات. تحتاج للتركيز على الحوار.', instructors: MOCK_INSTRUCTORS[0] },
     { id: 'BK-2', user_id: '12345678-abcd-efgh-ijkl-mnopqrstuvwx', user_name: 'أحمد محمود', instructor_id: 2, package_id: 1, package_name: 'الباقة التأسيسية', booking_date: '2024-07-26', booking_time: '09:00 ص', status: 'بانتظار الدفع', total: 1200, session_id: null, receipt_url: null, admin_comment: null, progress_notes: null, instructors: MOCK_INSTRUCTORS[1] },
-    { id: 'BK-3', user_id: 'f1e2d3c4-b5a6-9870-4321-098765fedcba', user_name: 'فاطمة علي', instructor_id: 1, package_id: 2, package_name: 'الباقة التطويرية', booking_date: new Date().toISOString(), booking_time: '11:00 ص', status: 'مؤكد', total: 2800, session_id: 'def-456', receipt_url: 'https://example.com/receipt.jpg', admin_comment: null, progress_notes: 'الجلسة القادمة ستركز على الحبكة.', instructors: MOCK_INSTRUCTORS[0] },
+    { id: 'BK-3', user_id: 'student-id-123', user_name: 'الطالب عمر', instructor_id: 1, package_id: 2, package_name: 'الباقة التطويرية', booking_date: new Date().toISOString(), booking_time: '11:00 ص', status: 'مؤكد', total: 2800, session_id: 'def-456', receipt_url: 'https://example.com/receipt.jpg', admin_comment: null, progress_notes: 'الجلسة القادمة ستركز على الحبكة.', instructors: MOCK_INSTRUCTORS[0] },
 
 ];
+
+// Helper to get next date for a given day of the week
+const getNextDateForDay = (dayOfWeek: keyof WeeklySchedule): Date => {
+    const dayMapping: { [key in keyof WeeklySchedule]: number } = {
+        'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3,
+        'thursday': 4, 'friday': 5, 'saturday': 6
+    };
+    const targetDay = dayMapping[dayOfWeek];
+    const today = new Date();
+    const currentDay = today.getDay();
+    const distance = (targetDay - currentDay + 7) % 7;
+    const nextDate = new Date(today);
+    nextDate.setDate(today.getDate() + distance);
+    return nextDate;
+};
 
 
 // --- Context Definition ---
@@ -151,7 +167,10 @@ export const CreativeWritingAdminProvider: React.FC<{children: ReactNode}> = ({ 
         addToast('تم تحديث الخدمات الإضافية بنجاح (تجريبيًا).', 'success');
     };
     
-    const createBooking = async (payload: any) => {
+    const createBooking = async (payload: { currentUser: UserProfile; instructorId: number; selectedPackage: CreativeWritingPackage; selectedServices: AdditionalService[]; recurringDay: keyof WeeklySchedule; recurringTime: string; }) => {
+        const bookingDate = getNextDateForDay(payload.recurringDay);
+        const total = payload.selectedPackage.price + payload.selectedServices.reduce((sum, s) => sum + s.price, 0);
+
         const newBooking: CreativeWritingBooking & { instructors: Instructor | null } = {
             id: `BK-${Date.now()}`,
             user_id: payload.currentUser.id,
@@ -159,10 +178,10 @@ export const CreativeWritingAdminProvider: React.FC<{children: ReactNode}> = ({ 
             instructor_id: payload.instructorId,
             package_id: payload.selectedPackage.id,
             package_name: payload.selectedPackage.name,
-            booking_date: payload.selectedDate.toISOString().split('T')[0],
-            booking_time: payload.selectedTime,
+            booking_date: bookingDate.toISOString().split('T')[0],
+            booking_time: payload.recurringTime,
             status: 'بانتظار الدفع',
-            total: payload.selectedPackage.price,
+            total: total,
             session_id: null,
             receipt_url: null,
             admin_comment: null,

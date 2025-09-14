@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 // FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
 import * as ReactRouterDOM from 'react-router-dom';
@@ -32,7 +33,7 @@ const ProductCard: React.FC<{ product: PersonalizedProduct, price: string }> = (
     return (
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transform hover:-translate-y-2 transition-transform duration-300 border">
             <div className="h-64 bg-gray-100 flex items-center justify-center p-4">
-                <img src={product.image_url || ''} alt={product.title} className="max-h-full max-w-full object-contain" />
+                <img src={product.image_url || ''} alt={product.title} className="max-h-full max-w-full object-contain" loading="lazy" />
             </div>
             <div className="p-6 flex flex-col flex-grow">
                 <h3 className="text-2xl font-bold text-gray-800">{product.title}</h3>

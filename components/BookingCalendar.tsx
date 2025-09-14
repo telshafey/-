@@ -1,10 +1,12 @@
 
 
+
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 // FIX: Added .ts extension to resolve module error.
 import { Instructor, AvailableSlots } from '../lib/database.types.ts';
-import { daysInMonth, firstDayOfMonth } from '../utils/helpers';
+// FIX: Added .ts extension to resolve module error.
+import { daysInMonth, firstDayOfMonth } from '../utils/helpers.ts';
 import { useCreativeWritingAdmin } from '../contexts/admin/CreativeWritingAdminContext';
 
 interface BookingCalendarProps {

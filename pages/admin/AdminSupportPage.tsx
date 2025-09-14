@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { MessageSquare, Eye, Inbox } from 'lucide-react';
 import { useCommunication, SupportTicket } from '../../contexts/admin/CommunicationContext';
-import { formatDate } from '../../utils/helpers';
+// FIX: Added .ts extension to resolve module error.
+import { formatDate } from '../../utils/helpers.ts';
 import AdminSection from '../../components/admin/AdminSection';
 import PageLoader from '../../components/ui/PageLoader';
 

@@ -1,4 +1,5 @@
 
+
 import React, { useEffect } from 'react';
 // FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
 import * as ReactRouterDOM from 'react-router-dom';
@@ -57,6 +58,7 @@ const InstructorProfilePage: React.FC = () => {
                 src={instructor.avatar_url || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} 
                 alt={instructor.name} 
                 className="w-40 h-40 rounded-full object-cover mb-4 ring-4 ring-blue-100 shadow-lg"
+                loading="lazy"
               />
               <h1 className="text-3xl font-extrabold text-gray-800">{instructor.name}</h1>
               <p className="text-lg text-blue-600 font-semibold mt-1">{instructor.specialty}</p>

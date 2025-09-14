@@ -1,8 +1,9 @@
 
+
 import React from 'react';
 // FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
 import * as ReactRouterDOM from 'react-router-dom';
-import { LayoutGrid, ShoppingBag, Settings, Home, Users, Gift, Feather, CheckSquare, FileText, MessageSquare, UserPlus, DollarSign } from 'lucide-react';
+import { LayoutGrid, ShoppingBag, Settings, Home, Users, Gift, Feather, CheckSquare, FileText, MessageSquare, UserPlus, DollarSign, BookOpen, Star } from 'lucide-react';
 import { useCommunication } from '../../contexts/admin/CommunicationContext';
 // FIX: Added .tsx extension to resolve module error.
 import { useAuth } from '../../contexts/AuthContext.tsx';
@@ -62,9 +63,11 @@ const AdminSidebar: React.FC = () => {
           <>
               <SectionTitle title="مشروع إنها لك" />
               <NavItem to="/admin/orders" label="الطلبات" icon={<ShoppingBag size={20} />} />
+              <NavItem to="/admin/subscriptions" label="الاشتراكات" icon={<Star size={20} />} />
               <NavItem to="/admin/personalized-products" label="إدارة المنتجات" icon={<Gift size={20} />} />
               <NavItem to="/admin/prices" label="إدارة الأسعار" icon={<DollarSign size={20} />} />
               <NavItem to="/admin/content-management" label="إدارة المحتوى" icon={<FileText size={20} />} />
+              <NavItem to="/admin/blog" label="إدارة المدونة" icon={<BookOpen size={20} />} />
           </>
       )}
       

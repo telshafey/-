@@ -1,10 +1,13 @@
 
+
+
 import React, { useEffect } from 'react';
 // FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
 import * as ReactRouterDOM from 'react-router-dom';
 import { useAdmin } from '../contexts/AdminContext';
 import PageLoader from '../components/ui/PageLoader';
-import { formatDate } from '../utils/helpers';
+// FIX: Added .ts extension to resolve module error.
+import { formatDate } from '../utils/helpers.ts';
 import { ArrowLeft, User, Calendar } from 'lucide-react';
 
 const BlogPostPage: React.FC = () => {
@@ -63,7 +66,7 @@ const BlogPostPage: React.FC = () => {
 
                     {post.image_url && (
                         <div className="mb-10 rounded-2xl overflow-hidden shadow-xl">
-                            <img src={post.image_url} alt={post.title} className="w-full h-auto object-cover" />
+                            <img src={post.image_url} alt={post.title} className="w-full h-auto object-cover" loading="lazy" />
                         </div>
                     )}
 

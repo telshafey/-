@@ -4,12 +4,16 @@
 
 
 
+
+
+
 import React, { useState, useEffect } from 'react';
 // FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
 import * as ReactRouterDOM from 'react-router-dom';
 import { Save, Calendar, CheckSquare, Package, Settings, Loader2, Video } from 'lucide-react';
 import { useCreativeWritingAdmin, CreativeWritingPackage, CreativeWritingBooking, AdditionalService } from '../../contexts/admin/CreativeWritingAdminContext';
-import { getStatusColor } from '../../utils/helpers';
+// FIX: Added .ts extension to resolve module error.
+import { getStatusColor } from '../../utils/helpers.ts';
 import AdminSection from '../../components/admin/AdminSection';
 import PageLoader from '../../components/ui/PageLoader';
 import { useToast } from '../../contexts/ToastContext';
@@ -69,8 +73,20 @@ const AdminCreativeWritingPage: React.FC = () => {
         setEditableServices(newServices);
     };
 
-    const handleBookingStatusChange = async (bookingId: string, newStatus: CreativeWritingBooking['status']) => {
-        await updateBookingStatus(bookingId, newStatus);
+    const handleBookingStatusChange = async (e: React.ChangeEvent<HTMLSelectElement>, bookingId: string, currentStatus: CreativeWritingBooking['status']) => {
+        const newStatus = e.target.value as CreativeWritingBooking['status'];
+
+        if (newStatus === 'ملغي') {
+            const confirmed = window.confirm('هل أنت متأكد من رغبتك في إلغاء هذا الحجز؟ هذا الإجراء لا يمكن التراجع عنه.');
+            if (confirmed) {
+                await updateBookingStatus(bookingId, newStatus);
+            } else {
+                // Revert the select element's value visually
+                e.target.value = currentStatus;
+            }
+        } else {
+            await updateBookingStatus(bookingId, newStatus);
+        }
     };
 
     const handleSaveChanges = async () => {
@@ -183,7 +199,7 @@ const AdminCreativeWritingPage: React.FC = () => {
                                             <td className="py-4 px-4">
                                                 <select 
                                                     value={booking.status}
-                                                    onChange={(e) => handleBookingStatusChange(booking.id, e.target.value as CreativeWritingBooking['status'])}
+                                                    onChange={(e) => handleBookingStatusChange(e, booking.id, booking.status)}
                                                     className={`border-0 rounded-full text-xs font-bold px-3 py-1 appearance-none ${getStatusColor(booking.status)}`}
                                                 >
                                                    {bookingStatusOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}

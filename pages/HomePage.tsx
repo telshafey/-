@@ -2,14 +2,14 @@
 import React from 'react';
 // FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
 import * as ReactRouterDOM from 'react-router-dom';
-import { Sparkles, Gift, BookHeart, BookOpen, Award, ArrowLeft, ClipboardPen, HeartHandshake, PackageCheck, Star, Quote, Zap, Shield, Globe, Feather, Users, Smile, Rocket, Heart } from 'lucide-react';
+import { Sparkles, Gift, BookHeart, BookOpen, Award, ArrowLeft, ClipboardPen, HeartHandshake, PackageCheck, Star, Quote, Zap, Shield, Globe, Feather, Users, Smile, Rocket, Heart, CalendarPlus } from 'lucide-react';
 import { useProduct } from '../contexts/ProductContext';
 import { useAdmin } from '../contexts/AdminContext';
 import PageLoader from '../components/ui/PageLoader';
 
 const heroContent = {
     title: 'اجعل طفلك بطل قصته التي لا تُنسى',
-    subtitle: 'حوّل طفلك إلى نجم حكايته الخاصة مع قصة فريدة ومخصصة بالكامل تعزز ثقته بنفسه وتغرس فيه أسمى القيم.',
+    subtitle: 'عندما يرى طفلك نفسه بطلاً، فإنه لا يقرأ قصة، بل يعيشها. تجربة سحرية تبني ثقته بنفسه، تعزز هويته، وتغرس فيه القيم النبيلة بأسلوب يلامس قلبه وعقله.',
 };
 
 const ProductShowcaseCard: React.FC<{ icon: React.ReactNode, title: string, description: string }> = ({ icon, title, description }) => (
@@ -149,7 +149,7 @@ const HomePage: React.FC = () => {
       <section id="products-section" className="py-16 sm:py-20 lg:py-24 scroll-mt-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800">منتجاتنا المصممة بحب</h2>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800">كنوزنا الصغيرة المصممة بحب</h2>
             <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">كل منتج هو فرصة جديدة لإسعاد طفلك وتعزيز ارتباطه بالكلمة والصورة.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
@@ -158,7 +158,7 @@ const HomePage: React.FC = () => {
                     key={product.key}
                     icon={<Gift size={32}/>}
                     title={product.title}
-                    description={(product.features || [])[0] || ''}
+                    description={product.description}
                  />
              ))}
           </div>
@@ -209,8 +209,26 @@ const HomePage: React.FC = () => {
               </div>
           </div>
       </section>
+      
+      {/* Subscription Box CTA Section */}
+      <section className="bg-gradient-to-br from-yellow-50 via-white to-orange-50 py-16 sm:py-20 lg:py-24">
+        <div className="container mx-auto px-4">
+            <div className="text-center">
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800">جديدنا! <span className="text-orange-500">صندوق الرحلة الشهري</span></h2>
+                <p className="mt-4 max-w-3xl mx-auto text-lg text-gray-600">
+                    استمر في إلهام طفلك كل شهر! اشترك الآن ليصلكم صندوق مليء بالقصص والأنشطة الإبداعية المصممة خصيصًا لطفلك، لرحلة من التعلم والمرح لا تتوقف.
+                </p>
+                <div className="mt-10">
+                <ReactRouterDOM.Link to="/subscription" className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-lg font-medium rounded-full text-white bg-orange-500 hover:bg-orange-600 transition-transform transform hover:scale-105 shadow-lg">
+                    <CalendarPlus className="me-3" />
+                    اكتشف الاشتراك الشهري
+                </ReactRouterDOM.Link>
+                </div>
+            </div>
+        </div>
+      </section>
 
-      {/* New Value Props Section */}
+      {/* Value Props Section */}
       <section className="bg-gray-50 py-16 sm:py-20 lg:py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -273,7 +291,7 @@ const HomePage: React.FC = () => {
                 </div>
             </div>
             <div className="hidden lg:block px-8">
-                <img src="https://i.ibb.co/Xz9d9J2/creative-writing-promo.jpg" alt="طفل يكتب بسعادة" className="rounded-2xl shadow-2xl" />
+                <img src="https://i.ibb.co/Xz9d9J2/creative-writing-promo.jpg" alt="طفل يكتب بسعادة" className="rounded-2xl shadow-2xl" loading="lazy" />
             </div>
             </div>
         </div>

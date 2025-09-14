@@ -1,28 +1,39 @@
 
+
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 // FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
 import * as ReactRouterDOM from 'react-router-dom';
-import { User, Menu, X, ShieldCheck, Send, HelpCircle, Briefcase, Gift, Home, LogOut, Feather, ArrowRightLeft, LayoutDashboard, BookOpen } from 'lucide-react';
+// FIX: Imported the 'Users' icon from 'lucide-react' to resolve 'Cannot find name' errors.
+import { User, Menu, X, ShieldCheck, Send, HelpCircle, Briefcase, Gift, Home, LogOut, Feather, ArrowRightLeft, LayoutDashboard, BookOpen, Star, Book, Target, Users } from 'lucide-react';
 // FIX: Added .tsx extension to resolve module error.
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useProduct } from '../contexts/ProductContext';
 
-const enhaLakLinks = [
-  { name: 'الرئيسية', path: '/enha-lak' },
-  { name: 'المتجر', path: '/store' },
-  { name: 'عنا', path: '/about' },
-  { name: 'الدعم والمساعدة', path: '/support' },
-  { name: 'انضم إلينا', path: '/join-us' },
+// FIX: Defined NavLink interface to make the 'icon' property optional, resolving type errors.
+interface NavLink {
+  name: string;
+  path: string;
+  icon?: React.ReactNode;
+  mobileIcon?: React.ReactNode;
+}
+
+const enhaLakLinks: NavLink[] = [
+  { name: 'الرئيسية', path: '/enha-lak', mobileIcon: <Home size={18} /> },
+  { name: 'المتجر', path: '/store', mobileIcon: <Gift size={18} /> },
+  { name: 'الاشتراك الشهري', path: '/subscription', icon: <Star className="text-yellow-500" size={16}/>, mobileIcon: <Star size={18} /> },
+  { name: 'المدونة', path: '/blog', mobileIcon: <BookOpen size={18} /> },
+  { name: 'عنا', path: '/about', mobileIcon: <Users size={18} /> },
+  { name: 'الدعم والمساعدة', path: '/support', mobileIcon: <HelpCircle size={18} /> },
+  { name: 'انضم إلينا', path: '/join-us', mobileIcon: <Briefcase size={18} /> },
 ];
 
-const creativeWritingLinks = [
-    { name: 'الرئيسية', path: '/creative-writing' },
-    { name: 'عن البرنامج', path: '/creative-writing/about' },
-    { name: 'المنهج الدراسي', path: '/creative-writing/curriculum' },
-    { name: 'المدربون', path: '/creative-writing/instructors' },
-    { name: 'الباقات والحجز', path: '/creative-writing/booking' },
-    { name: 'الدعم والمساعدة', path: '/creative-writing/support' },
-    { name: 'انضم إلينا', path: '/creative-writing/join-us' },
+const creativeWritingLinks: NavLink[] = [
+    { name: 'الرئيسية', path: '/creative-writing', mobileIcon: <Home size={18} /> },
+    { name: 'عن البرنامج', path: '/creative-writing/about', mobileIcon: <Target size={18} /> },
+    { name: 'المنهج الدراسي', path: '/creative-writing/curriculum', mobileIcon: <Book size={18} /> },
+    { name: 'المدربون', path: '/creative-writing/instructors', mobileIcon: <Users size={18} /> },
+    { name: 'الباقات والحجز', path: '/creative-writing/booking', mobileIcon: <Gift size={18} /> },
+    { name: 'الدعم والمساعدة', path: '/creative-writing/support', mobileIcon: <HelpCircle size={18} /> },
 ];
 
 const Header: React.FC = () => {
@@ -35,7 +46,7 @@ const Header: React.FC = () => {
 
   const getCurrentSection = () => {
       const { pathname } = location;
-      if (pathname.startsWith('/creative-writing') || pathname.startsWith('/instructor') || pathname.startsWith('/session')) {
+      if (pathname.startsWith('/creative-writing') || pathname.startsWith('/instructor') || pathname.startsWith('/session') || pathname.startsWith('/student')) {
           return 'creative-writing';
       }
       if (pathname === '/') {
@@ -181,9 +192,9 @@ const Header: React.FC = () => {
               <ReactRouterDOM.NavLink
                 key={link.name}
                 to={link.path}
-                className={({ isActive }) => (isActive ? activeLinkClass : inactiveLinkClass)}
+                className={({ isActive }) => `flex items-center gap-2 ${isActive ? activeLinkClass : inactiveLinkClass}`}
               >
-                {link.name}
+                {link.icon} {link.name}
               </ReactRouterDOM.NavLink>
             ))}
           </nav>
@@ -212,9 +223,7 @@ const Header: React.FC = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={({ isActive }) => `flex items-center gap-2 px-3 py-2 rounded-md text-base font-medium ${isActive ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'}`}
               >
-                {link.path.includes('store') && <Gift size={18} />}
-                {link.path.includes('support') && <HelpCircle size={18} />}
-                {link.path.includes('join-us') && <Briefcase size={18} />}
+                {link.mobileIcon}
                 <span>{link.name}</span>
               </ReactRouterDOM.NavLink>
             ))}

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { ShoppingBag, Gift, Users, DollarSign, Feather, CheckSquare } from 'lucide-react';
 import { useAdmin, IOrderDetails } from '../../contexts/AdminContext';
 import { useCreativeWritingAdmin } from '../../contexts/admin/CreativeWritingAdminContext';
-import { getStatusColor } from '../../utils/helpers';
+// FIX: Added .ts extension to resolve module error.
+import { getStatusColor } from '../../utils/helpers.ts';
 import PageLoader from '../../components/ui/PageLoader';
 import BarChart from '../../components/admin/BarChart';
 import ViewOrderModal from '../../components/admin/ViewOrderModal';

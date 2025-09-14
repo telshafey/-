@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 // FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
 import * as ReactRouterDOM from 'react-router-dom';
@@ -26,7 +27,7 @@ const CreativeWritingInstructorsPage: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {instructors.map(instructor => (
                             <div key={instructor.id} className="bg-white rounded-2xl p-6 text-center border flex flex-col items-center transform hover:-translate-y-2 transition-transform duration-300 shadow-lg">
-                                <img src={instructor.avatar_url || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} alt={instructor.name} className="w-24 h-24 rounded-full object-cover mb-4 ring-4 ring-blue-100 shadow-md"/>
+                                <img src={instructor.avatar_url || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} alt={instructor.name} className="w-24 h-24 rounded-full object-cover mb-4 ring-4 ring-blue-100 shadow-md" loading="lazy"/>
                                 <h3 className="text-xl font-bold text-gray-800">{instructor.name}</h3>
                                 <p className="text-blue-600 font-semibold mb-4 flex-grow">{instructor.specialty}</p>
                                 <ReactRouterDOM.Link 

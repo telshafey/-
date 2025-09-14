@@ -3,7 +3,7 @@ import React from 'react';
 // FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
 import * as ReactRouterDOM from 'react-router-dom';
 // FIX: Replaced non-existent 'PackageSelect' icon with 'Package'.
-import { Target, Book, Users, ArrowLeft, Calendar, CheckCircle, Package, CalendarCheck, Sparkles, Quote, Star } from 'lucide-react';
+import { Target, Book, Users, ArrowLeft, Calendar, CheckCircle, Package, CalendarCheck, Sparkles, Quote, Star, Award, HeartHandshake } from 'lucide-react';
 
 const FeatureCard: React.FC<{ title: string; description: string; link: string; icon: React.ReactNode; }> = ({ title, description, link, icon }) => (
     <div className="bg-white p-8 rounded-2xl shadow-lg text-center transform hover:-translate-y-2 transition-transform duration-300 h-full flex flex-col">
@@ -28,6 +28,17 @@ const HowItWorksStep: React.FC<{ icon: React.ReactNode, title: string, descripti
         <p className="mt-2 text-gray-600">{description}</p>
     </div>
 );
+
+const BenefitCard: React.FC<{ icon: React.ReactNode, title: string, description: string }> = ({ icon, title, description }) => (
+    <div className="bg-white p-8 rounded-2xl shadow-lg text-center transform hover:-translate-y-2 transition-transform duration-300">
+        <div className="flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-green-100 text-green-600 mb-6 mx-auto">
+            {icon}
+        </div>
+        <h3 className="text-2xl font-bold text-gray-800">{title}</h3>
+        <p className="mt-4 text-gray-600">{description}</p>
+    </div>
+);
+
 
 const TestimonialCard: React.FC<{ quote: string, author: string, role: string }> = ({ quote, author, role }) => (
     <div className="bg-white p-8 rounded-2xl shadow-lg h-full flex flex-col">
@@ -54,10 +65,10 @@ const CreativeWritingPage: React.FC = () => {
       <section className="bg-gradient-to-br from-purple-50 via-blue-50 to-white py-16 sm:py-20 lg:py-24 text-center">
         <div className="container mx-auto px-4">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-800 leading-tight">
-                برنامج "بداية الرحلة": <span className="text-blue-600">أطلق العنان للكاتب المبدع</span> في طفلك
+                "بداية الرحلة": <span className="text-blue-600">حيث لا تُكتب الكلمات، بل تولد العوالم</span>
             </h1>
             <p className="mt-6 max-w-3xl mx-auto text-lg sm:text-xl text-gray-600">
-                برنامج متكامل عبر الإنترنت لتنمية مهارات الكتابة الإبداعية للأطفال والشباب، في بيئة آمنة ومحفزة بإشراف مدربين متخصصين.
+                "بداية الرحلة" ليس برنامجاً لتعليم الكتابة، بل هو احتفال بالصوت الفريد لكل طفل. إنه المفتاح الذي يفتح أقفال الخيال، والمساحة الآمنة التي تتحول فيها الأفكار الخجولة إلى قصص عظيمة.
             </p>
             <div className="mt-10">
                 <ReactRouterDOM.Link 
@@ -72,41 +83,74 @@ const CreativeWritingPage: React.FC = () => {
       <section className="py-16 sm:py-20 lg:py-24">
         <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-                <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800">ماذا سيتعلم طفلك؟</h2>
-                <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">نركز على بناء المهارات الأساسية التي تحول الكتابة من واجب إلى شغف.</p>
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800">كيف نفعل ذلك؟</h2>
+                <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">من خلال حوار ملهم وتمارين إبداعية، نعلم الطفل كيف:</p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                  <div className="px-8">
-                    <img src="https://i.ibb.co/8XYt2s5/about-us-image.jpg" alt="طفلة تكتب وتتعلم" className="rounded-2xl shadow-2xl" />
+                    <img src="https://i.ibb.co/8XYt2s5/about-us-image.jpg" alt="طفلة تكتب وتتعلم" className="rounded-2xl shadow-2xl" loading="lazy" />
                 </div>
                 <div className="space-y-6">
                     <div className="flex items-start gap-4">
                         <CheckCircle className="w-10 h-10 text-green-500 flex-shrink-0 mt-1" />
                         <div>
-                            <h3 className="text-xl font-bold text-gray-800">بناء الثقة في التعبير</h3>
-                            <p className="text-gray-600 mt-1">يتعلم الطفل التعبير عن أفكاره ومشاعره بحرية في بيئة آمنة وداعمة، مما يعزز ثقته بنفسه وبقدراته.</p>
+                            <h3 className="text-xl font-bold text-gray-800">يصطاد الأفكار</h3>
+                            <p className="text-gray-600 mt-1">يحول المشاهدات اليومية إلى بذور لقصص مدهشة.</p>
                         </div>
                     </div>
                     <div className="flex items-start gap-4">
                         <CheckCircle className="w-10 h-10 text-green-500 flex-shrink-0 mt-1" />
                         <div>
-                            <h3 className="text-xl font-bold text-gray-800">تنمية الخيال والابتكار</h3>
-                            <p className="text-gray-600 mt-1">من خلال تمارين العصف الذهني والكتابة الحرة، نساعد الطفل على إطلاق العنان لخياله وتوليد أفكار أصيلة.</p>
+                            <h3 className="text-xl font-bold text-gray-800">يبني العوالم</h3>
+                            <p className="text-gray-600 mt-1">يخلق شخصيات تتنفس وتعيش في عوالم من صنعه.</p>
                         </div>
                     </div>
                     <div className="flex items-start gap-4">
                         <CheckCircle className="w-10 h-10 text-green-500 flex-shrink-0 mt-1" />
                         <div>
-                            <h3 className="text-xl font-bold text-gray-800">أساسيات بناء القصة</h3>
-                            <p className="text-gray-600 mt-1">يكتسب الطفل الأدوات الأساسية لكتابة قصة متكاملة، من بناء الشخصيات ورسم الحبكة إلى كتابة الحوار.</p>
+                            <h3 className="text-xl font-bold text-gray-800">يرسم بالكلمات</h3>
+                            <p className="text-gray-600 mt-1">يستخدم اللغة كفرشاة ليرسم الصور والمشاعر في عقل القارئ.</p>
+                        </div>
+                    </div>
+                     <div className="flex items-start gap-4">
+                        <CheckCircle className="w-10 h-10 text-green-500 flex-shrink-0 mt-1" />
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-800">يحرر صوته</h3>
+                            <p className="text-gray-600 mt-1">يعبر عن نفسه بثقة، ويكتشف أن كلماته قادرة على إحداث تغيير.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
       </section>
-      
+
         <section className="bg-white py-16 sm:py-20 lg:py-24">
+          <div className="container mx-auto px-4">
+              <div className="text-center mb-16">
+                  <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800">التحول الذي نصنعه</h2>
+                   <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">مع نهاية الرحلة، لا يحصل طفلك على مجرد نصوص مكتوبة، بل يحصل على ما هو أثمن:</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <BenefitCard 
+                    icon={<Award size={32} />}
+                    title="الثقة للتعبير"
+                    description="يصبح أكثر جرأة في مشاركة أفكاره ومشاعره."
+                  />
+                  <BenefitCard 
+                    icon={<HeartHandshake size={32} />}
+                    title="صديق جديد"
+                    description="تصبح الكتابة متنفسًا له، ووسيلة لفهم نفسه والعالم من حوله."
+                  />
+                  <BenefitCard 
+                    icon={<Sparkles size={32} />}
+                    title="قوة الإبداع"
+                    description="يدرك أنه ليس مجرد متلقٍ للقصص، بل هو صانع لها."
+                  />
+              </div>
+          </div>
+      </section>
+      
+        <section className="bg-gray-50 py-16 sm:py-20 lg:py-24">
           <div className="container mx-auto px-4">
               <div className="text-center mb-16">
                   <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800">رحلتنا في 3 خطوات بسيطة</h2>
@@ -125,7 +169,7 @@ const CreativeWritingPage: React.FC = () => {
       </section>
 
 
-      <section className="py-16 sm:py-20">
+      <section className="py-16 sm:py-20 bg-white">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-12">
                 <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800">استكشف رحلتنا الإبداعية</h2>
@@ -154,7 +198,7 @@ const CreativeWritingPage: React.FC = () => {
             </div>
       </section>
 
-       <section className="bg-white py-16 sm:py-20 lg:py-24">
+       <section className="bg-gray-50 py-16 sm:py-20 lg:py-24">
           <div className="container mx-auto px-4">
               <div className="text-center mb-12">
                   <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800">آراء أولياء الأمور</h2>

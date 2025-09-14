@@ -1,4 +1,3 @@
-
 import React from 'react';
 // FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
 import * as ReactRouterDOM from 'react-router-dom';
@@ -14,7 +13,7 @@ const FloatingAiButton: React.FC = () => {
   return (
     <ReactRouterDOM.Link
       to="/ai-guide"
-      className="fixed bottom-6 left-6 z-50 group flex items-center justify-center w-16 h-16 bg-purple-600 rounded-full text-white shadow-lg hover:bg-purple-700 transition-all duration-300 transform hover:scale-110 animate-pulse-slow"
+      className="fixed bottom-6 left-6 z-50 group flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-600 to-indigo-700 rounded-full text-white shadow-lg hover:from-purple-700 hover:to-indigo-800 transition-all duration-300 transform hover:scale-110 animate-glow"
       aria-label="المرشد الإبداعي"
     >
       <Sparkles size={32} className="transition-transform group-hover:rotate-12" />

@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
 import { useToast } from './ToastContext';
 // FIX: Added .ts extension to resolve module error.
@@ -19,7 +20,7 @@ interface AuthContextType {
   signIn: (email: string, pass: string) => Promise<void>;
   signUp: (email: string, pass: string, name: string) => Promise<void>;
   signOut: () => Promise<void>;
-  signInAsDemoUser: (role: Exclude<UserProfile['role'], 'student'>) => void;
+  signInAsDemoUser: (role: UserProfile['role']) => void;
   childProfiles: ChildProfile[];
   addChildProfile: (profile: Omit<ChildProfile, 'id' | 'user_id' | 'created_at'> & { avatarFile: File | null }) => Promise<void>;
   updateChildProfile: (profile: Omit<ChildProfile, 'user_id' | 'created_at'> & { avatarFile: File | null }) => Promise<void>;
@@ -27,12 +28,13 @@ interface AuthContextType {
 }
 
 // MOCK DATA
-const MOCK_DEMO_USERS: { [key in Exclude<UserProfile['role'], 'student'>]: UserProfile } = {
+const MOCK_DEMO_USERS: { [key in UserProfile['role']]: UserProfile } = {
     super_admin: { id: 'a1b2c3d4-e5f6-7890-1234-567890abcdef', email: 'admin@alrehlah.com', name: 'المدير العام', role: 'super_admin' },
     enha_lak_supervisor: { id: 'enha-lak-supervisor-id', email: 'enhalak@example.com', name: 'مشرف إنها لك', role: 'enha_lak_supervisor' },
     creative_writing_supervisor: { id: 'cw-supervisor-id', email: 'cw@example.com', name: 'مشرف بداية الرحلة', role: 'creative_writing_supervisor' },
     instructor: { id: 'd1e2f3a4-b5c6-d789-e123-f456a789b0cd', email: 'instructor@example.com', name: 'أحمد المصري (مدرب)', role: 'instructor' },
     user: { id: 'f1e2d3c4-b5a6-9870-4321-098765fedcba', email: 'user@alrehlah.com', name: 'فاطمة علي (مستخدم)', role: 'user' },
+    student: { id: 'student-id-123', email: 'student@alrehlah.com', name: 'الطالب عمر', role: 'student' },
 };
 
 const MOCK_USER: UserProfile = MOCK_DEMO_USERS.user;
@@ -77,7 +79,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setLoading(false);
     };
 
-    const signInAsDemoUser = (role: Exclude<UserProfile['role'], 'student'>) => {
+    const signInAsDemoUser = (role: UserProfile['role']) => {
         const userToSignIn = MOCK_DEMO_USERS[role];
         if (userToSignIn) {
             setCurrentUser(userToSignIn);

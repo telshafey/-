@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { GoogleGenAI, Content, Type } from "@google/genai";
 import { Bot, User, Send, Loader2, Sparkles, ArrowLeft } from 'lucide-react';
@@ -11,47 +10,33 @@ import * as ReactRouterDOM from 'react-router-dom';
 
 const productDetails = [
   {
-    key: 'custom-story',
+    key: 'custom_story',
     title: 'القصة المخصصة',
     description: 'قصة فريدة تجعل طفلك بطل الحكاية، مع دمج اسمه وصورته.',
     imageUrl: 'https://i.ibb.co/P9tGk1X/product-custom-story.png',
-    link: '/order'
+    link: '/order/custom_story'
   },
   {
-    key: 'coloring-book',
+    key: 'coloring_book',
     title: 'دفتر التلوين',
     description: 'شخصيات طفلك من قصته في دفتر تلوين ممتع.',
     imageUrl: 'https://i.ibb.co/m9xG3yS/product-coloring-book.png',
-    link: '/order'
+    link: '/order/coloring_book'
   },
-  {
-    key: 'values-story',
-    title: 'قصص الآداب والقيم',
-    description: 'قصص هادفة لغرس قيمة محددة مثل الصدق أو التعاون.',
-    imageUrl: 'https://i.ibb.co/kH7X6tT/product-values-story.png',
-    link: '/order'
-  },
-  {
-    key: 'skills-story',
-    title: 'المهارات الحياتية',
-    description: 'قصص لتنمية مهارات هامة مثل تنظيم الوقت وحل المشكلات.',
-    imageUrl: 'https://i.ibb.co/2d1h4fS/product-skills-story.png',
-    link: '/order'
-  },
-  {
-    key: 'dua-booklet',
-    title: 'كتيب الأذكار والأدعية',
-    description: 'رفيق يومي مصور لتعليم الأدعية والأذكار اليومية.',
-    imageUrl: 'https://i.ibb.co/R4k5p1S/product-dua-booklet.png',
-    link: '/order'
-  },
-  {
-    key: 'gift-box',
-    title: 'بوكس الهدية',
-    description: 'المجموعة الكاملة في بوكس أنيق، أفضل هدية متكاملة.',
-    imageUrl: 'https://i.ibb.co/dK5zZ7s/product-gift-box.png',
-    link: '/order'
-  },
+    { 
+        key: 'dua_booklet', 
+        title: 'كتيب الأذكار والأدعية', 
+        description: 'رفيق يومي مصور لتعليم الأدعية والأذكار اليومية.',
+        imageUrl: 'https://i.ibb.co/R4k5p1S/product-dua-booklet.png',
+        link: '/order/dua_booklet'
+    },
+    { 
+        key: 'gift_box', 
+        title: 'بوكس الهدية', 
+        description: 'المجموعة الكاملة في بوكس أنيق، أفضل هدية متكاملة.',
+        imageUrl: 'https://i.ibb.co/dK5zZ7s/product-gift-box.png',
+        link: '/order/gift_box'
+    },
 ];
 
 interface ProductSuggestion {
@@ -84,7 +69,7 @@ const responseSchema = {
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const generateSystemInstruction = (prices, siteContent) => {
-    if (!prices || !siteContent?.about?.vision_text) {
+    if (!prices || !siteContent?.about?.intro_text) {
         return 'أنت مساعد ذكي لمنصة الرحلة. البيانات غير متوفرة حالياً.';
     }
 
@@ -94,29 +79,30 @@ const generateSystemInstruction = (prices, siteContent) => {
 
     const aboutContent = siteContent.about || {};
 
-    return `**Persona:**
-أنت "المرشد الإبداعي"، مساعد ذكاء اصطناعي خبير لمنصة "الرحلة" المتخصصة في القصص المخصصة للأطفال. شخصيتك هي مزيج من خبير تربوي، وراوي قصص شغوف، ومستشار هدايا ودود. أنت صبور، مشجع، وخبير في أدب وتنمية الطفل.
+    return `
+**Persona:**
+أنت "المرشد الإبداعي"، الرفيق الذكي الدافئ والخيالي من منصة "الرحلة". صوتك هو مزيج من خبير تربوي يفهم "لماذا"، وراوي قصص شغوف يثير الحماس، ومستشار هدايا مدروس يساعد في خلق لحظات لا تُنسى. أنت متعاطف، صبور إلى ما لا نهاية، ومتعتك الأساسية هي مساعدة الآباء على رعاية الشرارة الفريدة لأطفالهم.
+
+**Tone of Voice:**
+كن دائمًا دافئًا وإيجابيًا ومشجعًا وخياليًا بعض الشيء. استخدم لغة متعاطفة مثل "إنه عمر رائع لسرد القصص..." أو "أتفهم تمامًا، قد يكون من الصعب العثور على الهدية المناسبة...". خاطب المستخدم باحترام ومباشرة.
 
 **Primary Goal:**
-مهمتك هي فهم احتياجات المستخدم (ولي الأمر) بعمق، وتقديم مشورة الخبراء حول أهمية القراءة المخصصة، والتوصية بشكل استباقي بالمنتج الأنسب من مجموعة "إنها لك"، وتوجيههم نحو صفحة الطلب. هدفك هو أن تكون مفيدًا بشكل استثنائي وتبني الثقة، مما يؤدي بشكل طبيعي إلى المبيعات.
+هدفك النهائي هو بناء علاقة موثوقة مع ولي الأمر، مما يجعله يشعر بالفهم والثقة في خياراته. من خلال تقديم نصائح ثاقبة ومخصصة، تقوم بتوجيهه بشكل طبيعي إلى المنتج المثالي الذي سيجعل طفله يشعر بأنه مرئي ومحتفى به ومحبوب. ينتهي التفاعل الناجح بشعور ولي الأمر بالحماس والاستعداد لبدء رحلة طفله الإبداعية.
 
 **Core Knowledge Base:**
 
 **1. عن منصة "الرحلة":**
-- **الرؤية:** ${aboutContent.vision_text || 'أن نكون المنصة الرائدة في العالم العربي التي تجعل كل طفل بطل قصته الخاصة.'}
-- **الرسالة:** ${aboutContent.mission_text || 'نصنع بحب وشغف قصصًا مخصصة بالكامل تدمج اسم الطفل وصورته وتفاصيل حياته في مغامرات شيقة.'}
+- **المفهوم:** ${aboutContent.intro_text || 'منظومة تربوية إبداعية متكاملة، صُممت لتكون الرفيق الأمين لكل طفل في رحلته نحو اكتشاف ذاته.'}
 - **القيم الأساسية:** 
-  - **تخصيص فريد:** نصنع قصصًا يكون فيها طفلك هو البطل، مما يعزز هويته وحبه للقراءة بشكل لا مثيل له.
+  - **تخصيص فريد:** نحول الطفل من مجرد قارئ إلى بطل حقيقي للحكاية، مما يعزز هويته وحبه للقراءة.
   - **إشراف تربوي:** يتم إعداد كل محتوياتنا بإشراف خبراء تربويين لضمان غرس قيم إيجابية وسليمة.
-  - **محتوى عربي أصيل:** نلتزم بتقديم محتوى عالي الجودة باللغة العربية، مصمم خصيصًا ليناسب ثقافة وقيم أطفالنا.
+  - **محتوى عربي أصيل:** نلتزم بتقديم محتوى عالي الجودة باللغة العربية.
 
 **2. كتالوج منتجات "إنها لك" (الأسعار بالجنيه المصري):**
   - القصة المخصصة (مطبوعة + إلكترونية): ${prices.story.printed}
   - القصة المخصصة (إلكترونية فقط): ${prices.story.electronic}
   - دفتر التلوين: ${prices.coloringBook}
   - كتيب الأذكار والأدعية: ${prices.duaBooklet}
-  - قصة الآداب والقيم: ${prices.valuesStory}
-  - قصة المهارات الحياتية: ${prices.skillsStory}
   - بوكس الهدية (المجموعة الكاملة): ${prices.giftBox}
 
 **3. معلومات تفصيلية عن المنتجات (للتوصيات):**
@@ -130,19 +116,10 @@ ${productInfoForPrompt}
 
 **Rules of Engagement:**
 1.  **JSON Output ONLY:** يجب أن تكون استجابتك دائمًا بتنسيق JSON المحدد في الـ schema. لا تستخدم markdown أو أي نص آخر خارج بنية JSON.
-2.  **كن مستشارًا خبيرًا:** لا تقم فقط بسرد المنتجات. أولاً، قدم نصيحة أو رؤية حقيقية بناءً على خبرتك. ثم انتقل بسلاسة إلى توصية بالمنتج.
-3.  **اقتراحات استباقية وذات صلة:** ابحث دائمًا عن فرصة لاقتراح منتج. إذا سأل المستخدم عن هدية لطفل خجول، يمكنك شرح كيف تساعد القصص المخصصة في بناء الثقة واقتراح "القصة المخصصة" أو "بوكس الهدية".
-4.  **روابط منتجات إلزامية:** إذا كان استعلام المستخدم يتعلق بمنتج ما أو يمكن حله بواسطة منتج، *يجب* عليك تضمين مفتاح المنتج في حقل "suggestedProductKey". إذا لم يكن هناك منتج ذي صلة، فاستخدم سلسلة فارغة "".
-5.  **لغة مقنعة ومشجعة:** يجب أن يكون نص استجابتك ("responseText") حواريًا ودافئًا وينتهي دائمًا بدعوة واضحة وجذابة لاتخاذ إجراء (على سبيل المثال، "هل تود معرفة المزيد عن كيفية تأثير القصة على تنمية الخيال؟"، "يمكنك استكشاف كل منتجاتنا الرائعة من هنا.").
-6.  **موجز وشامل:** حافظ على إجابات مباشرة ولكن مليئة بالقيمة.
-
-**Example Scenario:**
-- User: "ابني عمره 5 سنوات ويحب الديناصورات، ما هي أفضل هدية له؟"
-- Your JSON response should be:
-  {
-    "responseText": "يا لها من فكرة رائعة! طفل في هذا العمر شغوف بالخيال، والديناصورات عالم مذهل. أفضل هدية هي التي تجعله جزءاً من هذا العالم. يمكننا صنع قصة مخصصة يكون فيها طفلك هو عالم الحفريات الشجاع الذي يكتشف ديناصورًا صديقًا! هذا لا يشبع شغفه فحسب، بل يجعله بطل المغامرة. \\n\\n'القصة المخصصة' هي خيارنا الأمثل لمثل هذه الحالة، حيث ندمج اسمه وصورته في الحكاية. هل تود أن أطلعك على تفاصيل أكثر؟",
-    "suggestedProductKey": "custom-story"
-  }
+2.  **قدّم المشورة، لا تبع فقط:** دورك الأساسي هو أن تكون مرشدًا مفيدًا. ابدأ بتقديم نصيحة حقيقية أو رؤية تربوية بناءً على استعلام المستخدم. *ثم*، اربط تلك الرؤية بسلاسة بتوصية المنتج. لا تبدأ أبدًا بالمنتج.
+3.  **اقتراحات استباقية وذات صلة:** ابحث دائمًا عن فرصة لاقتراح منتج. إذا سأل المستخدم عن هدية لطفل خجول، اشرح كيف تساعد القصص المخصصة في بناء الثقة واقترح "القصة المخصصة".
+4.  **اطرح أسئلة توضيحية:** إذا كان طلب المستخدم غامضًا (مثل "ماذا لديكم؟")، فلا تقم فقط بسرد المنتجات. اطرح أسئلة توجيهية لطيفة لمعرفة المزيد. على سبيل المثال: "يسعدني المساعدة! للعثور على الخيار الأمثل، هل يمكنك إخباري قليلاً عن الطفل؟ ما هو عمره وما هي اهتماماته حاليًا؟"
+5.  **دائماً اختم بسؤال جذاب أو دعوة للعمل:** لا تترك المحادثة في طريق مسدود. شجع على مزيد من التفاعل. أمثلة: "هل تود أن تعرف كيف نقوم بتخصيص الرسومات؟"، "هل نستكشف معًا ما هي القيمة الأخلاقية الأنسب لقصة طفلك؟".
 `;
 };
 
@@ -174,14 +151,14 @@ const MessageBubble: React.FC<{ message: DisplayMessage }> = ({ message }) => {
     const isUser = message.role === 'user';
     
     const bubbleClass = isUser
-      ? 'bg-blue-500 text-white self-end rounded-xl rounded-br-lg'
-      : 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white self-start rounded-xl rounded-bl-lg shadow-sm';
+      ? 'bg-blue-600 text-white self-end rounded-2xl rounded-br-md shadow-md'
+      : 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white self-start rounded-2xl rounded-bl-md shadow-lg';
     
-    const icon = isUser ? <User size={24} className="text-blue-200" /> : <Bot size={24} className="text-purple-300" />;
+    const icon = isUser ? <User size={20} className="text-white" /> : <Bot size={20} className="text-white" />;
     
     return (
       <div className={`flex items-start gap-3 w-full max-w-2xl mx-auto ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-        <div className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full ${isUser ? 'bg-blue-400' : 'bg-purple-500'}`}>
+        <div className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full shadow-md ${isUser ? 'bg-blue-500' : 'bg-gradient-to-br from-purple-500 to-indigo-500'}`}>
           {icon}
         </div>
         <div className={`px-5 py-3 ${bubbleClass}`}>
@@ -208,7 +185,7 @@ const GeminiPage: React.FC = () => {
   const isDataLoading = pricesLoading || adminLoading;
 
   const systemInstruction = useMemo(() => {
-    if (isDataLoading || !prices || !siteContent?.about?.vision_text) {
+    if (isDataLoading || !prices || !siteContent?.about?.intro_text) {
         return 'أنت مساعد ذكي لمنصة الرحلة. البيانات غير متوفرة حالياً.';
     }
     return generateSystemInstruction(prices, siteContent);
@@ -291,26 +268,30 @@ const GeminiPage: React.FC = () => {
   }, [isDataLoading]);
   
   return (
-    <div className="bg-gray-50 py-12 sm:py-16 animate-fadeIn">
+    <div className="bg-gradient-to-br from-purple-50 via-blue-50 to-white min-h-[calc(100vh-160px)] py-12 sm:py-16 animate-fadeIn">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-purple-600 flex items-center justify-center gap-3">
-              <Sparkles size={40} />
+           <div className="text-center mb-12">
+            <div className="inline-block bg-gradient-to-r from-purple-600 to-indigo-600 p-1 rounded-full mb-4 shadow-lg">
+                <div className="bg-white/80 backdrop-blur-sm rounded-full p-4">
+                    <Sparkles size={40} className="text-purple-600" />
+                </div>
+            </div>
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-800">
               المرشد الإبداعي
             </h1>
             <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
-              مساعدك الذكي لاستكشاف عالم القصص المخصصة. اسأل عن أي شيء يخطر ببالك!
+              رفيقك الذكي في رحلة اختيار الهدية المثالية. اسألني أي شيء لمساعدة طفلك على أن يصبح بطل قصته!
             </p>
           </div>
           
-          <div className="bg-gray-100/50 rounded-2xl shadow-inner p-4 min-h-[60vh] flex flex-col">
+          <div className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-lg p-4 min-h-[60vh] flex flex-col border border-gray-200">
             <div className="flex-grow overflow-y-auto space-y-6 p-4">
               {chatHistory.map((msg) => <MessageBubble key={msg.id} message={msg} />)}
               {isLoading && (
                  <div className="flex items-start gap-3 w-full max-w-2xl mx-auto flex-row">
-                    <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-purple-500"><Bot size={24} className="text-purple-300" /></div>
-                    <div className="px-5 py-3 bg-gradient-to-br from-purple-600 to-indigo-600 text-white self-start rounded-xl rounded-bl-lg shadow-sm flex items-center gap-2">
+                    <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 shadow-md"><Bot size={20} className="text-white" /></div>
+                    <div className="px-5 py-3 bg-gradient-to-br from-purple-600 to-indigo-600 text-white self-start rounded-2xl rounded-bl-md shadow-lg flex items-center gap-2">
                         <Loader2 className="animate-spin text-white" size={20} />
                         <span className="text-white/80">المرشد يكتب...</span>
                     </div>
@@ -320,11 +301,11 @@ const GeminiPage: React.FC = () => {
               <div ref={chatEndRef} />
             </div>
 
-            <div className="pt-4 border-t mt-4">
+            <div className="pt-4 border-t border-gray-200/80 mt-4">
                 {chatHistory.length <= 1 && !isLoading && !isDataLoading && (
                     <div className="flex flex-wrap items-center justify-center gap-3 mb-4 animate-fadeIn">
                         {suggestionChips.map(chip => (
-                            <button key={chip.text} onClick={() => handleSendMessage(chip.text)} className="bg-white text-sm border border-gray-300 text-gray-700 px-4 py-2 rounded-full hover:bg-gray-200 hover:border-gray-400 transition-all transform hover:scale-105 shadow-sm">
+                            <button key={chip.text} onClick={() => handleSendMessage(chip.text)} className="bg-white/80 backdrop-blur-sm text-sm border border-gray-300 text-gray-800 px-4 py-2 rounded-full hover:bg-white hover:border-blue-400 hover:text-blue-600 transition-all transform hover:scale-105 shadow-sm font-medium">
                                 <span className="me-2">{chip.icon}</span>
                                 {chip.text}
                             </button>
@@ -333,7 +314,7 @@ const GeminiPage: React.FC = () => {
                 )}
               <form
                 onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}
-                className="flex items-center gap-3 bg-white p-2 rounded-full shadow-md border"
+                className="flex items-center gap-3 bg-white/90 backdrop-blur-sm p-2.5 rounded-full shadow-lg border border-gray-200/80"
               >
                 <input
                   type="text"
@@ -347,7 +328,7 @@ const GeminiPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isLoading || !userInput.trim() || isDataLoading}
-                  className="bg-blue-600 text-white rounded-full p-3 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed transition-all"
+                  className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-full p-3 hover:from-blue-700 hover:to-indigo-700 disabled:from-blue-300 disabled:to-indigo-300 disabled:cursor-not-allowed transition-all transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   aria-label="إرسال"
                 >
                   <Send size={20} />

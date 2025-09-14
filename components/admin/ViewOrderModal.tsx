@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, User, Gift, Truck, Image, MessageSquare, Receipt, Save, Loader2 } from 'lucide-react';
 import { useAdmin, IOrderDetails } from '../../contexts/AdminContext';
 // FIX: Added .ts extension to resolve module error.
@@ -33,6 +33,8 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({ order, isOpen, onClose 
   const { updateOrderComment } = useAdmin();
   const [comment, setComment] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (order?.admin_comment) {
@@ -41,6 +43,54 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({ order, isOpen, onClose 
       setComment('');
     }
   }, [order]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+            onClose();
+        }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Focus trapping
+    const focusableElements = modalRef.current?.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (!focusableElements || focusableElements.length === 0) return;
+
+    const firstElement = focusableElements[0] as HTMLElement;
+    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+    
+    closeButtonRef.current?.focus();
+
+    const handleTabKeyPress = (event: KeyboardEvent) => {
+        if (event.key === 'Tab') {
+            if (event.shiftKey) { // Shift + Tab
+                if (document.activeElement === firstElement) {
+                    lastElement.focus();
+                    event.preventDefault();
+                }
+            } else { // Tab
+                if (document.activeElement === lastElement) {
+                    firstElement.focus();
+                    event.preventDefault();
+                }
+            }
+        }
+    };
+    
+    const currentModalRef = modalRef.current;
+    currentModalRef?.addEventListener('keydown', handleTabKeyPress);
+
+    return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+        currentModalRef?.removeEventListener('keydown', handleTabKeyPress);
+    };
+  }, [isOpen, onClose]);
+
 
   if (!isOpen || !order) return null;
   
@@ -54,14 +104,14 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({ order, isOpen, onClose 
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-start pt-12" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl p-8 m-4 animate-fadeIn max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-start pt-12" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="order-modal-title">
+      <div ref={modalRef} className="bg-white rounded-2xl shadow-xl w-full max-w-3xl p-8 m-4 animate-fadeIn max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">تفاصيل الطلب: <span className="font-mono text-xl">{order.id}</span></h2>
+            <h2 id="order-modal-title" className="text-2xl font-bold text-gray-800">تفاصيل الطلب: <span className="font-mono text-xl">{order.id}</span></h2>
             <p className="text-sm text-gray-500">للعميل: {order.customer_name}</p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button ref={closeButtonRef} onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <X size={24} />
           </button>
         </div>

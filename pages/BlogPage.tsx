@@ -1,10 +1,13 @@
 
+
+
 import React from 'react';
 // FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
 import * as ReactRouterDOM from 'react-router-dom';
 import { useAdmin } from '../contexts/AdminContext';
 import PageLoader from '../components/ui/PageLoader';
-import { formatDate } from '../utils/helpers';
+// FIX: Added .ts extension to resolve module error.
+import { formatDate } from '../utils/helpers.ts';
 import { ArrowLeft } from 'lucide-react';
 
 const BlogPage: React.FC = () => {
@@ -35,7 +38,7 @@ const BlogPage: React.FC = () => {
                         {publishedPosts.map(post => (
                             <ReactRouterDOM.Link key={post.id} to={`/blog/${post.slug}`} className="group bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transform hover:-translate-y-2 transition-transform duration-300 border">
                                 <div className="h-56 bg-gray-100 flex items-center justify-center overflow-hidden">
-                                    <img src={post.image_url || 'https://i.ibb.co/RzJzQhL/hero-image-new.jpg'} alt={post.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                                    <img src={post.image_url || 'https://i.ibb.co/RzJzQhL/hero-image-new.jpg'} alt={post.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" />
                                 </div>
                                 <div className="p-6 flex flex-col flex-grow">
                                     <h2 className="text-xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{post.title}</h2>

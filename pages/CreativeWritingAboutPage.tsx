@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Target, Star, Eye, Shield, Users } from 'lucide-react';
 import { BookOpen, BrainCircuit, CheckCircle } from 'lucide-react';
@@ -24,36 +25,23 @@ const CreativeWritingAboutPage: React.FC = () => {
                 <div className="text-center mb-16">
                     <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-600">عن برنامج "بداية الرحلة"</h1>
                     <p className="mt-4 max-w-3xl mx-auto text-lg text-gray-600">
-                        مساحة آمنة وملهمة للأطفال والشباب للتعبير عن أنفسهم من خلال الكلمة المكتوبة.
+                        "بداية الرحلة" ليس برنامجاً لتعليم الكتابة، بل هو احتفال بالصوت الفريد لكل طفل. إنه المفتاح الذي يفتح أقفال الخيال، والمساحة الآمنة التي تتحول فيها الأفكار الخجولة إلى قصص عظيمة.
                     </p>
                 </div>
 
-                <Section title="رسالة البرنامج" icon={<Target size={24} />}>
+                <Section title="ماذا نقدم؟" icon={<Target size={24} />}>
                     <p>
-                        في زمن يزداد فيه التركيز على التحصيل والنتائج، يقدم البرنامج مساحة آمنة للأطفال ليعبّروا عن أنفسهم من خلال الكتابة دون الحاجة للمحاكمة أو التقييد بالمعايير الأكاديمية التقليدية. يركز البرنامج على تعريف الطفل بالكتابة كأداة للتعبير الذاتي وليس فقط كمهارة مدرسية.
+                        نحن لا نقدم دروسًا، بل نقدم رحلة شخصية بصحبة مرشد متخصص. في جلسات فردية مباشرة، نأخذ بيد طفلك بعيدًا عن سطوة القواعد الصارمة والتقييم، ونمنحه حرية الورقة البيضاء. هنا، لا توجد إجابات صحيحة أو خاطئة؛ يوجد فقط صوت طفلك، خياله، وقصته التي تنتظر أن تُروى.
                     </p>
                 </Section>
 
-                <Section title="الأهداف التعليمية والتربوية" icon={<Star size={24} />}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div>
-                            <h3 className="text-xl font-bold text-gray-700 mb-3 flex items-center gap-2"><BookOpen size={22}/> الأهداف الأساسية:</h3>
-                            <ul className="space-y-2 list-disc list-inside">
-                                <li><span className="font-semibold">تطوير الهوية الكتابية:</span> تمكين الطفل من اكتشاف صوته الخاص في الكتابة وتطوير أسلوبه الشخصي.</li>
-                                <li><span className="font-semibold">تعزيز الثقة بالنفس:</span> بناء الثقة في التعبير الشخصي من خلال بيئة آمنة ومحفزة.</li>
-                                <li><span className="font-semibold">تنمية المهارات الإبداعية:</span> تطوير مهارات الطلاقة والمرونة والأصالة في الكتابة.</li>
-                                <li><span className="font-semibold">الربط العاطفي:</span> تدريب الطفل على ربط مشاعره وأفكاره بصور لغوية بسيطة.</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h3 className="text-xl font-bold text-gray-700 mb-3 flex items-center gap-2"><BrainCircuit size={22}/> الأهداف التطويرية:</h3>
-                            <ul className="space-y-2 list-disc list-inside">
-                                <li><span className="font-semibold">تحسين العلاقة بالكتابة:</span> تحويل النظرة التقليدية للكتابة من واجب أكاديمي إلى متعة شخصية.</li>
-                                <li><span className="font-semibold">تطوير الخيال:</span> إثارة خيال الطالب وزيادة الإبداع لديهم من خلال التدريب على نماذج مختلفة للكتابة.</li>
-                                <li><span className="font-semibold">إنتاج نهائي ملموس:</span> إنتاج نص مكتوب في نهاية البرنامج يعكس صوت الطفل الخاص.</li>
-                            </ul>
-                        </div>
-                    </div>
+                <Section title="التحول الذي نصنعه" icon={<Star size={24} />}>
+                    <p>مع نهاية الرحلة، لا يحصل طفلك على مجرد نصوص مكتوبة، بل يحصل على ما هو أثمن:</p>
+                     <ul className="space-y-3 list-none mt-6">
+                        <li className="flex items-start"><CheckCircle className="text-green-500 mt-1 me-3 flex-shrink-0"/><span><span className="font-bold">الثقة للتعبير:</span> يصبح أكثر جرأة في مشاركة أفكاره ومشاعره.</span></li>
+                        <li className="flex items-start"><CheckCircle className="text-green-500 mt-1 me-3 flex-shrink-0"/><span><span className="font-bold">صديق جديد:</span> تصبح الكتابة متنفسًا له، ووسيلة لفهم نفسه والعالم من حوله.</span></li>
+                        <li className="flex items-start"><CheckCircle className="text-green-500 mt-1 me-3 flex-shrink-0"/><span><span className="font-bold">قوة الإبداع:</span> يدرك أنه ليس مجرد متلقٍ للقصص، بل هو صانع لها.</span></li>
+                    </ul>
                 </Section>
 
                 <Section title="المنهجية التعليمية" icon={<Eye size={24} />}>

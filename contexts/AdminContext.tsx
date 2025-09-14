@@ -1,8 +1,10 @@
+
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
 import { useToast } from './ToastContext';
 // FIX: Added .ts extension to resolve module error.
 // FIX: Import BlogPost type.
-import { Database, SocialLinks, PersonalizedProduct, Json, BlogPost } from '../lib/database.types.ts';
+// FIX: Import Subscription type.
+import { Database, SocialLinks, PersonalizedProduct, Json, BlogPost, Subscription } from '../lib/database.types.ts';
 // FIX: Added .tsx extension to resolve module error.
 import { UserProfile } from './AuthContext.tsx';
 
@@ -36,7 +38,7 @@ export interface TextContent {
 }
 
 // FIX: Re-export BlogPost type.
-export type { PersonalizedProduct, BlogPost };
+export type { PersonalizedProduct, BlogPost, Subscription };
 
 // --- Mock Data Generation ---
 
@@ -80,8 +82,8 @@ const MOCK_PERSONALIZED_PRODUCTS: PersonalizedProduct[] = [
     { 
         id: 1, 
         key: 'custom_story', 
-        title: 'القصة المخصصة', 
-        description: "قصة فريدة من 20 صفحة تجعل طفلك بطل الحكاية، مع دمج اسمه وصورته وتفاصيل من عالمه الخاص في مغامرة شيقة ومصورة خصيصًا له.",
+        title: 'القصة المخصصة: مرآة الروح وكنز البطل', 
+        description: 'ليست مجرد صفحات ملونة، بل هي أول كنز يمتلكه طفلك ويجد فيه انعكاس ذاته. كل كلمة هي همسة تشجيع، وكل رسمة هي نافذة يطل منها على مغامراته التي يحلم بها. نحن نمنحه كتاباً لا يقرأه فحسب، بل يعيشه ويتنفسه، ليصبح تذكاراً ثميناً لرحلة بناء ثقته بنفسه، وجسراً يربطه باللغة العربية، وحبه الأبدي للكلمة.',
         image_url: 'https://i.ibb.co/P9tGk1X/product-custom-story.png', 
         features: [
             '20 صفحة مع الغلاف',
@@ -96,8 +98,8 @@ const MOCK_PERSONALIZED_PRODUCTS: PersonalizedProduct[] = [
     { 
         id: 2, 
         key: 'coloring_book', 
-        title: 'دفتر التلوين', 
-        description: "دفتر تلوين فريد يحتوي على شخصيات مصممة بصورة طفلك واسمه، مأخوذة من قصته المخصصة. يتضمن 20 صفحة من الرسومات الملونة وغير الملونة للتفاعل والإبداع.",
+        title: 'دفتر التلوين: لوحة أحلامه الخاصة', 
+        description: 'ماذا لو امتدت مغامرة القصة إلى ما بعد الكلمات؟ دفتر التلوين هذا ليس مجرد رسومات، بل هو دعوة للطفل ليشارك في إبداع عالمه. هنا، يمسك بزمام الألوان ليكمل قصته، ويضيف لمسته الخاصة على شخصيته التي أحبها في كتابه. إنها مساحة حرة يطلق فيها العنان لخياله، ويحول الحلم إلى حقيقة تضج بالحياة والألوان.',
         image_url: 'https://i.ibb.co/m9xG3yS/product-coloring-book.png', 
         features: [
             '20 صفحة تلوين مقاس A5',
@@ -110,8 +112,8 @@ const MOCK_PERSONALIZED_PRODUCTS: PersonalizedProduct[] = [
     { 
         id: 3, 
         key: 'dua_booklet', 
-        title: 'كتيب الأذكار والأدعية', 
-        description: "كتيب من 40 صفحة يحتوي على الأدعية والأذكار اليومية، مع رسومات مخصصة تضم صورة واسم طفلك لتعزيز ارتباطه بالهوية الدينية بأسلوب محبب وشخصي.",
+        title: 'كتيب الأذكار والأدعية: همسة سلام لقلبه الصغير', 
+        description: 'نؤمن بأن الإيمان ينمو بالحب لا بالتلقين. هذا الكتيب ليس مجرد أدعية محفوظة، بل هو رفيق يومي هادئ، يظهر فيه الطفل نفسه في رسومات ملائكية وهو يناجي خالقه. يصبح الدعاء حواراً شخصياً دافئاً، وتصبح الأذكار درعاً من الطمأنينة يحيط بروحه الصغيرة، مما يغرس فيه حب الله بطريقة تلامس قلبه النقي.',
         image_url: 'https://i.ibb.co/R4k5p1S/product-dua-booklet.png', 
         features: [
             '40 صفحة مقاس A5',
@@ -124,8 +126,8 @@ const MOCK_PERSONALIZED_PRODUCTS: PersonalizedProduct[] = [
     { 
         id: 6, 
         key: 'gift_box', 
-        title: 'بوكس الهدية', 
-        description: "الهدية المتكاملة التي لا تُنسى. صندوق أنيق يجمع منتجاتنا المخصصة بصورة واسم طفلك، ويشمل القصة المطبوعة، دفتر التلوين، كتيب الأدعية، وهدية إضافية مميزة.",
+        title: 'بوكس الهدية: صندوق العجائب الكامل', 
+        description: 'عندما تجتمع كل الأمنيات في مكان واحد! هذا الصندوق ليس مجرد هدية، بل هو احتفال متكامل بالطفل. يفتحه ليجد عالمه كله في انتظاره: قصته التي تحكي عنه، دفتر تلوينه ليبدع فيه، وكتيب أدعيته ليرعاه. إنه عناق دافئ يأتي على هيئة صندوق، ورسالة تقول: "أنت مميز، وكل هذا العالم صنع من أجلك."',
         image_url: 'https://i.ibb.co/dK5zZ7s/product-gift-box.png', 
         features: [
             'قصة طفلك المخصصة (مطبوعة)',
@@ -139,16 +141,16 @@ const MOCK_PERSONALIZED_PRODUCTS: PersonalizedProduct[] = [
 
 const MOCK_SITE_CONTENT: TextContent = {
     about: {
-        title: 'عن مشروع "إنها لك"',
-        subtitle: 'منصة رقمية رائدة لتقديم قصص مخصصة للأطفال العرب.',
-        intro_title: 'رؤية لمستقبل قصص الأطفال',
-        intro_text: '"انها لك" هو مشروع رقمي رائد يهدف إلى تطوير منصة متقدمة لتقديم قصص مخصصة للأطفال العرب. تتميز هذه المنصة بدمج اسم الطفل وصفاته الشخصية في قصص تفاعلية، مصحوبة برسومات كرتونية احترافية. تظهر الملاحظات السوقية وجود فجوة كبيرة في المحتوى العربي الرقمي المخصص للأطفال. "انها لك" لا يدخل سوقًا موجودًا فحسب، بل يعالج هذه الفجوة الواضحة، مما يتيح له بناء مكانة تنافسية قوية كمتخصص في هذا المجال الفريد.',
-        vision_title: 'رؤيتنا',
-        vision_text: 'تتمثل رؤية المشروع في الجمع بين التكنولوجيا الحديثة والإبداع الثقافي لتعزيز حب القراءة وغرس القيم الإيجابية لدى الأطفال من خلال تجربة قراءة فريدة وشخصية.',
-        mission_title: 'رسالتنا',
-        mission_text: 'نصنع بحب وشغف قصة مخصصة تتراوح صفحاتها حوالي 20 صفحة، مصممة ككتاب PDF باحترافية عالية، تحمل اسم الطفل وتتحدث عنه وعن طبيعته وصفاته، مع إمكانية غرس قيم محددة يود أولياء الأمور تعزيزها.',
-        goals_title: 'أهدافنا',
-        goals: 'تعزيز حب القراءة لدى الأطفال بجعلها تجربة شخصية.\nغرس القيم الإيجابية والأخلاق الحميدة بطريقة محببة.\nتنمية الذكاء العاطفي والمهارات المعرفية للطفل.\nبناء جسر من التواصل بين الطفل والكتاب.\nإثراء المحتوى العربي الرقمي الموجه للطفل بمنتجات عالية الجودة.',
+        title: 'منصة "الرحلة"',
+        subtitle: 'حيث تبدأ كل قصة، وتُصنع كل موهبة',
+        intro_title: 'منظومة تربوية إبداعية متكاملة',
+        intro_text: '"الرحلة" ليست مجرد منصة، بل هي منظومة تربوية إبداعية متكاملة، صُممت لتكون الرفيق الأمين لكل طفل في رحلته نحو اكتشاف ذاته وإطلاق العنان لقدراته. نحن نؤمن بأن كل طفل يحمل في داخله بطلاً ينتظر قصته، وكاتباً ينتظر قلمه، ومبدعاً ينتظر فرصته. من هذا الإيمان، انطلقت "الرحلة" بجناحيها الرئيسيين:',
+        project1_title: 'مشروع "إنها لك": رحلة اكتشاف الذات',
+        project1_text: 'هنا، نحول الطفل من مجرد قارئ إلى بطل حقيقي للحكاية. "إنها لك" ليست مجرد خدمة لطباعة قصص بأسماء مخصصة؛ إنها تجربة نفسية وتربوية عميقة. نحن ننسج اسم الطفل، صورته، وتفاصيل عالمه الخاص في مغامرات شيقة ومصورة بإتقان. عندما يرى الطفل نفسه بطلاً على صفحات الكتاب، فإنه لا يقرأ قصة، بل يعيشها. هذه التجربة السحرية تبني جسراً من الثقة بالنفس، تعزز هويته وارتباطه بلغته وثقافته، وتغرس فيه القيم النبيلة بأسلوب يلامس قلبه وعقله، لتصبح القراءة متعة شخصية وتذكاراً لا يُنسى.',
+        project2_title: 'برنامج "بداية الرحلة": رحلة صناعة الإبداع',
+        project2_text: 'هنا، نأخذ بيد الطفل لينتقل من كونه بطل القصة إلى صانعها. "بداية الرحلة" هو برنامج متخصص في الكتابة الإبداعية، يقدم مساحة آمنة وملهمة للأطفال والشباب للتعبير عن أنفسهم بحرية. من خلال جلسات فردية مباشرة مع مدربين خبراء، نحرر الطفل من قيود الكتابة المدرسية التقليدية ونعلمه كيف يستخدم الكلمة كأداة لاستكشاف خياله، تنظيم أفكاره، والتعبير عن مشاعره. نحن لا نعلمهم قواعد الكتابة فحسب، بل نطلق العنان لأصواتهم الفريدة، ونمنحهم الأدوات ليصبحوا رواة قصص المستقبل، قادرين على التعبير عن أنفسهم بثقة وإبداع.',
+        conclusion_title: 'رحلة متكاملة نحو المستقبل',
+        conclusion_text: 'تجمع المنصة بين هذين العالمين لتشكل رحلة متكاملة: تبدأ باكتشاف الطفل لذاته كبطل في "إنها لك"، وتتطور لتصل به إلى صناعة عوالمه الخاصة في "بداية الرحلة". إنها استثمار في عقل الطفل وروحه، وبوابة تفتح له آفاقاً لا نهائية من الخيال والمعرفة والتعبير.',
     },
     privacy: {
         main_title: 'سياسة الخصوصية والاستخدام',
@@ -227,6 +229,18 @@ const MOCK_BLOG_POSTS: BlogPost[] = [
     },
 ];
 
+const MOCK_SUBSCRIPTIONS: Subscription[] = [
+    {
+        id: 'SUB-1',
+        user_id: 'f1e2d3c4-b5a6-9870-4321-098765fedcba',
+        user_name: 'فاطمة علي',
+        child_name: 'سارة',
+        status: 'active',
+        start_date: new Date('2024-07-01T10:00:00Z').toISOString(),
+        next_renewal_date: new Date('2024-08-01T10:00:00Z').toISOString(),
+        price: 350
+    }
+];
 
 // --- Context Definition ---
 
@@ -274,6 +288,9 @@ interface AdminContextType {
     createBlogPost: (payload: any) => Promise<void>;
     updateBlogPost: (payload: any) => Promise<void>;
     deleteBlogPost: (postId: number) => Promise<void>;
+
+    subscriptions: Subscription[];
+    createSubscription: (userId: string, userName: string, childName: string) => Promise<void>;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -284,8 +301,8 @@ export const AdminProvider: React.FC<{children: ReactNode}> = ({ children }) => 
     const [personalizedProducts, setPersonalizedProducts] = useState<PersonalizedProduct[]>([]);
     const [siteContent, setSiteContent] = useState<TextContent>({});
     const [socialLinks, setSocialLinks] = useState<SocialLinks>(MOCK_SOCIAL_LINKS);
-    // FIX: Add state for blog posts.
     const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+    const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
     
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -300,8 +317,8 @@ export const AdminProvider: React.FC<{children: ReactNode}> = ({ children }) => 
         setPersonalizedProducts(MOCK_PERSONALIZED_PRODUCTS);
         setSiteContent(MOCK_SITE_CONTENT);
         setSocialLinks(MOCK_SOCIAL_LINKS);
-        // FIX: Load mock blog posts into state.
         setBlogPosts(MOCK_BLOG_POSTS);
+        setSubscriptions(MOCK_SUBSCRIPTIONS);
         setLoading(false);
     }, []);
     
@@ -316,8 +333,6 @@ export const AdminProvider: React.FC<{children: ReactNode}> = ({ children }) => 
         for (const key in files) {
             const file = files[key];
             if (file) {
-                // In a real app, this would be an upload function returning a URL.
-                // For mock, we'll use a local blob URL.
                 imageUrls[key] = URL.createObjectURL(file);
             }
         }
@@ -347,7 +362,6 @@ export const AdminProvider: React.FC<{children: ReactNode}> = ({ children }) => 
         if (itemType === 'order') {
           setOrders(prev => prev.map(o => o.id === itemId ? { ...o, status: 'بانتظار المراجعة', receipt_url } : o));
         }
-        // Booking logic is now in CreativeWritingAdminContext
     };
 
     const updateOrderStatus = async (orderId: string, newStatus: IOrderDetails['status']) => {
@@ -389,7 +403,6 @@ export const AdminProvider: React.FC<{children: ReactNode}> = ({ children }) => 
         addToast('تم تحديث المنتج بنجاح (تجريبي)!', 'success');
     };
 
-    // FIX: Implement blog post management functions.
     const createBlogPost = async (payload: any) => {
         const newPost: BlogPost = {
             id: Date.now(),
@@ -427,6 +440,23 @@ export const AdminProvider: React.FC<{children: ReactNode}> = ({ children }) => 
         addToast('تم حذف المقال بنجاح.', 'success');
     };
 
+    const createSubscription = async (userId: string, userName: string, childName: string) => {
+        const startDate = new Date();
+        const nextRenewalDate = new Date(startDate);
+        nextRenewalDate.setMonth(startDate.getMonth() + 1);
+
+        const newSubscription: Subscription = {
+            id: `SUB-${Date.now()}`,
+            user_id: userId,
+            user_name: userName,
+            child_name: childName,
+            status: 'active',
+            start_date: startDate.toISOString(),
+            next_renewal_date: nextRenewalDate.toISOString(),
+            price: 350
+        };
+        setSubscriptions(prev => [...prev, newSubscription]);
+    };
 
     return (
         <AdminContext.Provider value={{
@@ -437,8 +467,8 @@ export const AdminProvider: React.FC<{children: ReactNode}> = ({ children }) => 
             siteContent, updateSiteContent,
             socialLinks, updateSocialLinks,
             personalizedProducts, updatePersonalizedProduct,
-            // FIX: Provide blog post state and handlers through the context.
             blogPosts, createBlogPost, updateBlogPost, deleteBlogPost,
+            subscriptions, createSubscription,
         }}>
             {children}
         </AdminContext.Provider>

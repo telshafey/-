@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { UserPlus, Eye, Link as LinkIcon } from 'lucide-react';
 import { useCommunication, JoinRequest } from '../../contexts/admin/CommunicationContext';
-import { formatDate } from '../../utils/helpers';
+// FIX: Added .ts extension to resolve module error.
+import { formatDate } from '../../utils/helpers.ts';
 import AdminSection from '../../components/admin/AdminSection';
 import PageLoader from '../../components/ui/PageLoader';
 
