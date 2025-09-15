@@ -1,16 +1,17 @@
 
 
+
 import React, { useEffect } from 'react';
-// FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Replaced the 'react-router-dom' namespace import with named imports to resolve component and hook resolution errors, and updated the code to use them directly.
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useCreativeWritingAdmin } from '../contexts/admin/CreativeWritingAdminContext';
 import PageLoader from '../components/ui/PageLoader';
 import { ArrowLeft, Calendar } from 'lucide-react';
 
 const InstructorProfilePage: React.FC = () => {
-  const { slug } = ReactRouterDOM.useParams<{ slug: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const { instructors, loading } = useCreativeWritingAdmin();
-  const navigate = ReactRouterDOM.useNavigate();
+  const navigate = useNavigate();
 
   const instructor = instructors.find(i => i.slug === slug);
 
@@ -27,9 +28,9 @@ const InstructorProfilePage: React.FC = () => {
     return (
       <div className="text-center py-20 min-h-[50vh] flex flex-col justify-center items-center">
         <h1 className="text-2xl font-bold text-gray-800">لم يتم العثور على المدرب</h1>
-        <ReactRouterDOM.Link to="/creative-writing/instructors" className="text-blue-600 hover:underline mt-4 inline-block">
+        <Link to="/creative-writing/instructors" className="text-blue-600 hover:underline mt-4 inline-block">
           العودة إلى صفحة المدربين
-        </ReactRouterDOM.Link>
+        </Link>
       </div>
     );
   }
@@ -45,10 +46,10 @@ const InstructorProfilePage: React.FC = () => {
     <div className="bg-gray-50 py-16 sm:py-20 animate-fadeIn">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
         <div className="mb-8">
-          <ReactRouterDOM.Link to="/creative-writing/instructors" className="flex items-center gap-2 text-gray-600 hover:text-blue-600 font-semibold transition-colors">
+          <Link to="/creative-writing/instructors" className="flex items-center gap-2 text-gray-600 hover:text-blue-600 font-semibold transition-colors">
             <ArrowLeft size={20} />
             <span>العودة إلى جميع المدربين</span>
-          </ReactRouterDOM.Link>
+          </Link>
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">

@@ -4,7 +4,7 @@ import { useAdmin } from '../contexts/AdminContext';
 import { useToast } from '../contexts/ToastContext';
 import PageLoader from '../components/ui/PageLoader';
 import { ArrowLeft, CreditCard, Home, Loader2, Lock, Truck, Upload, Link as LinkIcon, AlertCircle } from 'lucide-react';
-import { EGYPTIAN_GOVERNORATES } from '../../utils/governorates.ts';
+import { EGYPTIAN_GOVERNORATES } from '../utils/governorates.ts';
 
 const PAYMENT_LINK = 'https://ipn.eg/S/gm2000/instapay/0dqErO';
 
@@ -45,7 +45,7 @@ const CheckoutPage: React.FC = () => {
     const { addToast } = useToast();
     const { updateReceipt } = useAdmin();
     
-    const item = location.state?.item as { id: string, type: 'order' | 'booking', total: string | number | null, summary: string | null } | null;
+    const item = location.state?.item as { id: string, type: 'order' | 'booking' | 'subscription', total: string | number | null, summary: string | null } | null;
     const shippingCost = location.state?.shippingCost as number ?? 0;
 
     const [shippingInfo, setShippingInfo] = useState({ address: '', governorate: 'القاهرة', phone: '' });

@@ -1,6 +1,7 @@
+
 import React, { Suspense } from 'react';
-// FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Replaced the 'react-router-dom' namespace import with named imports to resolve component and hook resolution errors, and updated the code to use them directly.
+import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
@@ -50,15 +51,15 @@ const ProtectedRoute: React.FC<{ children: React.ReactElement, adminOnly?: boole
     
     if (!isLoggedIn) {
         const target = studentOnly ? '/student-login' : '/account';
-        return <ReactRouterDOM.Navigate to={target} replace />;
+        return <Navigate to={target} replace />;
     }
     
     if (adminOnly && !hasAdminAccess) {
-        return <ReactRouterDOM.Navigate to="/" replace />;
+        return <Navigate to="/" replace />;
     }
 
     if (studentOnly && currentUser?.role !== 'student') {
-        return <ReactRouterDOM.Navigate to="/" replace />;
+        return <Navigate to="/" replace />;
     }
 
     return children;
@@ -66,7 +67,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactElement, adminOnly?: boole
 
 
 const AppContent: React.FC = () => {
-    const location = ReactRouterDOM.useLocation();
+    const location = useLocation();
     const isAdminRoute = location.pathname.startsWith('/admin');
     const isSessionRoute = location.pathname.startsWith('/session');
     const isPortalRoute = location.pathname === '/';
@@ -80,36 +81,36 @@ const AppContent: React.FC = () => {
             {shouldShowHeaderFooter && <Header />}
             <main className="flex-grow">
                 <Suspense fallback={<PageLoader />}>
-                    <ReactRouterDOM.Routes>
-                        <ReactRouterDOM.Route path="/" element={<PortalPage />} />
+                    <Routes>
+                        <Route path="/" element={<PortalPage />} />
                         
                         {/* Enha Lak */}
-                        <ReactRouterDOM.Route path="/enha-lak" element={<HomePage />} />
-                        <ReactRouterDOM.Route path="/store" element={<PersonalizedStoriesPage />} />
-                        <ReactRouterDOM.Route path="/order/:productKey" element={<ProtectedRoute><OrderPage /></ProtectedRoute>} />
-                        <ReactRouterDOM.Route path="/join-us" element={<JoinUsPage />} />
-                        <ReactRouterDOM.Route path="/subscription" element={<SubscriptionPage />} />
+                        <Route path="/enha-lak" element={<HomePage />} />
+                        <Route path="/store" element={<PersonalizedStoriesPage />} />
+                        <Route path="/order/:productKey" element={<ProtectedRoute><OrderPage /></ProtectedRoute>} />
+                        <Route path="/join-us" element={<JoinUsPage />} />
+                        <Route path="/subscription" element={<SubscriptionPage />} />
 
                         {/* Creative Writing */}
-                        <ReactRouterDOM.Route path="/creative-writing" element={<CreativeWritingPage />} />
-                        <ReactRouterDOM.Route path="/creative-writing/about" element={<CreativeWritingAboutPage />} />
-                        <ReactRouterDOM.Route path="/creative-writing/curriculum" element={<CreativeWritingCurriculumPage />} />
-                        <ReactRouterDOM.Route path="/creative-writing/instructors" element={<CreativeWritingInstructorsPage />} />
-                        <ReactRouterDOM.Route path="/instructor/:slug" element={<InstructorProfilePage />} />
-                        <ReactRouterDOM.Route path="/creative-writing/booking" element={<CreativeWritingBookingPage />} />
-                        <ReactRouterDOM.Route path="/creative-writing/join-us" element={<CreativeWritingJoinUsPage />} />
+                        <Route path="/creative-writing" element={<CreativeWritingPage />} />
+                        <Route path="/creative-writing/about" element={<CreativeWritingAboutPage />} />
+                        <Route path="/creative-writing/curriculum" element={<CreativeWritingCurriculumPage />} />
+                        <Route path="/creative-writing/instructors" element={<CreativeWritingInstructorsPage />} />
+                        <Route path="/instructor/:slug" element={<InstructorProfilePage />} />
+                        <Route path="/creative-writing/booking" element={<CreativeWritingBookingPage />} />
+                        <Route path="/creative-writing/join-us" element={<CreativeWritingJoinUsPage />} />
                         
                          {/* Shared Pages */}
-                        <ReactRouterDOM.Route path="/about" element={<AboutPage />} />
-                        <ReactRouterDOM.Route path="/blog" element={<BlogPage />} />
-                        <ReactRouterDOM.Route path="/blog/:slug" element={<BlogPostPage />} />
-                        <ReactRouterDOM.Route path="/support" element={<SupportPage />} />
-                        <ReactRouterDOM.Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-                        <ReactRouterDOM.Route path="/terms-of-use" element={<TermsOfUsePage />} />
+                        <Route path="/about" element={<AboutPage />} />
+                        <Route path="/blog" element={<BlogPage />} />
+                        <Route path="/blog/:slug" element={<BlogPostPage />} />
+                        <Route path="/support" element={<SupportPage />} />
+                        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                        <Route path="/terms-of-use" element={<TermsOfUsePage />} />
 
                         {/* Student Routes */}
-                        <ReactRouterDOM.Route path="/student-login" element={<StudentLoginPage />} />
-                         <ReactRouterDOM.Route 
+                        <Route path="/student-login" element={<StudentLoginPage />} />
+                         <Route 
                             path="/student/dashboard" 
                             element={
                                 <ProtectedRoute studentOnly>
@@ -117,14 +118,14 @@ const AppContent: React.FC = () => {
                                 </ProtectedRoute>
                             } 
                         />
-                        <ReactRouterDOM.Route path="/session/:sessionId" element={<ProtectedRoute><SessionPage /></ProtectedRoute>} />
+                        <Route path="/session/:sessionId" element={<ProtectedRoute><SessionPage /></ProtectedRoute>} />
 
                         {/* System Pages */}
-                        <ReactRouterDOM.Route path="/account" element={<AccountPage />} />
-                        <ReactRouterDOM.Route path="/ai-guide" element={<GeminiPage />} />
-                        <ReactRouterDOM.Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+                        <Route path="/account" element={<AccountPage />} />
+                        <Route path="/ai-guide" element={<GeminiPage />} />
+                        <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
                         
-                        <ReactRouterDOM.Route 
+                        <Route 
                             path="/admin/*" 
                             element={
                                 <ProtectedRoute adminOnly>
@@ -132,7 +133,7 @@ const AppContent: React.FC = () => {
                                 </ProtectedRoute>
                             } 
                         />
-                    </ReactRouterDOM.Routes>
+                    </Routes>
                 </Suspense>
             </main>
             {shouldShowHeaderFooter && <Footer />}
@@ -143,7 +144,7 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
     return (
-        <ReactRouterDOM.HashRouter>
+        <HashRouter>
             <ScrollToTop />
             <AdminProvider>
                 <CreativeWritingAdminProvider>
@@ -152,7 +153,7 @@ const App: React.FC = () => {
                     </CommunicationProvider>
                 </CreativeWritingAdminProvider>
             </AdminProvider>
-        </ReactRouterDOM.HashRouter>
+        </HashRouter>
     );
 };
 

@@ -1,8 +1,9 @@
 
 
+
 import React from 'react';
-// FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Replaced the 'react-router-dom' namespace import with named imports to resolve component and hook resolution errors, and updated the code to use them directly.
+import { useNavigate } from 'react-router-dom';
 import { useAdmin, PersonalizedProduct } from '../contexts/AdminContext';
 import { useProduct, Prices } from '../contexts/ProductContext';
 import PageLoader from '../components/ui/PageLoader';
@@ -25,7 +26,7 @@ const getPriceForProduct = (productKey: string, prices: Prices) => {
 };
 
 const ProductCard: React.FC<{ product: PersonalizedProduct, price: string }> = ({ product, price }) => {
-    const navigate = ReactRouterDOM.useNavigate();
+    const navigate = useNavigate();
 
     const handleOrderNow = () => {
         navigate(`/order/${product.key}`);

@@ -1,6 +1,7 @@
+
 import React, { Suspense } from 'react';
-// FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Replaced the 'react-router-dom' namespace import with named imports to resolve component and hook resolution errors, and updated the code to use them directly.
+import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
 import PageLoader from '../ui/PageLoader';
 // FIX: Added .tsx extension to resolve module error.
@@ -30,7 +31,7 @@ const RoleBasedRoute: React.FC<{ children: React.ReactElement, allowedRoles: Use
     if (currentUser && allowedRoles.includes(currentUser.role)) {
         return children;
     }
-    return <ReactRouterDOM.Navigate to="/admin" replace />; 
+    return <Navigate to="/admin" replace />; 
 };
 
 const AdminLayout: React.FC = () => {
@@ -44,9 +45,9 @@ const AdminLayout: React.FC = () => {
         <AdminSidebar />
         <main className="flex-grow p-6 sm:p-8 lg:p-10">
           <Suspense fallback={<PageLoader text="جاري تحميل لوحة التحكم..." />}>
-            <ReactRouterDOM.Routes>
-              <ReactRouterDOM.Route path="/*" element={<InstructorDashboardPage />} />
-            </ReactRouterDOM.Routes>
+            <Routes>
+              <Route path="/*" element={<InstructorDashboardPage />} />
+            </Routes>
           </Suspense>
         </main>
       </div>
@@ -59,26 +60,26 @@ const AdminLayout: React.FC = () => {
       <AdminSidebar />
       <main className="flex-grow p-6 sm:p-8 lg:p-10">
         <Suspense fallback={<PageLoader text="جاري تحميل الصفحة..." />}>
-          <ReactRouterDOM.Routes>
-            <ReactRouterDOM.Route index element={<AdminDashboardPage />} />
+          <Routes>
+            <Route index element={<AdminDashboardPage />} />
             
-            <ReactRouterDOM.Route path="users" element={<RoleBasedRoute allowedRoles={['super_admin']}><AdminUsersPage /></RoleBasedRoute>} />
-            <ReactRouterDOM.Route path="settings" element={<RoleBasedRoute allowedRoles={['super_admin']}><AdminSettingsPage /></RoleBasedRoute>} />
+            <Route path="users" element={<RoleBasedRoute allowedRoles={['super_admin']}><AdminUsersPage /></RoleBasedRoute>} />
+            <Route path="settings" element={<RoleBasedRoute allowedRoles={['super_admin']}><AdminSettingsPage /></RoleBasedRoute>} />
 
-            <ReactRouterDOM.Route path="orders" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminOrdersPage /></RoleBasedRoute>} />
-            <ReactRouterDOM.Route path="subscriptions" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminSubscriptionsPage /></RoleBasedRoute>} />
-            <ReactRouterDOM.Route path="personalized-products" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminPersonalizedProductsPage /></RoleBasedRoute>} />
-            <ReactRouterDOM.Route path="prices" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminProductsPage /></RoleBasedRoute>} />
-            <ReactRouterDOM.Route path="shipping" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminShippingPage /></RoleBasedRoute>} />
-            <ReactRouterDOM.Route path="content-management" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminContentManagementPage /></RoleBasedRoute>} />
-            <ReactRouterDOM.Route path="blog" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminBlogPage /></RoleBasedRoute>} />
+            <Route path="orders" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminOrdersPage /></RoleBasedRoute>} />
+            <Route path="subscriptions" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminSubscriptionsPage /></RoleBasedRoute>} />
+            <Route path="personalized-products" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminPersonalizedProductsPage /></RoleBasedRoute>} />
+            <Route path="prices" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminProductsPage /></RoleBasedRoute>} />
+            <Route path="shipping" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminShippingPage /></RoleBasedRoute>} />
+            <Route path="content-management" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminContentManagementPage /></RoleBasedRoute>} />
+            <Route path="blog" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminBlogPage /></RoleBasedRoute>} />
             
-            <ReactRouterDOM.Route path="creative-writing" element={<RoleBasedRoute allowedRoles={['super_admin', 'creative_writing_supervisor']}><AdminCreativeWritingPage /></RoleBasedRoute>} />
-            <ReactRouterDOM.Route path="instructors" element={<RoleBasedRoute allowedRoles={['super_admin', 'creative_writing_supervisor']}><AdminInstructorsPage /></RoleBasedRoute>} />
+            <Route path="creative-writing" element={<RoleBasedRoute allowedRoles={['super_admin', 'creative_writing_supervisor']}><AdminCreativeWritingPage /></RoleBasedRoute>} />
+            <Route path="instructors" element={<RoleBasedRoute allowedRoles={['super_admin', 'creative_writing_supervisor']}><AdminInstructorsPage /></RoleBasedRoute>} />
             
-            <ReactRouterDOM.Route path="support" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor', 'creative_writing_supervisor']}><AdminSupportPage /></RoleBasedRoute>} />
-            <ReactRouterDOM.Route path="join-requests" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor', 'creative_writing_supervisor']}><AdminJoinRequestsPage /></RoleBasedRoute>} />
-          </ReactRouterDOM.Routes>
+            <Route path="support" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor', 'creative_writing_supervisor']}><AdminSupportPage /></RoleBasedRoute>} />
+            <Route path="join-requests" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor', 'creative_writing_supervisor']}><AdminJoinRequestsPage /></RoleBasedRoute>} />
+          </Routes>
         </Suspense>
       </main>
     </div>

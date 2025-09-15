@@ -1,7 +1,8 @@
 
+
 import React from 'react';
-// FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Replaced the 'react-router-dom' namespace import with named imports to resolve component and hook resolution errors, and updated the code to use them directly.
+import { Link } from 'react-router-dom';
 // FIX: Replaced non-existent 'PackageSelect' icon with 'Package'.
 import { Target, Book, Users, ArrowLeft, Calendar, CheckCircle, Package, CalendarCheck, Sparkles, Quote, Star, Award, HeartHandshake } from 'lucide-react';
 import ShareButtons from '../components/shared/ShareButtons';
@@ -13,10 +14,10 @@ const FeatureCard: React.FC<{ title: string; description: string; link: string; 
         </div>
         <h3 className="text-2xl font-bold text-gray-800">{title}</h3>
         <p className="mt-4 text-gray-600 flex-grow">{description}</p>
-        <ReactRouterDOM.Link to={link} className="mt-6 inline-flex items-center font-semibold text-lg text-blue-600 hover:text-blue-800 group">
+        <Link to={link} className="mt-6 inline-flex items-center font-semibold text-lg text-blue-600 hover:text-blue-800 group">
             <span>اعرف المزيد</span>
             <ArrowLeft size={22} className="ms-2 transition-transform group-hover:-translate-x-1 rtl:group-hover:translate-x-1" />
-        </ReactRouterDOM.Link>
+        </Link>
     </div>
 );
 
@@ -73,11 +74,11 @@ const CreativeWritingPage: React.FC = () => {
                 "بداية الرحلة" ليس برنامجاً لتعليم الكتابة، بل هو احتفال بالصوت الفريد لكل طفل. إنه المفتاح الذي يفتح أقفال الخيال، والمساحة الآمنة التي تتحول فيها الأفكار الخجولة إلى قصص عظيمة.
             </p>
             <div className="mt-10">
-                <ReactRouterDOM.Link 
+                <Link 
                     to="/creative-writing/booking"
                     className="px-8 py-3 border border-transparent text-lg font-medium rounded-full text-white bg-blue-600 hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
                     اكتشف الباقات وابدأ الآن
-                </ReactRouterDOM.Link>
+                </Link>
             </div>
             <div className="mt-8 flex justify-center">
                 <ShareButtons 
@@ -233,10 +234,10 @@ const CreativeWritingPage: React.FC = () => {
                 <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800">هل أنت جاهز لبدء الرحلة؟</h2>
                 <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">اختر الباقة التي تناسب طفلك اليوم وافتح له بابًا جديدًا من الإبداع والتعبير.</p>
                 <div className="mt-8">
-                    <ReactRouterDOM.Link to="/creative-writing/booking" className="inline-flex items-center justify-center px-10 py-4 border border-transparent text-lg font-medium rounded-full text-white bg-blue-600 hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
+                    <Link to="/creative-writing/booking" className="inline-flex items-center justify-center px-10 py-4 border border-transparent text-lg font-medium rounded-full text-white bg-blue-600 hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
                         <Calendar className="me-3" size={22}/>
                         عرض الباقات وحجز موعد
-                    </ReactRouterDOM.Link>
+                    </Link>
                 </div>
             </div>
         </section>

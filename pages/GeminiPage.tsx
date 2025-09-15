@@ -1,11 +1,12 @@
 
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { GoogleGenAI, Content, Type } from "@google/genai";
 import { Bot, User, Send, Loader2, Sparkles, ArrowLeft } from 'lucide-react';
 import { useProduct } from '../contexts/ProductContext';
 import { useAdmin } from '../contexts/AdminContext';
-// FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Replaced the 'react-router-dom' namespace import with a named import for 'Link' to resolve component resolution errors.
+import { Link } from 'react-router-dom';
 
 // --- Static Data and Types ---
 
@@ -138,10 +139,10 @@ const ProductSuggestionCard: React.FC<{ productKey: string }> = ({ productKey })
                 <div className="flex-grow">
                     <h4 className="font-bold">{product.title}</h4>
                     <p className="text-sm opacity-90 mb-3">{product.description}</p>
-                    <ReactRouterDOM.Link to={product.link} className="inline-flex items-center gap-2 bg-white text-blue-600 px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-gray-200 transition-colors">
+                    <Link to={product.link} className="inline-flex items-center gap-2 bg-white text-blue-600 px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-gray-200 transition-colors">
                         <span>اعرف المزيد</span>
                         <ArrowLeft size={16} />
-                    </ReactRouterDOM.Link>
+                    </Link>
                 </div>
             </div>
         </div>

@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
-import * as ReactRouterDOM from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useAdmin, PersonalizedProduct } from '../contexts/AdminContext.tsx';
 import { useProduct } from '../contexts/ProductContext.tsx';
@@ -7,7 +8,7 @@ import { useToast } from '../contexts/ToastContext.tsx';
 import PageLoader from '../components/ui/PageLoader';
 import InteractivePreview from '../components/order/InteractivePreview';
 import { User, Heart, Image, Edit, Plus, Send, Loader2, AlertCircle, Truck } from 'lucide-react';
-import { EGYPTIAN_GOVERNORATES } from '../../utils/governorates.ts';
+import { EGYPTIAN_GOVERNORATES } from '../utils/governorates.ts';
 
 const storyGoals = [
     { key: 'respect', title: 'الاستئذان والاحترام' },
@@ -48,8 +49,8 @@ const FileUpload: React.FC<{ id: string; label: string; onFileChange: (id: strin
 
 
 const OrderPage: React.FC = () => {
-    const { productKey } = ReactRouterDOM.useParams<{ productKey: string }>();
-    const navigate = ReactRouterDOM.useNavigate();
+    const { productKey } = useParams<{ productKey: string }>();
+    const navigate = useNavigate();
     const { addToast } = useToast();
     const { currentUser, childProfiles } = useAuth();
     const { personalizedProducts, loading: adminLoading, createOrder } = useAdmin();

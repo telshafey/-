@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
-// FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Replaced the 'react-router-dom' namespace import with a named import for 'useNavigate' to resolve hook resolution errors.
+import { useNavigate } from 'react-router-dom';
 import { Save, Calendar, CheckSquare, Package, Settings, Loader2, Video, Eye } from 'lucide-react';
 import { useCreativeWritingAdmin, CreativeWritingPackage, CreativeWritingBooking, AdditionalService } from '../../contexts/admin/CreativeWritingAdminContext';
 // FIX: Added .ts extension to resolve module error.
@@ -21,7 +22,7 @@ const AdminCreativeWritingPage: React.FC = () => {
         additionalServices, updateAdditionalServices,
         loading, error
     } = useCreativeWritingAdmin();
-    const navigate = ReactRouterDOM.useNavigate();
+    const navigate = useNavigate();
     const { addToast } = useToast();
 
     const [editablePackages, setEditablePackages] = useState<CreativeWritingPackage[]>([]);

@@ -1,7 +1,8 @@
 
+
 import React from 'react';
-// FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Replaced the 'react-router-dom' namespace import with a named import for 'Link' to resolve component resolution errors.
+import { Link } from 'react-router-dom';
 import { Shield, FileText, UserCheck, Lock, Database } from 'lucide-react';
 import { useAdmin } from '../contexts/AdminContext';
 import PageLoader from '../components/ui/PageLoader';
@@ -98,7 +99,7 @@ const PrivacyPolicyPage: React.FC = () => {
         <Section title={privacyContent.contact_us_title || 'اتصل بنا'} icon={<UserCheck size={24} />}>
             <p>
               {privacyContent.contact_us_text?.replace('الدعم والمساعدة', '')}
-              <ReactRouterDOM.Link to="/support" className="text-blue-600 hover:underline">الدعم والمساعدة</ReactRouterDOM.Link>.
+              <Link to="/support" className="text-blue-600 hover:underline">الدعم والمساعدة</Link>.
             </p>
         </Section>
 

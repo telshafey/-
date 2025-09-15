@@ -2,9 +2,10 @@
 
 
 
+
 import React, { useRef, useEffect, useState } from 'react';
-// FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Replaced the 'react-router-dom' namespace import with named imports to resolve component and hook resolution errors, and updated the code to use them directly.
+import { useParams, useNavigate } from 'react-router-dom';
 // FIX: Added .tsx extension to resolve module error.
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { Loader2, ShieldAlert } from 'lucide-react';
@@ -16,10 +17,10 @@ declare global {
 }
 
 const SessionPage: React.FC = () => {
-    const { sessionId } = ReactRouterDOM.useParams<{ sessionId: string }>();
+    const { sessionId } = useParams<{ sessionId: string }>();
     const { currentUser, loading: authLoading } = useAuth();
     const jitsiContainerRef = useRef<HTMLDivElement>(null);
-    const navigate = ReactRouterDOM.useNavigate();
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 

@@ -1,8 +1,9 @@
 
 
+
 import React, { useMemo, useState } from 'react';
-// FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Replaced the 'react-router-dom' namespace import with a named import for 'useNavigate' to resolve hook resolution errors.
+import { useNavigate } from 'react-router-dom';
 // FIX: Added .tsx extension to resolve module error.
 import { useAuth } from '../../contexts/AuthContext.tsx';
 import { useCreativeWritingAdmin, CreativeWritingBooking } from '../../contexts/admin/CreativeWritingAdminContext';
@@ -37,7 +38,7 @@ const StatCard: React.FC<{ title: string, value: string | number, icon: React.Re
 const InstructorDashboardPage: React.FC = () => {
     const { currentUser, loading: authLoading } = useAuth();
     const { instructors, creativeWritingBookings, generateAndSetSessionId, loading: cwLoading } = useCreativeWritingAdmin();
-    const navigate = ReactRouterDOM.useNavigate();
+    const navigate = useNavigate();
     const { addToast } = useToast();
     const [startingSession, setStartingSession] = React.useState<string | null>(null);
 

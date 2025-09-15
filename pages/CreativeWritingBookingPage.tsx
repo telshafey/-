@@ -1,7 +1,8 @@
 
+
 import React, { useState, useEffect } from 'react';
-// FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Replaced the 'react-router-dom' namespace import with named imports to resolve component and hook resolution errors, and updated the code to use them directly.
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useCreativeWritingAdmin, Instructor, CreativeWritingPackage, AdditionalService } from '../contexts/admin/CreativeWritingAdminContext';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useToast } from '../contexts/ToastContext';
@@ -25,8 +26,8 @@ const dayNames: { [key in keyof WeeklySchedule]: string } = {
 
 
 const CreativeWritingBookingPage: React.FC = () => {
-    const location = ReactRouterDOM.useLocation();
-    const navigate = ReactRouterDOM.useNavigate();
+    const location = useLocation();
+    const navigate = useNavigate();
     const { 
         instructors, 
         creativeWritingPackages, 
