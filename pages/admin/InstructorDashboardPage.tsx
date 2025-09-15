@@ -10,7 +10,7 @@ import AdminSection from '../../components/admin/AdminSection';
 import PageLoader from '../../components/ui/PageLoader';
 // FIX: Added .ts extension to resolve module error.
 import { getStatusColor } from '../../utils/helpers.ts';
-import { Calendar, Video, Loader2, Users, BarChart2, MessageSquare } from 'lucide-react';
+import { Calendar, Video, Loader2, Users, BarChart2, MessageSquare, CheckCircle } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import WeeklyScheduleManager from '../../components/admin/WeeklyScheduleManager';
 
@@ -21,15 +21,25 @@ interface Student {
     lastProgressNote: string | null;
 }
 
+const StatCard: React.FC<{ title: string, value: string | number, icon: React.ReactNode, color: string }> = ({ title, value, icon, color }) => (
+    <div className="bg-white p-6 rounded-2xl shadow-md flex items-center justify-between transition-transform transform hover:-translate-y-1">
+        <div>
+            <p className="text-sm font-medium text-gray-500">{title}</p>
+            <p className="text-3xl font-extrabold text-gray-800">{value}</p>
+        </div>
+        <div className={`w-16 h-16 rounded-full flex items-center justify-center ${color}`}>
+            {icon}
+        </div>
+    </div>
+);
+
+
 const InstructorDashboardPage: React.FC = () => {
     const { currentUser, loading: authLoading } = useAuth();
     const { instructors, creativeWritingBookings, generateAndSetSessionId, loading: cwLoading } = useCreativeWritingAdmin();
     const navigate = ReactRouterDOM.useNavigate();
     const { addToast } = useToast();
     const [startingSession, setStartingSession] = React.useState<string | null>(null);
-    const [dateFrom, setDateFrom] = useState('');
-    const [dateTo, setDateTo] = useState('');
-    const [sessionCount, setSessionCount] = useState<number | null>(null);
 
     const loading = authLoading || cwLoading;
 
@@ -38,9 +48,14 @@ const InstructorDashboardPage: React.FC = () => {
         return instructors.find(i => i.user_id === currentUser.id);
     }, [currentUser, instructors]);
 
-    const myStudents = useMemo(() => {
-        if (!instructorProfile) return [];
+    const { myStudents, completedSessionsThisMonth, totalCompletedSessions } = useMemo(() => {
+        if (!instructorProfile) return { myStudents: [], completedSessionsThisMonth: 0, totalCompletedSessions: 0 };
         const studentMap = new Map<string, Student>();
+        let completedThisMonth = 0;
+        let totalCompleted = 0;
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+
         creativeWritingBookings
             .filter(b => b.instructor_id === instructorProfile.id)
             .forEach(booking => {
@@ -52,8 +67,20 @@ const InstructorDashboardPage: React.FC = () => {
                 if (booking.progress_notes) {
                     student.lastProgressNote = booking.progress_notes;
                 }
+                if (booking.status === 'مكتمل') {
+                    totalCompleted++;
+                    const bookingDate = new Date(booking.booking_date);
+                    if (bookingDate.getMonth() === currentMonth && bookingDate.getFullYear() === currentYear) {
+                        completedThisMonth++;
+                    }
+                }
             });
-        return Array.from(studentMap.values());
+        
+        return { 
+            myStudents: Array.from(studentMap.values()),
+            completedSessionsThisMonth: completedThisMonth,
+            totalCompletedSessions: totalCompleted
+        };
     }, [instructorProfile, creativeWritingBookings]);
 
     if (loading || !currentUser) {
@@ -64,7 +91,8 @@ const InstructorDashboardPage: React.FC = () => {
         return <div className="text-center text-red-500">لم يتم العثور على ملف المدرب المرتبط بهذا الحساب.</div>;
     }
 
-    const myUpcomingBookings = creativeWritingBookings.filter(b => b.instructor_id === instructorProfile.id && b.status === 'مؤكد' && new Date(b.booking_date) >= new Date());
+    const myUpcomingBookings = creativeWritingBookings.filter(b => b.instructor_id === instructorProfile.id && b.status === 'مؤكد' && new Date(b.booking_date) >= new Date(new Date().setDate(new Date().getDate() - 1))).sort((a, b) => new Date(a.booking_date).getTime() - new Date(b.booking_date).getTime());
+
 
     const handleStartSession = async (booking: typeof myUpcomingBookings[0]) => {
         setStartingSession(booking.id);
@@ -82,30 +110,17 @@ const InstructorDashboardPage: React.FC = () => {
         setStartingSession(null);
     };
 
-    const handleFilterSessions = () => {
-        if (!dateFrom || !dateTo) {
-            addToast('يرجى تحديد تاريخ البداية والنهاية', 'warning');
-            return;
-        }
-        const from = new Date(dateFrom);
-        const to = new Date(dateTo);
-        const count = creativeWritingBookings.filter(b => {
-            const bookingDate = new Date(b.booking_date);
-            return (
-                b.instructor_id === instructorProfile.id &&
-                b.status === 'مكتمل' &&
-                bookingDate >= from &&
-                bookingDate <= to
-            );
-        }).length;
-        setSessionCount(count);
-    };
-
     return (
         <div className="animate-fadeIn space-y-12">
             <div>
                 <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-800">أهلاً بعودتك، {currentUser.name.split(' ')[0]}!</h1>
                 <p className="mt-2 text-lg text-gray-600">هذه هي لوحة التحكم الخاصة بك لإدارة جلساتك وطلابك.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <StatCard title="إجمالي الطلاب" value={myStudents.length} icon={<Users className="text-white" />} color="bg-blue-500" />
+                <StatCard title="جلسات مكتملة (هذا الشهر)" value={completedSessionsThisMonth} icon={<CheckCircle className="text-white" />} color="bg-green-500" />
+                <StatCard title="إجمالي الجلسات المكتملة" value={totalCompletedSessions} icon={<BarChart2 className="text-white" />} color="bg-purple-500" />
             </div>
 
             <AdminSection title="جلساتك القادمة" icon={<Video />}>
@@ -170,24 +185,7 @@ const InstructorDashboardPage: React.FC = () => {
                     )}
                 </div>
             </AdminSection>
-
-            <AdminSection title="تحليل الجلسات" icon={<BarChart2 />}>
-                <div className="flex flex-col sm:flex-row gap-4 items-center">
-                    <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="form-input rounded-lg border-gray-300" />
-                    <span className="text-gray-600">إلى</span>
-                    <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="form-input rounded-lg border-gray-300" />
-                    <button onClick={handleFilterSessions} className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">
-                        عرض
-                    </button>
-                </div>
-                {sessionCount !== null && (
-                    <div className="mt-6 text-center bg-blue-50 p-4 rounded-lg">
-                        <p className="text-lg text-gray-700">عدد الجلسات المكتملة في هذه الفترة:</p>
-                        <p className="text-4xl font-extrabold text-blue-600">{sessionCount}</p>
-                    </div>
-                )}
-            </AdminSection>
-
+            
             <AdminSection title="إدارة جدولك الأسبوعي" icon={<Calendar />}>
                 <WeeklyScheduleManager instructor={instructorProfile} />
             </AdminSection>

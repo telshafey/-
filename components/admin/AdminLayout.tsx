@@ -1,6 +1,3 @@
-
-
-
 import React, { Suspense } from 'react';
 // FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
 import * as ReactRouterDOM from 'react-router-dom';
@@ -25,6 +22,7 @@ const AdminJoinRequestsPage = React.lazy(() => import('../../pages/admin/AdminJo
 const AdminBlogPage = React.lazy(() => import('../../pages/admin/AdminBlogPage.tsx'));
 const AdminSubscriptionsPage = React.lazy(() => import('../../pages/admin/AdminSubscriptionsPage.tsx'));
 const InstructorDashboardPage = React.lazy(() => import('../../pages/admin/InstructorDashboardPage.tsx'));
+const AdminShippingPage = React.lazy(() => import('../../pages/admin/AdminShippingPage.tsx'));
 
 
 const RoleBasedRoute: React.FC<{ children: React.ReactElement, allowedRoles: UserProfile['role'][] }> = ({ children, allowedRoles }) => {
@@ -71,6 +69,7 @@ const AdminLayout: React.FC = () => {
             <ReactRouterDOM.Route path="subscriptions" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminSubscriptionsPage /></RoleBasedRoute>} />
             <ReactRouterDOM.Route path="personalized-products" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminPersonalizedProductsPage /></RoleBasedRoute>} />
             <ReactRouterDOM.Route path="prices" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminProductsPage /></RoleBasedRoute>} />
+            <ReactRouterDOM.Route path="shipping" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminShippingPage /></RoleBasedRoute>} />
             <ReactRouterDOM.Route path="content-management" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminContentManagementPage /></RoleBasedRoute>} />
             <ReactRouterDOM.Route path="blog" element={<RoleBasedRoute allowedRoles={['super_admin', 'enha_lak_supervisor']}><AdminBlogPage /></RoleBasedRoute>} />
             

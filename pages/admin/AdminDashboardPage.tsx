@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ShoppingBag, Gift, Users, DollarSign, Feather, CheckSquare } from 'lucide-react';
 import { useAdmin, IOrderDetails } from '../../contexts/AdminContext';
 import { useCreativeWritingAdmin } from '../../contexts/admin/CreativeWritingAdminContext';
@@ -48,7 +48,34 @@ const AdminDashboardPage: React.FC = () => {
   const loading = adminLoading || cwLoading;
   const error = adminError || cwError;
 
-  const revenue = "15,750 ج.م"; // Dummy data
+  const { totalRevenue, totalStudents } = useMemo(() => {
+    const parseCurrency = (value: string | number | null) => {
+        if (typeof value === 'number') return value;
+        if (typeof value === 'string') {
+            return parseFloat(value.replace(/[^0-9.]/g, '')) || 0;
+        }
+        return 0;
+    };
+
+    const completedOrdersRevenue = orders
+        .filter(o => o.status === 'تم التسليم')
+        .reduce((acc, order) => acc + parseCurrency(order.total), 0);
+
+    const completedBookingsRevenue = creativeWritingBookings
+        .filter(b => b.status === 'مكتمل')
+        .reduce((acc, booking) => acc + parseCurrency(booking.total), 0);
+
+    const totalRevenue = completedOrdersRevenue + completedBookingsRevenue;
+
+    const uniqueStudentIds = new Set(creativeWritingBookings.map(b => b.user_id));
+    const totalStudents = uniqueStudentIds.size;
+    
+    return { 
+        totalRevenue: totalRevenue.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP', minimumFractionDigits: 0 }),
+        totalStudents
+    };
+  }, [orders, creativeWritingBookings]);
+
   const recentOrders = orders.slice(0, 5);
   const recentBookings = creativeWritingBookings.slice(0, 5);
   
@@ -82,7 +109,7 @@ const AdminDashboardPage: React.FC = () => {
       <div className="animate-fadeIn">
         <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-8">لوحة التحكم</h1>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {(role === 'super_admin' || role === 'enha_lak_supervisor') && (
             <StatCard title="إجمالي الطلبات ('إنها لك')" value={orders.length.toString()} icon={<ShoppingBag className="text-white" />} color="bg-blue-500" />
           )}
@@ -91,7 +118,7 @@ const AdminDashboardPage: React.FC = () => {
           )}
           {role === 'super_admin' && (
             <>
-              <StatCard title="الإيرادات (تجريبي)" value={revenue} icon={<DollarSign className="text-white" />} color="bg-yellow-500" />
+              <StatCard title="الإيرادات المكتملة" value={totalRevenue} icon={<DollarSign className="text-white" />} color="bg-yellow-500" />
               <StatCard title="المستخدمون" value={users.length.toString()} icon={<Users className="text-white" />} color="bg-purple-500" />
             </>
           )}
@@ -100,6 +127,9 @@ const AdminDashboardPage: React.FC = () => {
           )}
           {(role === 'super_admin' || role === 'creative_writing_supervisor') && (
             <StatCard title="المدربون" value={instructors.length.toString()} icon={<Feather className="text-white" />} color="bg-indigo-500" />
+          )}
+           {(role === 'super_admin' || role === 'creative_writing_supervisor') && (
+            <StatCard title="إجمالي الطلاب (الكتابة)" value={totalStudents.toString()} icon={<Users className="text-white" />} color="bg-pink-500" />
           )}
         </div>
 

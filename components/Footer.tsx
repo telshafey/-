@@ -40,57 +40,38 @@ const Footer: React.FC = () => {
   }, [currentSection, siteBranding, isLoading]);
 
   const renderLinks = () => {
-    if (currentSection === 'creative-writing') {
-        return (
-            <>
-                <div className="mt-4 md:mt-0">
-                    <h3 className="font-bold text-gray-800 mb-4">البرنامج</h3>
-                    <ul className="space-y-2">
-                        <li><ReactRouterDOM.Link to="/creative-writing" className="text-gray-600 hover:text-blue-500 transition-colors">الرئيسية</ReactRouterDOM.Link></li>
-                        <li><ReactRouterDOM.Link to="/creative-writing/about" className="text-gray-600 hover:text-blue-500 transition-colors">عن البرنامج</ReactRouterDOM.Link></li>
-                        <li><ReactRouterDOM.Link to="/privacy-policy" className="text-gray-600 hover:text-blue-500 transition-colors">سياسة الخصوصية</ReactRouterDOM.Link></li>
-                    </ul>
-                </div>
-                <div className="mt-4 md:mt-0">
-                    <h3 className="font-bold text-gray-800 mb-4">الباقات والمدربون</h3>
-                    <ul className="space-y-2">
-                        <li><ReactRouterDOM.Link to="/creative-writing/booking" className="text-gray-600 hover:text-blue-500 transition-colors">الباقات والحجز</ReactRouterDOM.Link></li>
-                        <li><ReactRouterDOM.Link to="/creative-writing/instructors" className="text-gray-600 hover:text-blue-500 transition-colors">المدربون</ReactRouterDOM.Link></li>
-                    </ul>
-                </div>
-                <div className="mt-4 md:mt-0">
-                    <h3 className="font-bold text-gray-800 mb-4">تواصل معنا</h3>
-                    <ul className="space-y-2">
-                        <li><ReactRouterDOM.Link to="/creative-writing/support" className="text-gray-600 hover:text-blue-500 transition-colors">الدعم والمساعدة</ReactRouterDOM.Link></li>
-                        <li><ReactRouterDOM.Link to="/creative-writing/join-us" className="text-gray-600 hover:text-blue-500 transition-colors">انضم لفريقنا</ReactRouterDOM.Link></li>
-                    </ul>
-                </div>
-            </>
-        );
-    }
-
-    // Default to 'enha-lak' links
     return (
         <>
             <div className="mt-4 md:mt-0">
                 <h3 className="font-bold text-gray-800 mb-4">المنصة</h3>
                 <ul className="space-y-2">
-                    <li><ReactRouterDOM.Link to="/enha-lak" className="text-gray-600 hover:text-blue-500 transition-colors">الرئيسية "إنها لك"</ReactRouterDOM.Link></li>
                     <li><ReactRouterDOM.Link to="/about" className="text-gray-600 hover:text-blue-500 transition-colors">عنا</ReactRouterDOM.Link></li>
-                    <li><ReactRouterDOM.Link to="/privacy-policy" className="text-gray-600 hover:text-blue-500 transition-colors">سياسة الخصوصية</ReactRouterDOM.Link></li>
-                </ul>
-            </div>
-            <div className="mt-4 md:mt-0">
-                <h3 className="font-bold text-gray-800 mb-4">منتجاتنا</h3>
-                <ul className="space-y-2">
-                    <li><ReactRouterDOM.Link to="/store" className="text-gray-600 hover:text-blue-500 transition-colors">متجر "إنها لك"</ReactRouterDOM.Link></li>
-                </ul>
-            </div>
-            <div className="mt-4 md:mt-0">
-                <h3 className="font-bold text-gray-800 mb-4">تواصل معنا</h3>
-                <ul className="space-y-2">
+                    <li><ReactRouterDOM.Link to="/blog" className="text-gray-600 hover:text-blue-500 transition-colors">المدونة</ReactRouterDOM.Link></li>
                     <li><ReactRouterDOM.Link to="/support" className="text-gray-600 hover:text-blue-500 transition-colors">الدعم والمساعدة</ReactRouterDOM.Link></li>
-                    <li><ReactRouterDOM.Link to="/join-us" className="text-gray-600 hover:text-blue-500 transition-colors">انضم لفريقنا</ReactRouterDOM.Link></li>
+                </ul>
+            </div>
+             <div className="mt-4 md:mt-0">
+                <h3 className="font-bold text-gray-800 mb-4">أقسامنا</h3>
+                 <ul className="space-y-2">
+                    {currentSection === 'enha-lak' ? (
+                        <>
+                            <li><ReactRouterDOM.Link to="/store" className="text-gray-600 hover:text-blue-500 transition-colors">متجر "إنها لك"</ReactRouterDOM.Link></li>
+                            <li><ReactRouterDOM.Link to="/creative-writing" className="text-gray-600 hover:text-blue-500 transition-colors">برنامج "بداية الرحلة"</ReactRouterDOM.Link></li>
+                        </>
+                    ) : (
+                         <>
+                            <li><ReactRouterDOM.Link to="/creative-writing/booking" className="text-gray-600 hover:text-blue-500 transition-colors">الباقات والحجز</ReactRouterDOM.Link></li>
+                            <li><ReactRouterDOM.Link to="/enha-lak" className="text-gray-600 hover:text-blue-500 transition-colors">قصص "إنها لك"</ReactRouterDOM.Link></li>
+                        </>
+                    )}
+                </ul>
+            </div>
+
+            <div className="mt-4 md:mt-0">
+                <h3 className="font-bold text-gray-800 mb-4">قانوني</h3>
+                <ul className="space-y-2">
+                    <li><ReactRouterDOM.Link to="/privacy-policy" className="text-gray-600 hover:text-blue-500 transition-colors">سياسة الخصوصية</ReactRouterDOM.Link></li>
+                    <li><ReactRouterDOM.Link to="/terms-of-use" className="text-gray-600 hover:text-blue-500 transition-colors">شروط الاستخدام</ReactRouterDOM.Link></li>
                 </ul>
             </div>
         </>

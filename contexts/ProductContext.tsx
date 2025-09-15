@@ -7,9 +7,9 @@ export interface Prices {
     coloringBook: number;
     duaBooklet: number;
     giftBox: number;
-    // FIX: Added missing price properties to align with AdminProductsPage.tsx.
     valuesStory: number;
     skillsStory: number;
+    subscriptionBox: number;
 }
 
 export interface SiteBranding {
@@ -19,11 +19,15 @@ export interface SiteBranding {
     creativeWritingLogoUrl: string | null;
 }
 
+export type ShippingCosts = { [key: string]: number };
+
 interface ProductContextType {
   prices: Prices | null;
   setPrices: (newPrices: Prices) => Promise<void>;
   siteBranding: SiteBranding | null;
   setSiteBranding: (newBranding: Partial<SiteBranding>) => Promise<void>;
+  shippingCosts: ShippingCosts | null;
+  setShippingCosts: (newCosts: ShippingCosts) => Promise<void>;
   loading: boolean;
   error: string | null;
 }
@@ -34,9 +38,9 @@ const MOCK_PRICES: Prices = {
     coloringBook: 150,
     duaBooklet: 250,
     giftBox: 1200,
-    // FIX: Added mock values for the new price properties.
     valuesStory: 350,
     skillsStory: 350,
+    subscriptionBox: 350,
 };
 
 const MOCK_SITE_BRANDING: SiteBranding = {
@@ -46,6 +50,35 @@ const MOCK_SITE_BRANDING: SiteBranding = {
     creativeWritingLogoUrl: 'https://i.ibb.co/bF9gYq2/Bidayat-Alrehla-Logo.png',
 };
 
+const MOCK_SHIPPING_COSTS: ShippingCosts = {
+    "القاهرة": 0,
+    "الجيزة": 35,
+    "الإسكندرية": 50,
+    "الدقهلية": 60,
+    "البحر الأحمر": 70,
+    "البحيرة": 60,
+    "الفيوم": 55,
+    "الغربية": 60,
+    "الإسماعيلية": 55,
+    "المنوفية": 60,
+    "المنيا": 65,
+    "القليوبية": 35,
+    "الوادي الجديد": 80,
+    "السويس": 55,
+    "اسوان": 75,
+    "اسيوط": 70,
+    "بني سويف": 60,
+    "بورسعيد": 55,
+    "دمياط": 60,
+    "الشرقية": 60,
+    "جنوب سيناء": 80,
+    "كفر الشيخ": 60,
+    "مطروح": 75,
+    "الأقصر": 75,
+    "قنا": 70,
+    "شمال سيناء": 80,
+    "سوهاج": 70
+};
 
 // Create Context
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
@@ -54,6 +87,7 @@ const ProductContext = createContext<ProductContextType | undefined>(undefined);
 export const ProductProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const [prices, setPricesState] = useState<Prices | null>(null);
   const [siteBranding, setSiteBrandingState] = useState<SiteBranding | null>(null);
+  const [shippingCosts, setShippingCostsState] = useState<ShippingCosts | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { addToast } = useToast();
@@ -64,6 +98,7 @@ export const ProductProvider: React.FC<{children: ReactNode}> = ({ children }) =
     await new Promise(res => setTimeout(res, 200)); 
     setPricesState(MOCK_PRICES);
     setSiteBrandingState(MOCK_SITE_BRANDING);
+    setShippingCostsState(MOCK_SHIPPING_COSTS);
     setLoading(false);
   }, []);
   
@@ -83,11 +118,16 @@ export const ProductProvider: React.FC<{children: ReactNode}> = ({ children }) =
     // Toast is handled in the settings page for a unified message.
   };
 
+  const updateShippingCosts = async (newCosts: ShippingCosts) => {
+    setShippingCostsState(newCosts);
+    addToast('تم تحديث تكاليف الشحن بنجاح (تجريبيًا)!', 'success');
+  };
 
   return (
     <ProductContext.Provider value={{ 
         prices, setPrices: updatePrices, 
         siteBranding, setSiteBranding: updateSiteBranding,
+        shippingCosts, setShippingCosts: updateShippingCosts,
         loading, error
     }}>
       {children}

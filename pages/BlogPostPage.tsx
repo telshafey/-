@@ -1,6 +1,3 @@
-
-
-
 import React, { useEffect } from 'react';
 // FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
 import * as ReactRouterDOM from 'react-router-dom';
@@ -9,10 +6,12 @@ import PageLoader from '../components/ui/PageLoader';
 // FIX: Added .ts extension to resolve module error.
 import { formatDate } from '../utils/helpers.ts';
 import { ArrowLeft, User, Calendar } from 'lucide-react';
+import ShareButtons from '../components/shared/ShareButtons';
 
 const BlogPostPage: React.FC = () => {
     const { slug } = ReactRouterDOM.useParams<{ slug: string }>();
     const { blogPosts, loading, error } = useAdmin();
+    const postUrl = window.location.href;
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -50,22 +49,25 @@ const BlogPostPage: React.FC = () => {
                 </div>
 
                 <article>
-                    <header className="mb-10">
+                    <header className="mb-6 border-b pb-6">
                         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-800 leading-tight mb-4">{post.title}</h1>
-                        <div className="flex items-center gap-6 text-sm text-gray-500">
-                            <div className="flex items-center gap-2">
-                                <User size={16} />
-                                <span>{post.author_name}</span>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div className="flex items-center gap-6 text-sm text-gray-500">
+                                <div className="flex items-center gap-2">
+                                    <User size={16} />
+                                    <span>{post.author_name}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Calendar size={16} />
+                                    <span>{formatDate(post.published_at)}</span>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <Calendar size={16} />
-                                <span>{formatDate(post.published_at)}</span>
-                            </div>
+                            <ShareButtons title={post.title} url={postUrl} label="شارك المقال:" />
                         </div>
                     </header>
 
                     {post.image_url && (
-                        <div className="mb-10 rounded-2xl overflow-hidden shadow-xl">
+                        <div className="my-10 rounded-2xl overflow-hidden shadow-xl">
                             <img src={post.image_url} alt={post.title} className="w-full h-auto object-cover" loading="lazy" />
                         </div>
                     )}

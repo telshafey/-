@@ -7,6 +7,7 @@ import { useAdmin, PersonalizedProduct } from '../contexts/AdminContext';
 import { useProduct, Prices } from '../contexts/ProductContext';
 import PageLoader from '../components/ui/PageLoader';
 import { ArrowLeft, Check } from 'lucide-react';
+import ShareButtons from '../components/shared/ShareButtons';
 
 const getPriceForProduct = (productKey: string, prices: Prices) => {
     switch(productKey) {
@@ -62,6 +63,7 @@ const ProductCard: React.FC<{ product: PersonalizedProduct, price: string }> = (
 const PersonalizedStoriesPage: React.FC = () => {
   const { personalizedProducts, loading: adminLoading } = useAdmin();
   const { prices, loading: pricesLoading } = useProduct();
+  const pageUrl = window.location.href;
 
   if (adminLoading || pricesLoading || !prices) {
     return <PageLoader text="جاري تحميل المتجر..." />;
@@ -75,6 +77,13 @@ const PersonalizedStoriesPage: React.FC = () => {
           <p className="mt-4 max-w-3xl mx-auto text-lg text-gray-600">
             استكشف منتجاتنا المصممة بحب لتلهم أطفالكم وتصنع ذكريات لا تُنسى. اختر المنتج وابدأ رحلة التخصيص.
           </p>
+          <div className="mt-6 flex justify-center">
+            <ShareButtons 
+              title='اكتشف كنوز "إنها لك" لصناعة قصص الأطفال المخصصة' 
+              url={pageUrl} 
+              label="شارك المتجر:"
+            />
+          </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">

@@ -84,6 +84,7 @@ const AdminContentManagementPage: React.FC = () => {
 
     const about = editableContent.about || {};
     const privacy = editableContent.privacy || {};
+    const terms = editableContent.terms || {};
 
     return (
         <div className="animate-fadeIn">
@@ -98,20 +99,32 @@ const AdminContentManagementPage: React.FC = () => {
                             <TextInput label="عنوان المقدمة" value={about.intro_title} onChange={val => handleContentChange('about', 'intro_title', val)} disabled={isSaving} />
                             <TextInput label="نص المقدمة" value={about.intro_text} onChange={val => handleContentChange('about', 'intro_text', val)} disabled={isSaving} rows={4}/>
                             <hr />
-                            <TextInput label="عنوان الرؤية" value={about.vision_title} onChange={val => handleContentChange('about', 'vision_title', val)} disabled={isSaving} />
-                            <TextInput label="نص الرؤية" value={about.vision_text} onChange={val => handleContentChange('about', 'vision_text', val)} disabled={isSaving} rows={3}/>
+                            <TextInput label="عنوان مشروع 'إنها لك'" value={about.project1_title} onChange={val => handleContentChange('about', 'project1_title', val)} disabled={isSaving} />
+                            <TextInput label="نص مشروع 'إنها لك'" value={about.project1_text} onChange={val => handleContentChange('about', 'project1_text', val)} disabled={isSaving} rows={3}/>
                             <hr />
-                            <TextInput label="عنوان الرسالة" value={about.mission_title} onChange={val => handleContentChange('about', 'mission_title', val)} disabled={isSaving} />
-                            <TextInput label="نص الرسالة" value={about.mission_text} onChange={val => handleContentChange('about', 'mission_text', val)} disabled={isSaving} rows={3}/>
-                            <hr />
-                             <TextInput label="عنوان الأهداف" value={about.goals_title} onChange={val => handleContentChange('about', 'goals_title', val)} disabled={isSaving} />
-                             <TextInput label="قائمة الأهداف (كل هدف في سطر)" value={about.goals} onChange={val => handleContentChange('about', 'goals', val)} disabled={isSaving} rows={5}/>
+                            <TextInput label="عنوان برنامج 'بداية الرحلة'" value={about.project2_title} onChange={val => handleContentChange('about', 'project2_title', val)} disabled={isSaving} />
+                            <TextInput label="نص برنامج 'بداية الرحلة'" value={about.project2_text} onChange={val => handleContentChange('about', 'project2_text', val)} disabled={isSaving} rows={3}/>
+                             <hr />
+                             <TextInput label="عنوان الخاتمة" value={about.conclusion_title} onChange={val => handleContentChange('about', 'conclusion_title', val)} disabled={isSaving} />
+                             <TextInput label="نص الخاتمة" value={about.conclusion_text} onChange={val => handleContentChange('about', 'conclusion_text', val)} disabled={isSaving} rows={3}/>
                         </div>
                     </Accordion>
 
-                     <Accordion title="محتوى صفحة 'سياسة الخصوصية والاستخدام'">
+                    <Accordion title="محتوى صفحة 'شروط الاستخدام'">
                         <div className="p-6 space-y-4 bg-gray-50/50">
-                           {/* Add inputs for privacy policy content here, similar to the about page */}
+                             <TextInput label="العنوان الرئيسي" value={terms.main_title} onChange={val => handleContentChange('terms', 'main_title', val)} disabled={isSaving} />
+                             <TextInput label="العنوان الفرعي" value={terms.main_subtitle} onChange={val => handleContentChange('terms', 'main_subtitle', val)} disabled={isSaving} />
+                             <hr/>
+                             <TextInput label="عنوان الموافقة" value={terms.approval_title} onChange={val => handleContentChange('terms', 'approval_title', val)} disabled={isSaving} />
+                             <TextInput label="نص الموافقة" value={terms.approval_text} onChange={val => handleContentChange('terms', 'approval_text', val)} disabled={isSaving} rows={2} />
+                             <hr/>
+                             <TextInput label="عنوان الملكية الفكرية" value={terms.ip_title} onChange={val => handleContentChange('terms', 'ip_title', val)} disabled={isSaving} />
+                             <TextInput label="نص الملكية الفكرية" value={terms.ip_text} onChange={val => handleContentChange('terms', 'ip_text', val)} disabled={isSaving} rows={3} />
+                        </div>
+                    </Accordion>
+
+                     <Accordion title="محتوى صفحة 'سياسة الخصوصية'">
+                        <div className="p-6 space-y-4 bg-gray-50/50">
                            <p className="text-gray-500">جاري إضافة المزيد من الحقول...</p>
                         </div>
                     </Accordion>

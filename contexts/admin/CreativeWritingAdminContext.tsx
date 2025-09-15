@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
 import { useToast } from '../ToastContext';
 // FIX: Added .ts extension to resolve module error.
@@ -70,6 +69,7 @@ interface CreativeWritingAdminContextType {
     
     creativeWritingBookings: (CreativeWritingBooking & { instructors: Instructor | null })[];
     updateBookingStatus: (bookingId: string, newStatus: CreativeWritingBooking['status']) => Promise<void>;
+    updateBookingProgressNotes: (bookingId: string, notes: string) => Promise<void>;
     createBooking: (payload: any) => Promise<void>;
     generateAndSetSessionId: (bookingId: string) => Promise<string | null>;
     
@@ -196,6 +196,10 @@ export const CreativeWritingAdminProvider: React.FC<{children: ReactNode}> = ({ 
         setCreativeWritingBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: newStatus } : b));
         addToast('تم تحديث حالة الحجز (تجريبيًا).', 'success');
     };
+    
+    const updateBookingProgressNotes = async (bookingId: string, notes: string) => {
+        setCreativeWritingBookings(prev => prev.map(b => b.id === bookingId ? { ...b, progress_notes: notes } : b));
+    };
 
     const generateAndSetSessionId = async (bookingId: string) => {
         const newSessionId = `mock-session-${Math.random().toString(36).substring(7)}`;
@@ -218,6 +222,7 @@ export const CreativeWritingAdminProvider: React.FC<{children: ReactNode}> = ({ 
             updateAdditionalServices,
             creativeWritingBookings,
             updateBookingStatus,
+            updateBookingProgressNotes,
             createBooking,
             generateAndSetSessionId,
             loading,

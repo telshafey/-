@@ -167,7 +167,7 @@ export interface Database {
             user_id: string;
             user_name: string;
             child_name: string;
-            status: 'active' | 'paused' | 'cancelled';
+            status: 'active' | 'paused' | 'cancelled' | 'pending_payment';
             start_date: string;
             next_renewal_date: string;
             price: number;

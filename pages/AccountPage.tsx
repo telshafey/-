@@ -1,8 +1,6 @@
-
-
-
-import React, { useState } from 'react';
-import { User, Heart, FileText, Plus, Edit, Trash, ChevronDown, ShoppingBag, CheckSquare, Star, Gift } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { User, Heart, FileText, Plus, Edit, Trash, ChevronDown, ShoppingBag, CheckSquare, Star, Gift, Package, Frown } from 'lucide-react';
 // FIX: Added .tsx extension to resolve module error.
 import { useAuth, UserProfile } from '../contexts/AuthContext.tsx';
 // FIX: Import ChildProfile from its source to resolve module export error.
@@ -12,7 +10,6 @@ import { useCreativeWritingAdmin, CreativeWritingBooking } from '../contexts/adm
 // FIX: Added .ts extension to resolve module error.
 import { getStatusColor, formatDate } from '../utils/helpers.ts';
 import ChildProfileModal from '../components/order/ChildProfileModal';
-import PaymentModal from '../components/PaymentModal';
 
 // Auth Components
 const AuthForm: React.FC = () => {
@@ -101,7 +98,7 @@ const ChildCard: React.FC<{
     bookings: CreativeWritingBooking[];
     onEdit: (child: ChildProfile) => void;
     onDelete: (childId: number) => void;
-    onPay: (item: { id: string, type: 'order' | 'booking' }) => void;
+    onPay: (item: { id: string, type: 'order' | 'booking' | 'subscription', total: string | number | null, summary: string | null }) => void;
 }> = ({ child, orders, bookings, onEdit, onDelete, onPay }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     
@@ -133,19 +130,23 @@ const ChildCard: React.FC<{
                 <div className="border-t p-6 bg-gray-50/50 space-y-4">
                     <h4 className="font-bold flex items-center gap-2"><ShoppingBag size={16}/> طلبات "إنها لك"</h4>
                     {childOrders.length > 0 ? childOrders.map(o => (
-                        <div key={o.id} className="text-sm border-b pb-2">
-                             <p>رقم الطلب: {o.id}</p>
-                             <p>الحالة: <span className={`px-2 py-1 text-xs font-bold rounded-full ${getStatusColor(o.status)}`}>{o.status}</span></p>
-                             {o.status === 'بانتظار الدفع' && <button onClick={() => onPay({ id: o.id, type: 'order' })} className="text-blue-600">إتمام الدفع</button>}
+                        <div key={o.id} className="text-sm border-b pb-2 flex justify-between items-center">
+                            <div>
+                                <p>رقم الطلب: {o.id}</p>
+                                <p>الحالة: <span className={`px-2 py-1 text-xs font-bold rounded-full ${getStatusColor(o.status)}`}>{o.status}</span></p>
+                            </div>
+                            {o.status === 'بانتظار الدفع' && <button onClick={() => onPay({ id: o.id, type: 'order', total: o.total, summary: o.item_summary })} className="text-blue-600 font-bold hover:underline">إتمام الدفع</button>}
                         </div>
                     )) : <p className="text-sm text-gray-500">لا توجد طلبات لهذا الطفل.</p>}
                     
                     <h4 className="font-bold flex items-center gap-2 pt-4"><CheckSquare size={16}/> حجوزات "بداية الرحلة"</h4>
                     {bookings.length > 0 ? bookings.map(b => (
-                        <div key={b.id} className="text-sm border-b pb-2">
-                             <p>رقم الحجز: {b.id}</p>
-                             <p>الحالة: <span className={`px-2 py-1 text-xs font-bold rounded-full ${getStatusColor(b.status)}`}>{b.status}</span></p>
-                             {b.status === 'بانتظار الدفع' && <button onClick={() => onPay({ id: b.id, type: 'booking' })} className="text-blue-600">إتمام الدفع</button>}
+                        <div key={b.id} className="text-sm border-b pb-2 flex justify-between items-center">
+                            <div>
+                                <p>رقم الحجز: {b.id}</p>
+                                <p>الحالة: <span className={`px-2 py-1 text-xs font-bold rounded-full ${getStatusColor(b.status)}`}>{b.status}</span></p>
+                            </div>
+                            {b.status === 'بانتظار الدفع' && <button onClick={() => onPay({ id: b.id, type: 'booking', total: b.total, summary: b.package_name })} className="text-blue-600 font-bold hover:underline">إتمام الدفع</button>}
                         </div>
                     )) : <p className="text-sm text-gray-500">لا توجد حجوزات.</p>}
                 </div>
@@ -160,12 +161,59 @@ const AccountPage: React.FC = () => {
     const { isLoggedIn, currentUser, signOut, childProfiles, deleteChildProfile } = useAuth();
     const { orders, subscriptions } = useAdmin();
     const { creativeWritingBookings } = useCreativeWritingAdmin();
+    const navigate = useNavigate();
 
     const [activeTab, setActiveTab] = useState('family');
     const [isChildModalOpen, setIsChildModalOpen] = useState(false);
     const [childToEdit, setChildToEdit] = useState<ChildProfile | null>(null);
-    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-    const [itemToPay, setItemToPay] = useState<{ id: string; type: 'order' | 'booking' } | null>(null);
+
+    // FIX: Memoize user-specific data before any potential early returns to ensure consistent hook calls.
+    const userOrders = useMemo(() => {
+        if (!currentUser) return [];
+        return orders.filter(o => o.user_id === currentUser.id);
+    }, [orders, currentUser]);
+
+    const userBookings = useMemo(() => {
+        if (!currentUser) return [];
+        return creativeWritingBookings.filter(b => b.user_id === currentUser.id);
+    }, [creativeWritingBookings, currentUser]);
+
+    const userSubscriptions = useMemo(() => {
+        if (!currentUser) return [];
+        return subscriptions.filter(s => s.user_id === currentUser.id);
+    }, [subscriptions, currentUser]);
+    
+    const unifiedItems = useMemo(() => [
+        ...userOrders.map(o => ({
+            id: o.id,
+            type: 'order' as const,
+            date: o.order_date,
+            summary: o.item_summary,
+            total: o.total,
+            status: o.status,
+            details: null,
+        })),
+        ...userBookings.map(b => ({
+            id: b.id,
+            type: 'booking' as const,
+            date: b.booking_date,
+            summary: b.package_name,
+            total: `${b.total} ج.م`,
+            status: b.status,
+            details: `مع المدرب: ${b.instructors?.name || 'غير محدد'}`,
+        })),
+        ...userSubscriptions
+            .filter(s => s.status === 'pending_payment')
+            .map(s => ({
+                id: s.id,
+                type: 'subscription' as const,
+                date: s.start_date,
+                summary: `اشتراك سنوي لصندوق الرحلة (${s.child_name})`,
+                total: `${s.price} ج.م`,
+                status: 'بانتظار الدفع' as const,
+                details: null
+            }))
+    ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()), [userOrders, userBookings, userSubscriptions]);
 
     if (!isLoggedIn || !currentUser) {
         return (
@@ -177,9 +225,6 @@ const AccountPage: React.FC = () => {
             </div>
         );
     }
-    
-    const userBookings = creativeWritingBookings.filter(b => b.user_id === currentUser.id);
-    const userSubscriptions = subscriptions.filter(s => s.user_id === currentUser.id);
 
     const handleEditChild = (child: ChildProfile) => {
         setChildToEdit(child);
@@ -192,18 +237,13 @@ const AccountPage: React.FC = () => {
         }
     };
     
-    const openPaymentModal = (item: { id: string, type: 'order' | 'booking' }) => {
-        setItemToPay(item);
-        setIsPaymentModalOpen(true);
-    };
-
-    const handlePaymentSuccess = () => {
-        setIsPaymentModalOpen(false);
-        setItemToPay(null);
+    const openPaymentPage = (item: { id: string, type: 'order' | 'booking' | 'subscription', total: string | number | null, summary: string | null }) => {
+        navigate('/checkout', { state: { item } });
     };
 
     const tabs = [
         { key: 'family', label: 'عائلتي', icon: <Heart size={18} /> },
+        { key: 'orders', label: 'طلباتي', icon: <ShoppingBag size={18} /> },
         { key: 'subscriptions', label: 'اشتراكاتي', icon: <Star size={18} /> },
         { key: 'profile', label: 'ملفي الشخصي', icon: <User size={18} /> },
     ];
@@ -211,7 +251,6 @@ const AccountPage: React.FC = () => {
     return (
         <>
             <ChildProfileModal isOpen={isChildModalOpen} onClose={() => setIsChildModalOpen(false)} childToEdit={childToEdit} />
-            <PaymentModal isOpen={isPaymentModalOpen} onClose={() => setIsPaymentModalOpen(false)} item={itemToPay} onSuccess={handlePaymentSuccess} />
             <div className="bg-gray-50 py-16 sm:py-20 animate-fadeIn">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12">
@@ -246,11 +285,11 @@ const AccountPage: React.FC = () => {
                                             <ChildCard 
                                                 key={child.id} 
                                                 child={child}
-                                                orders={orders}
+                                                orders={userOrders}
                                                 bookings={userBookings}
                                                 onEdit={handleEditChild}
                                                 onDelete={handleDeleteChild}
-                                                onPay={openPaymentModal}
+                                                onPay={openPaymentPage}
                                             />
                                         ))}
                                          {childProfiles.length === 0 && (
@@ -261,12 +300,58 @@ const AccountPage: React.FC = () => {
                                     </div>
                                 </div>
                             )}
+                            
+                            {activeTab === 'orders' && (
+                                <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg space-y-6">
+                                    <h2 className="text-2xl font-bold mb-4">كل الطلبات والحجوزات</h2>
+                                    {unifiedItems.length > 0 ? (
+                                        unifiedItems.map(item => (
+                                            <div key={`${item.type}-${item.id}`} className="p-4 border rounded-lg bg-gray-50/70 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                                                <div className="flex-grow">
+                                                    <div className="flex items-center gap-3">
+                                                        {item.type === 'order' ? <ShoppingBag className="text-blue-500"/> : item.type === 'subscription' ? <Star className="text-orange-500" /> : <CheckSquare className="text-purple-500"/>}
+                                                        <p className="font-bold text-lg text-gray-800">
+                                                            {item.type === 'order' ? 'طلبية' : item.type === 'subscription' ? 'اشتراك' : 'حجز'}: <span className="font-mono text-sm">{item.id}</span>
+                                                        </p>
+                                                    </div>
+                                                    <p className="text-sm text-gray-600 mt-2 ms-9">{item.summary}</p>
+                                                    {item.details && <p className="text-sm text-gray-500 ms-9">{item.details}</p>}
+                                                </div>
+                                                <div className="flex-shrink-0 w-full sm:w-auto text-center sm:text-left">
+                                                    <p className="text-sm text-gray-500 mb-1">{formatDate(item.date)}</p>
+                                                    <span className={`px-3 py-1 text-xs font-bold rounded-full ${getStatusColor(item.status)}`}>{item.status}</span>
+                                                    <p className="font-bold text-lg mt-2">{item.total}</p>
+                                                </div>
+                                                 {item.status === 'بانتظار الدفع' && (
+                                                    <button onClick={() => openPaymentPage({ id: item.id, type: item.type, total: item.total, summary: item.summary })} className="w-full sm:w-auto flex-shrink-0 bg-green-600 text-white font-bold py-2 px-4 rounded-full hover:bg-green-700 transition-transform transform hover:scale-105">
+                                                        إتمام الدفع
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-16">
+                                            <Frown className="mx-auto h-16 w-16 text-gray-400" />
+                                            <h3 className="mt-4 text-lg font-semibold text-gray-800">لا يوجد شيء هنا بعد</h3>
+                                            <p className="mt-1 text-gray-500">لم تقم بأي طلبات أو حجوزات حتى الآن.</p>
+                                            <div className="mt-6 flex justify-center gap-4">
+                                                <a href="#/store" className="px-5 py-2 border border-blue-600 text-base font-medium rounded-full text-blue-600 bg-white hover:bg-blue-50">
+                                                    تصفح متجر "إنها لك"
+                                                </a>
+                                                 <a href="#/creative-writing/booking" className="px-5 py-2 border border-purple-600 text-base font-medium rounded-full text-purple-600 bg-white hover:bg-purple-50">
+                                                    احجز جلسة "بداية الرحلة"
+                                                </a>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                              {activeTab === 'subscriptions' && (
                                 <div className="bg-white p-8 rounded-2xl shadow-lg space-y-6">
                                     <h2 className="text-2xl font-bold mb-4">صندوق الرحلة الشهري</h2>
-                                    {userSubscriptions.length > 0 ? (
-                                        userSubscriptions.map(sub => (
+                                    {userSubscriptions.filter(s => s.status === 'active').length > 0 ? (
+                                        userSubscriptions.filter(s => s.status === 'active').map(sub => (
                                             <div key={sub.id} className="p-4 border rounded-lg bg-orange-50 border-orange-200">
                                                 <div className="flex items-center gap-3">
                                                     <Gift className="text-orange-500" />

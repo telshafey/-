@@ -115,7 +115,12 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess,
     
     setIsSubmitting(true);
     try {
-        await updateReceipt(item.id, item.type, receiptFile);
+        // FIX: The updateReceipt function expects a single object payload.
+        await updateReceipt({
+            itemId: item.id,
+            itemType: item.type,
+            receiptFile
+        });
         addToast('تم رفع الإيصال بنجاح! طلبك قيد المراجعة الآن.', 'success');
         onSuccess();
     } catch (error: any) {

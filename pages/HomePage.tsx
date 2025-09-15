@@ -6,6 +6,7 @@ import { Sparkles, Gift, BookHeart, BookOpen, Award, ArrowLeft, ClipboardPen, He
 import { useProduct } from '../contexts/ProductContext';
 import { useAdmin } from '../contexts/AdminContext';
 import PageLoader from '../components/ui/PageLoader';
+import ShareButtons from '../components/shared/ShareButtons';
 
 const heroContent = {
     title: 'اجعل طفلك بطل قصته التي لا تُنسى',
@@ -73,6 +74,7 @@ const ValuePropCard: React.FC<{ icon: React.ReactNode, title: string, descriptio
 const HomePage: React.FC = () => {
   const { siteBranding, loading: brandingLoading } = useProduct();
   const { personalizedProducts, loading: productsLoading } = useAdmin();
+  const pageUrl = window.location.href;
 
   const isLoading = brandingLoading || productsLoading;
 
@@ -103,6 +105,14 @@ const HomePage: React.FC = () => {
               <ReactRouterDOM.Link to="/store" className="px-8 py-3 border border-gray-300 text-base font-medium rounded-full text-blue-600 bg-white hover:bg-gray-100 transition-transform transform hover:scale-105 shadow-lg">
                 تصفح المنتجات
               </ReactRouterDOM.Link>
+          </div>
+          <div className="mt-8 flex justify-center">
+            <ShareButtons 
+              title='اجعل طفلك بطل قصته التي لا تُنسى مع قصص "إنها لك" المخصصة' 
+              url={pageUrl} 
+              theme="dark"
+              label="شارك الصفحة:"
+            />
           </div>
         </div>
       </section>

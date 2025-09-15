@@ -119,6 +119,13 @@ const AdminProductsPage: React.FC = () => {
                              <PriceInput label="بوكس الهدية (المجموعة الكاملة)" name="giftBox" value={editablePrices.giftBox} onChange={handleChange} />
                         </div>
                     </div>
+                    
+                    <div>
+                        <h2 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2">الاشتراكات</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                             <PriceInput label="صندوق الرحلة الشهري (السعر الشهري)" name="subscriptionBox" value={editablePrices.subscriptionBox} onChange={handleChange} />
+                        </div>
+                    </div>
                 </div>
 
                 <div className="flex justify-end sticky bottom-6 mt-8">

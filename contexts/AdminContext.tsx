@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
 import { useToast } from './ToastContext';
 // FIX: Added .ts extension to resolve module error.
@@ -29,6 +28,7 @@ export type User = {
   name: string;
   email: string;
   role: "user" | "admin";
+  created_at: string;
 };
 
 export interface TextContent {
@@ -43,9 +43,9 @@ export type { PersonalizedProduct, BlogPost, Subscription };
 // --- Mock Data Generation ---
 
 const MOCK_USERS: User[] = [
-    { id: 'a1b2c3d4-e5f6-7890-1234-567890abcdef', name: 'المدير العام', email: 'admin@alrehlah.com', role: 'admin' },
-    { id: 'f1e2d3c4-b5a6-9870-4321-098765fedcba', name: 'فاطمة علي', email: 'user@alrehlah.com', role: 'user' },
-    { id: '12345678-abcd-efgh-ijkl-mnopqrstuvwx', name: 'أحمد محمود', email: 'user2@alrehlah.com', role: 'user' },
+    { id: 'a1b2c3d4-e5f6-7890-1234-567890abcdef', name: 'المدير العام', email: 'admin@alrehlah.com', role: 'admin', created_at: new Date('2024-01-01T10:00:00Z').toISOString() },
+    { id: 'f1e2d3c4-b5a6-9870-4321-098765fedcba', name: 'فاطمة علي', email: 'user@alrehlah.com', role: 'user', created_at: new Date('2024-07-15T11:00:00Z').toISOString() },
+    { id: '12345678-abcd-efgh-ijkl-mnopqrstuvwx', name: 'أحمد محمود', email: 'user2@alrehlah.com', role: 'user', created_at: new Date('2024-07-18T14:30:00Z').toISOString() },
 ];
 
 const MOCK_ORDERS: IOrderDetails[] = [
@@ -57,7 +57,7 @@ const MOCK_ORDERS: IOrderDetails[] = [
         total: '850 ج.م',
         // FIX: Added missing 'status' property to satisfy the IOrderDetails type.
         status: 'تم التسليم',
-        details: { childName: 'سارة', childAge: '5', products: 'قصة ودفتر تلوين' } as any,
+        details: { childName: 'سارة', childAge: '5', products: 'قصة ودفتر تلوين', shippingCost: 50, governorate: 'الإسكندرية', shippingDetails: { address: '123 شارع النصر', governorate: 'الإسكندرية', phone: '0123456789' } } as any,
         user_id: 'f1e2d3c4-b5a6-9870-4321-098765fedcba',
         file_url: 'https://example.com/story.pdf',
         receipt_url: null,
@@ -70,7 +70,7 @@ const MOCK_ORDERS: IOrderDetails[] = [
         item_summary: 'بوكس الهدية',
         total: '1200 ج.م',
         status: 'قيد التجهيز',
-        details: { childName: 'علي', childAge: '7', products: 'بوكس الهدية' } as any,
+        details: { childName: 'علي', childAge: '7', products: 'بوكس الهدية', shippingCost: 0, governorate: 'القاهرة' } as any,
         user_id: '12345678-abcd-efgh-ijkl-mnopqrstuvwx',
         file_url: null,
         receipt_url: 'https://example.com/receipt.jpg',
@@ -152,34 +152,41 @@ const MOCK_SITE_CONTENT: TextContent = {
         conclusion_title: 'رحلة متكاملة نحو المستقبل',
         conclusion_text: 'تجمع المنصة بين هذين العالمين لتشكل رحلة متكاملة: تبدأ باكتشاف الطفل لذاته كبطل في "إنها لك"، وتتطور لتصل به إلى صناعة عوالمه الخاصة في "بداية الرحلة". إنها استثمار في عقل الطفل وروحه، وبوابة تفتح له آفاقاً لا نهائية من الخيال والمعرفة والتعبير.',
     },
+    terms: {
+        main_title: 'شروط الاستخدام',
+        main_subtitle: 'باستخدامك لمنصتنا، فإنك توافق على الالتزام بهذه الشروط والأحكام.',
+        approval_title: 'الموافقة على الشروط',
+        approval_text: 'باستخدامك لمنصة "الرحلة"، فإنك توافق على الالتزام بهذه الشروط والأحكام. إذا كنت لا توافق، يرجى عدم استخدام المنصة.',
+        accounts_title: 'الحسابات',
+        accounts_text: 'عند إنشاء حساب معنا، يجب عليك تزويدنا بمعلومات دقيقة وكاملة. أنت مسؤول عن الحفاظ على سرية حسابك وكلمة المرور.',
+        ip_title: 'الملكية الفكرية',
+        ip_text: 'جميع المحتويات والقصص والرسومات والتصاميم على المنصة هي ملك حصري لمشروع "الرحلة" ومحمية بموجب قوانين حقوق النشر. يُمنع منعًا باتًا استخدام أو نسخ أو توزيع أي من محتوياتنا لأغراض تجارية دون الحصول على إذن خطي مسبق.',
+        payment_title: 'الطلبات والدفع',
+        payment_text: 'نحتفظ بالحق في رفض أو إلغاء أي طلب لأي سبب من الأسباب، بما في ذلك عدم توفر المنتج أو وجود أخطاء في التسعير. عند تقديم طلب، فإنك توافق على دفع السعر المعلن للمنتج بالإضافة إلى أي رسوم شحن مطبقة.',
+        policy_changes_title: 'التغييرات على هذه الشروط',
+        policy_changes_text: 'قد نقوم بتحديث شروط الاستخدام من وقت لآخر. سنقوم بإعلامك بأي تغييرات عن طريق نشر الشروط الجديدة على هذه الصفحة. يُنصح بمراجعة هذه الصفحة بشكل دوري.',
+        contact_us_title: 'اتصل بنا',
+        contact_us_text: 'إذا كان لديك أي أسئلة حول هذه الشروط، يرجى التواصل معنا عبر صفحة الدعم والمساعدة.',
+    },
     privacy: {
-        main_title: 'سياسة الخصوصية والاستخدام',
+        main_title: 'سياسة الخصوصية',
         main_subtitle: 'نحن نهتم بخصوصيتك. توضح هذه الصفحة كيفية جمعنا واستخدامنا وحمايتنا لمعلوماتك الشخصية.',
-        terms_title: 'شروط الاستخدام',
-        terms_approval_title: 'الموافقة على الشروط',
-        terms_approval_text: 'باستخدامك لمنصة "إنها لك"، فإنك توافق على الالتزام بهذه الشروط والأحكام. إذا كنت لا توافق، يرجى عدم استخدام المنصة.',
-        terms_accounts_title: 'الحسابات',
-        terms_accounts_text: 'عند إنشاء حساب معنا، يجب عليك تزويدنا بمعلومات دقيقة وكاملة. أنت مسؤول عن الحفاظ على سرية حسابك وكلمة المرور.',
-        terms_ip_title: 'الملكية الفكرية',
-        terms_ip_text: 'جميع المحتويات والقصص والرسومات والتصاميم على المنصة هي ملك حصري لمشروع "إنها لك" ومحمية بموجب قوانين حقوق النشر. يُمنع منعًا باتًا استخدام أو نسخ أو توزيع أي من محتوياتنا لأغراض تجارية دون الحصول على إذن خطي مسبق.',
-        terms_payment_title: 'الطلبات والدفع',
-        terms_payment_text: 'نحتفظ بالحق في رفض أو إلغاء أي طلب لأي سبب من الأسباب، بما في ذلك عدم توفر المنتج أو وجود أخطاء في التسعير. عند تقديم طلب، فإنك توافق على دفع السعر المعلن للمنتج بالإضافة إلى أي رسوم شحن مطبقة.',
-        privacy_title: 'سياسة الخصوصية',
-        privacy_intro: 'توضح هذه السياسة كيفية تعاملنا مع معلوماتك الشخصية التي نجمعها منك عند استخدامك للمنصة.',
-        privacy_data_collection_title: 'المعلومات التي نجمعها',
-        privacy_data_collection_list: 'معلومات الحساب: الاسم، البريد الإلكتروني.\nمعلومات الطفل: الاسم، العمر، الجنس، الصور، وأي تفاصيل أخرى تقدمها لتخصيص القصة.\nمعلومات الدفع: تفاصيل المعاملات المالية.',
-        privacy_data_usage_title: 'كيف نستخدم معلوماتك',
-        privacy_data_usage_list: 'لتخصيص وإنشاء المنتجات التي تطلبها.\nلمعالجة طلباتك ومدفوعاتك.\nللتواصل معك بخصوص طلباتك أو لتقديم الدعم الفني.\nلتحسين خدماتنا وتجربة المستخدم على المنصة.',
-        privacy_data_sharing_title: 'مشاركة المعلومات',
-        privacy_data_sharing_text: 'نحن لا نبيع أو نؤجر أو نشارك معلوماتك الشخصية أو معلومات طفلك مع أي طرف ثالث لأغراض تسويقية. قد نشارك المعلومات فقط مع مزودي الخدمات الذين يساعدوننا في تشغيل المنصة (مثل بوابات الدفع) والذين يلتزمون بالحفاظ على سرية هذه المعلومات.',
-        privacy_children_title: 'خصوصية الأطفال',
-        privacy_children_text: 'نحن نأخذ خصوصية الأطفال على محمل الجد. يتم استخدام المعلومات المقدمة عن الأطفال فقط لغرض وحيد وهو إنشاء المنتج المخصص المطلوب. لا يتم استخدام هذه المعلومات لأي غرض آخر.',
-        privacy_security_title: 'أمان البيانات',
-        privacy_security_text: 'نتخذ إجراءات أمنية معقولة لحماية معلوماتك من الوصول غير المصرح به. ومع ذلك، لا توجد طريقة نقل عبر الإنترنت أو تخزين إلكتروني آمنة بنسبة 100%.',
-        privacy_rights_title: 'حقوقك',
-        privacy_rights_text: 'لديك الحق في الوصول إلى معلوماتك الشخصية أو تصحيحها أو حذفها. يمكنك القيام بذلك عن طريق التواصل معنا.',
+        intro_title: 'سياسة الخصوصية',
+        intro_text: 'توضح هذه السياسة كيفية تعاملنا مع معلوماتك الشخصية التي نجمعها منك عند استخدامك للمنصة.',
+        data_collection_title: 'المعلومات التي نجمعها',
+        data_collection_list: 'معلومات الحساب: الاسم، البريد الإلكتروني.\nمعلومات الطفل: الاسم، العمر، الجنس، الصور، وأي تفاصيل أخرى تقدمها لتخصيص القصة.\nمعلومات الدفع: تفاصيل المعاملات المالية.',
+        data_usage_title: 'كيف نستخدم معلوماتك',
+        data_usage_list: 'لتخصيص وإنشاء المنتجات التي تطلبها.\nلمعالجة طلباتك ومدفوعاتك.\nللتواصل معك بخصوص طلباتك أو لتقديم الدعم الفني.\nلتحسين خدماتنا وتجربة المستخدم على المنصة.',
+        data_sharing_title: 'مشاركة المعلومات',
+        data_sharing_text: 'نحن لا نبيع أو نؤجر أو نشارك معلوماتك الشخصية أو معلومات طفلك مع أي طرف ثالث لأغراض تسويقية. قد نشارك المعلومات فقط مع مزودي الخدمات الذين يساعدوننا في تشغيل المنصة (مثل بوابات الدفع) والذين يلتزمون بالحفاظ على سرية هذه المعلومات.',
+        children_title: 'خصوصية الأطفال',
+        children_text: 'نحن نأخذ خصوصية الأطفال على محمل الجد. يتم استخدام المعلومات المقدمة عن الأطفال فقط لغرض وحيد وهو إنشاء المنتج المخصص المطلوب. لا يتم استخدام هذه المعلومات لأي غرض آخر.',
+        security_title: 'أمان البيانات',
+        security_text: 'نتخذ إجراءات أمنية معقولة لحماية معلوماتك من الوصول غير المصرح به. ومع ذلك، لا توجد طريقة نقل عبر الإنترنت أو تخزين إلكتروني آمنة بنسبة 100%.',
+        rights_title: 'حقوقك',
+        rights_text: 'لديك الحق في الوصول إلى معلوماتك الشخصية أو تصحيحها أو حذفها. يمكنك القيام بذلك عن طريق التواصل معنا.',
         policy_changes_title: 'التغييرات على هذه السياسة',
-        policy_changes_text: 'قد نقوم بتحديث سياسة الخصوصية وشروط الاستخدام من وقت لآخر. سنقوم بإعلامك بأي تغييرات عن طريق نشر السياسة الجديدة على هذه الصفحة. يُنصح بمراجعة هذه الصفحة بشكل دوري.',
+        policy_changes_text: 'قد نقوم بتحديث سياسة الخصوصية من وقت لآخر. سنقوم بإعلامك بأي تغييرات عن طريق نشر السياسة الجديدة على هذه الصفحة. يُنصح بمراجعة هذه الصفحة بشكل دوري.',
         contact_us_title: 'اتصل بنا',
         contact_us_text: 'إذا كان لديك أي أسئلة حول هذه السياسة، يرجى التواصل معنا عبر صفحة الدعم والمساعدة.',
     },
@@ -237,8 +244,8 @@ const MOCK_SUBSCRIPTIONS: Subscription[] = [
         child_name: 'سارة',
         status: 'active',
         start_date: new Date('2024-07-01T10:00:00Z').toISOString(),
-        next_renewal_date: new Date('2024-08-01T10:00:00Z').toISOString(),
-        price: 350
+        next_renewal_date: new Date('2025-07-01T10:00:00Z').toISOString(),
+        price: 4200
     }
 ];
 
@@ -250,7 +257,20 @@ interface CreateOrderPayload {
     files: { [key: string]: File | null };
     totalPrice: number;
     itemSummary: string;
+    shippingCost: number;
 }
+
+interface UpdateReceiptPayload {
+    itemId: string;
+    itemType: 'order' | 'booking' | 'subscription';
+    receiptFile: File;
+    shippingDetails?: {
+        address: string;
+        governorate: string;
+        phone: string;
+    } | null;
+}
+
 
 interface UpdateProductPayload {
     id: number;
@@ -264,12 +284,12 @@ interface AdminContextType {
     orders: IOrderDetails[];
     updateOrderStatus: (orderId: string, newStatus: IOrderDetails['status']) => Promise<void>;
     updateOrderComment: (orderId: string, comment: string) => Promise<void>;
-    createOrder: (payload: CreateOrderPayload) => Promise<void>;
+    createOrder: (payload: CreateOrderPayload) => Promise<IOrderDetails>;
     
     users: User[];
     updateUserRole: (userId: string, newRole: 'user' | 'admin') => Promise<void>;
     
-    updateReceipt: (itemId: string, itemType: 'order' | 'booking', receiptFile: File) => Promise<void>;
+    updateReceipt: (payload: UpdateReceiptPayload) => Promise<void>;
     
     loading: boolean;
     error: string | null;
@@ -290,7 +310,7 @@ interface AdminContextType {
     deleteBlogPost: (postId: number) => Promise<void>;
 
     subscriptions: Subscription[];
-    createSubscription: (userId: string, userName: string, childName: string) => Promise<void>;
+    createSubscription: (userId: string, userName: string, childName: string, price: number) => Promise<Subscription>;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -326,7 +346,7 @@ export const AdminProvider: React.FC<{children: ReactNode}> = ({ children }) => 
         fetchData();
     }, [fetchData]);
 
-    const createOrder = async ({ currentUser, formData, files, totalPrice, itemSummary }: CreateOrderPayload) => {
+    const createOrder = async ({ currentUser, formData, files, totalPrice, itemSummary, shippingCost }: CreateOrderPayload) => {
         const orderId = `ORD-${Date.now()}`;
         
         const imageUrls: { [key: string]: string | null } = {};
@@ -342,7 +362,7 @@ export const AdminProvider: React.FC<{children: ReactNode}> = ({ children }) => 
             customer_name: currentUser.name,
             item_summary: itemSummary,
             total: `${totalPrice} ج.م`,
-            details: { ...formData, images: imageUrls } as any,
+            details: { ...formData, images: imageUrls, shippingCost } as any,
             user_id: currentUser.id,
             status: 'بانتظار الدفع',
             order_date: new Date().toISOString(),
@@ -353,14 +373,29 @@ export const AdminProvider: React.FC<{children: ReactNode}> = ({ children }) => 
 
         setOrders(prev => [newOrder, ...prev]);
         console.log("Mock Order Created:", newOrder);
+        return newOrder;
     };
     
-    const updateReceipt = async (itemId: string, itemType: 'order' | 'booking', receiptFile: File) => {
+    const updateReceipt = async ({ itemId, itemType, receiptFile, shippingDetails }: UpdateReceiptPayload) => {
         console.log(`Mock receipt uploaded for ${itemType} ${itemId}:`, receiptFile.name);
         const receipt_url = URL.createObjectURL(receiptFile); // Create local preview URL
         
         if (itemType === 'order') {
-          setOrders(prev => prev.map(o => o.id === itemId ? { ...o, status: 'بانتظار المراجعة', receipt_url } : o));
+          setOrders(prev => prev.map(o => {
+            if (o.id === itemId) {
+                const currentDetails = o.details as any || {};
+                const newDetails = { ...currentDetails, shippingDetails };
+                return { ...o, status: 'بانتظار المراجعة', receipt_url, details: newDetails };
+            }
+            return o;
+          }));
+        } else if (itemType === 'subscription') {
+            setSubscriptions(prev => prev.map(s => {
+                if (s.id === itemId) {
+                    return { ...s, status: 'active' };
+                }
+                return s;
+            }));
         }
     };
 
@@ -440,22 +475,23 @@ export const AdminProvider: React.FC<{children: ReactNode}> = ({ children }) => 
         addToast('تم حذف المقال بنجاح.', 'success');
     };
 
-    const createSubscription = async (userId: string, userName: string, childName: string) => {
+    const createSubscription = async (userId: string, userName: string, childName: string, price: number): Promise<Subscription> => {
         const startDate = new Date();
         const nextRenewalDate = new Date(startDate);
-        nextRenewalDate.setMonth(startDate.getMonth() + 1);
+        nextRenewalDate.setFullYear(startDate.getFullYear() + 1);
 
         const newSubscription: Subscription = {
             id: `SUB-${Date.now()}`,
             user_id: userId,
             user_name: userName,
             child_name: childName,
-            status: 'active',
+            status: 'pending_payment',
             start_date: startDate.toISOString(),
             next_renewal_date: nextRenewalDate.toISOString(),
-            price: 350
+            price: price
         };
         setSubscriptions(prev => [...prev, newSubscription]);
+        return newSubscription;
     };
 
     return (

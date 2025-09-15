@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { GoogleGenAI, Content, Type } from "@google/genai";
 import { Bot, User, Send, Loader2, Sparkles, ArrowLeft } from 'lucide-react';
@@ -194,6 +195,44 @@ const GeminiPage: React.FC = () => {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatHistory, isLoading]);
+
+  // Load chat history from sessionStorage on initial load
+  useEffect(() => {
+    try {
+      const storedHistory = sessionStorage.getItem('geminiChatHistory');
+      if (storedHistory) {
+        setChatHistory(JSON.parse(storedHistory));
+      } else if (!isDataLoading) {
+        // Only set welcome message if there's no stored history
+        setChatHistory([
+          {
+            id: Date.now(),
+            role: 'model',
+            text: 'أهلاً بك في منصة الرحلة! أنا "المرشد الإبداعي" هنا لمساعدتك في اختيار الهدية والقصة المثالية لطفلك. كيف يمكنني أن أخدمك اليوم؟',
+          },
+        ]);
+      }
+    } catch (error) {
+      console.error("Failed to parse chat history from sessionStorage", error);
+      // Fallback to welcome message if parsing fails
+       if (!isDataLoading) {
+        setChatHistory([
+          {
+            id: Date.now(),
+            role: 'model',
+            text: 'أهلاً بك في منصة الرحلة! أنا "المرشد الإبداعي" هنا لمساعدتك في اختيار الهدية والقصة المثالية لطفلك. كيف يمكنني أن أخدمك اليوم؟',
+          },
+        ]);
+      }
+    }
+  }, [isDataLoading]);
+
+  // Save chat history to sessionStorage whenever it changes
+  useEffect(() => {
+    if (chatHistory.length > 0) {
+      sessionStorage.setItem('geminiChatHistory', JSON.stringify(chatHistory));
+    }
+  }, [chatHistory]);
   
   const handleSendMessage = async (prompt?: string) => {
     const originalMessage = prompt || userInput;
@@ -256,16 +295,6 @@ const GeminiPage: React.FC = () => {
     { text: 'كيف تتم عملية تخصيص القصة؟', icon: '🤔' },
     { text: 'ما فائدة القصة المخصصة؟', icon: '✍️' },
   ];
-  
-  useEffect(() => {
-      if(!isDataLoading) {
-        setChatHistory([{
-            id: Date.now(),
-            role: 'model',
-            text: 'أهلاً بك في منصة الرحلة! أنا "المرشد الإبداعي" هنا لمساعدتك في اختيار الهدية والقصة المثالية لطفلك. كيف يمكنني أن أخدمك اليوم؟',
-        }])
-      }
-  }, [isDataLoading]);
   
   return (
     <div className="bg-gradient-to-br from-purple-50 via-blue-50 to-white min-h-[calc(100vh-160px)] py-12 sm:py-16 animate-fadeIn">

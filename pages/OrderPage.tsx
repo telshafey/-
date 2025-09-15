@@ -6,7 +6,19 @@ import { useProduct } from '../contexts/ProductContext.tsx';
 import { useToast } from '../contexts/ToastContext.tsx';
 import PageLoader from '../components/ui/PageLoader';
 import InteractivePreview from '../components/order/InteractivePreview';
-import { User, Heart, Image, Edit, Plus, Send, Loader2, AlertCircle } from 'lucide-react';
+import { User, Heart, Image, Edit, Plus, Send, Loader2, AlertCircle, Truck } from 'lucide-react';
+import { EGYPTIAN_GOVERNORATES } from '../../utils/governorates.ts';
+
+const storyGoals = [
+    { key: 'respect', title: 'الاستئذان والاحترام' },
+    { key: 'cooperation', title: 'التعاون والمشاركة' },
+    { key: 'honesty', title: 'الصدق والأمانة' },
+    { key: 'cleanliness', title: 'النظافة والترتيب' },
+    { key: 'time_management', title: 'تنظيم الوقت' },
+    { key: 'emotion_management', title: 'إدارة العواطف' },
+    { key: 'problem_solving', title: 'حل المشكلات' },
+    { key: 'creative_thinking', title: 'التفكير الإبداعي' },
+];
 
 // Form Components
 const FileUpload: React.FC<{ id: string; label: string; onFileChange: (id: string, file: File | null) => void; file: File | null }> = ({ id, label, onFileChange, file }) => {
@@ -41,7 +53,7 @@ const OrderPage: React.FC = () => {
     const { addToast } = useToast();
     const { currentUser, childProfiles } = useAuth();
     const { personalizedProducts, loading: adminLoading, createOrder } = useAdmin();
-    const { prices, loading: pricesLoading } = useProduct();
+    const { prices, shippingCosts, loading: pricesLoading } = useProduct();
 
     const [product, setProduct] = useState<PersonalizedProduct | null>(null);
     const [formData, setFormData] = useState({
@@ -50,14 +62,23 @@ const OrderPage: React.FC = () => {
         childGender: 'ذكر',
         familyNames: '',
         childTraits: '',
-        storyValue: 'respect',
+        storyValue: 'respect', // Default story value
         customGoal: '',
         deliveryType: 'printed', // for custom_story
+        governorate: 'القاهرة',
     });
     const [files, setFiles] = useState<{ [key: string]: File | null }>({
         image1: null, image2: null, image3: null,
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    
+    const needsShipping = useMemo(() => {
+        if (!product) return false;
+        if (product.key === 'custom_story' && formData.deliveryType === 'printed') return true;
+        if (product.key === 'gift_box' || product.key === 'coloring_book' || product.key === 'dua_booklet') return true;
+        return false;
+    }, [product, formData.deliveryType]);
+
 
     useEffect(() => {
         if (!adminLoading) {
@@ -86,32 +107,60 @@ const OrderPage: React.FC = () => {
         setFiles({ ...files, [id]: file });
     };
 
-    const { totalPrice, itemSummary } = useMemo(() => {
-        if (!product || !prices) return { totalPrice: 0, itemSummary: '' };
-        let total = 0;
+    const { subtotal, shippingCost, totalPrice, itemSummary } = useMemo(() => {
+        if (!product || !prices) return { subtotal: 0, shippingCost: 0, totalPrice: 0, itemSummary: '' };
+        
+        let sub = 0;
         let summary = product.title;
 
         if (product.key === 'custom_story') {
-            total = formData.deliveryType === 'printed' ? prices.story.printed : prices.story.electronic;
+            sub = formData.deliveryType === 'printed' ? prices.story.printed : prices.story.electronic;
             summary = `القصة المخصصة (${formData.deliveryType === 'printed' ? 'مطبوعة' : 'إلكترونية'})`;
         } else if (product.key === 'coloring_book') {
-            total = prices.coloringBook;
+            sub = prices.coloringBook;
         } else if (product.key === 'dua_booklet') {
-            total = prices.duaBooklet;
+            sub = prices.duaBooklet;
         } else if (product.key === 'gift_box') {
-            total = prices.giftBox;
+            sub = prices.giftBox;
         }
-        return { totalPrice: total, itemSummary: summary };
-    }, [product, prices, formData.deliveryType]);
+        
+        const shipping = needsShipping && shippingCosts ? (shippingCosts[formData.governorate] ?? 60) : 0;
+        const total = sub + shipping;
+
+        return { subtotal: sub, shippingCost: shipping, totalPrice: total, itemSummary: summary };
+    }, [product, prices, formData.deliveryType, formData.governorate, needsShipping, shippingCosts]);
+
+    const showFullCustomization = product?.key === 'custom_story' || product?.key === 'gift_box';
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!currentUser) return;
+        if (!currentUser || !product) return;
+
+        // Validation
+        if (showFullCustomization && !files.image1) {
+            addToast('الرجاء رفع صورة وجه الطفل على الأقل، فهي إلزامية لتصميم الشخصية.', 'error');
+            return;
+        }
+        if (showFullCustomization && formData.storyValue === 'custom' && !formData.customGoal.trim()) {
+            addToast('لقد اخترت هدفًا مخصصًا، يرجى كتابته في الحقل المخصص.', 'error');
+            return;
+        }
+
         setIsSubmitting(true);
         try {
-            await createOrder({ currentUser, formData, files, totalPrice, itemSummary });
-            addToast('تم استلام طلبك بنجاح! سيتم توجيهك لصفحة حسابك لإتمام الدفع.', 'success');
-            navigate('/account');
+            const newOrder = await createOrder({ currentUser, formData, files, totalPrice, itemSummary, shippingCost });
+            addToast('تم استلام طلبك! سيتم توجيهك الآن لإتمام عملية الدفع.', 'success');
+            navigate('/checkout', { 
+                state: { 
+                    item: { 
+                        id: newOrder.id, 
+                        type: 'order',
+                        total: newOrder.total,
+                        summary: newOrder.item_summary
+                    },
+                    shippingCost: shippingCost
+                } 
+            });
         } catch (error: any) {
             addToast(`حدث خطأ: ${error.message}`, 'error');
             setIsSubmitting(false);
@@ -121,8 +170,6 @@ const OrderPage: React.FC = () => {
     if (adminLoading || pricesLoading || !product || !prices) {
         return <PageLoader text="جاري تجهيز صفحة الطلب..." />;
     }
-
-    const showFullCustomization = product.key === 'custom_story' || product.key === 'gift_box';
 
     return (
         <div className="bg-gray-50 py-16 sm:py-20 animate-fadeIn">
@@ -171,9 +218,9 @@ const OrderPage: React.FC = () => {
                              {/* Image Uploads */}
                             <section>
                                 <h2 className="text-xl font-bold mb-4">2. صور الطفل</h2>
-                                <p className="text-sm text-gray-600 mb-4">ارفع 3 صور واضحة للطفل (وجه كامل، جانب، وجسم كامل) لنستخدمها في الرسومات. </p>
+                                <p className="text-sm text-gray-600 mb-4">ارفع 3 صور واضحة للطفل (وجه كامل، جانب، وجسم كامل) لنستخدمها في الرسومات. <span className="font-bold text-red-600">صورة الوجه إلزامية.</span></p>
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                                    <FileUpload id="image1" label="صورة 1 (الوجه)" file={files.image1} onFileChange={handleFileChange} />
+                                    <FileUpload id="image1" label="صورة 1 (الوجه)*" file={files.image1} onFileChange={handleFileChange} />
                                     <FileUpload id="image2" label="صورة 2 (جانبية)" file={files.image2} onFileChange={handleFileChange} />
                                     <FileUpload id="image3" label="صورة 3 (كاملة)" file={files.image3} onFileChange={handleFileChange} />
                                 </div>
@@ -181,32 +228,70 @@ const OrderPage: React.FC = () => {
                             
                              {/* Customization Details */}
                             {showFullCustomization && (
-                                <section>
+                                <section className="space-y-4">
                                     <h2 className="text-xl font-bold mb-4">3. تفاصيل التخصيص</h2>
                                      <div>
                                         <label className="block text-sm font-bold mb-2">صفات الطفل وهواياته</label>
                                         <textarea name="childTraits" value={formData.childTraits} onChange={handleChange} rows={3} className="w-full p-2 border rounded-lg" placeholder="مثال: يحب الرسم والقطط، شجاع، لون عينيه بني..."></textarea>
                                     </div>
+                                    <div>
+                                        <label className="block text-sm font-bold mb-2">الهدف التربوي من القصة*</label>
+                                        <select name="storyValue" value={formData.storyValue} onChange={handleChange} className="w-full p-2 border rounded-lg bg-white">
+                                            {storyGoals.map(goal => (
+                                                <option key={goal.key} value={goal.key}>{goal.title}</option>
+                                            ))}
+                                            <option value="custom">هدف مخصص (اكتبه بنفسك)</option>
+                                        </select>
+                                    </div>
+                                    {formData.storyValue === 'custom' && (
+                                        <div className="animate-fadeIn">
+                                            <label className="block text-sm font-bold mb-2">اكتب هدفك المخصص هنا*</label>
+                                            <textarea name="customGoal" value={formData.customGoal} onChange={handleChange} rows={3} className="w-full p-2 border rounded-lg" placeholder="مثال: تعليم الطفل أهمية مساعدة كبار السن..." required></textarea>
+                                        </div>
+                                    )}
                                 </section>
                             )}
                             
                             {/* Delivery Options */}
-                             {product.key === 'custom_story' && (
-                                <section>
-                                     <h2 className="text-xl font-bold mb-4">4. خيارات الاستلام</h2>
-                                     <select name="deliveryType" value={formData.deliveryType} onChange={handleChange} className="w-full p-2 border rounded-lg bg-white">
-                                        <option value="printed">نسخة مطبوعة + إلكترونية ({prices.story.printed} ج.م)</option>
-                                        <option value="electronic">نسخة إلكترونية فقط ({prices.story.electronic} ج.م)</option>
-                                     </select>
-                                </section>
-                            )}
+                            <section>
+                                <h2 className="text-xl font-bold mb-4">4. خيارات الاستلام والشحن</h2>
+                                {product.key === 'custom_story' && (
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-bold mb-2">نوع النسخة</label>
+                                        <select name="deliveryType" value={formData.deliveryType} onChange={handleChange} className="w-full p-2 border rounded-lg bg-white">
+                                            <option value="printed">نسخة مطبوعة + إلكترونية ({prices.story.printed} ج.م)</option>
+                                            <option value="electronic">نسخة إلكترونية فقط ({prices.story.electronic} ج.م)</option>
+                                        </select>
+                                    </div>
+                                )}
+                                {needsShipping && (
+                                    <div className="animate-fadeIn">
+                                        <label className="block text-sm font-bold mb-2">اختر المحافظة*</label>
+                                        <select name="governorate" value={formData.governorate} onChange={handleChange} className="w-full p-2 border rounded-lg bg-white">
+                                            {EGYPTIAN_GOVERNORATES.map(gov => (
+                                                <option key={gov} value={gov}>{gov}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+                            </section>
                         </div>
                         <div className="lg:col-span-1">
                             <div className="sticky top-24 space-y-6">
                                 <InteractivePreview formData={formData} product={product} />
                                 <div className="bg-white p-6 rounded-2xl shadow-lg border">
-                                    <div className="flex justify-between items-center">
-                                        <p className="text-lg font-semibold text-gray-700">الإجمالي</p>
+                                    <div className="space-y-2 mb-4">
+                                        <div className="flex justify-between items-center text-gray-600">
+                                            <p>المجموع الفرعي:</p>
+                                            <p className="font-semibold">{subtotal} ج.م</p>
+                                        </div>
+                                        <div className="flex justify-between items-center text-gray-600">
+                                            <p>تكلفة الشحن:</p>
+                                            <p className="font-semibold">{shippingCost} ج.م</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between items-center border-t pt-4">
+                                        <p className="text-lg font-bold text-gray-800">الإجمالي</p>
                                         <p className="text-3xl font-extrabold text-blue-600">{totalPrice} ج.م</p>
                                     </div>
                                     <button type="submit" disabled={isSubmitting} className="mt-6 w-full flex items-center justify-center gap-2 bg-green-600 text-white font-bold py-3 px-4 rounded-full hover:bg-green-700 disabled:bg-gray-400">

@@ -21,20 +21,22 @@ const enhaLakLinks: NavLink[] = [
   { name: 'الرئيسية', path: '/enha-lak', mobileIcon: <Home size={18} /> },
   { name: 'المتجر', path: '/store', mobileIcon: <Gift size={18} /> },
   { name: 'الاشتراك الشهري', path: '/subscription', icon: <Star className="text-yellow-500" size={16}/>, mobileIcon: <Star size={18} /> },
-  { name: 'المدونة', path: '/blog', mobileIcon: <BookOpen size={18} /> },
-  { name: 'عنا', path: '/about', mobileIcon: <Users size={18} /> },
-  { name: 'الدعم والمساعدة', path: '/support', mobileIcon: <HelpCircle size={18} /> },
-  { name: 'انضم إلينا', path: '/join-us', mobileIcon: <Briefcase size={18} /> },
 ];
 
 const creativeWritingLinks: NavLink[] = [
     { name: 'الرئيسية', path: '/creative-writing', mobileIcon: <Home size={18} /> },
     { name: 'عن البرنامج', path: '/creative-writing/about', mobileIcon: <Target size={18} /> },
-    { name: 'المنهج الدراسي', path: '/creative-writing/curriculum', mobileIcon: <Book size={18} /> },
+    { name: 'المنهج', path: '/creative-writing/curriculum', mobileIcon: <Book size={18} /> },
     { name: 'المدربون', path: '/creative-writing/instructors', mobileIcon: <Users size={18} /> },
-    { name: 'الباقات والحجز', path: '/creative-writing/booking', mobileIcon: <Gift size={18} /> },
-    { name: 'الدعم والمساعدة', path: '/creative-writing/support', mobileIcon: <HelpCircle size={18} /> },
+    { name: 'الباقات', path: '/creative-writing/booking', mobileIcon: <Gift size={18} /> },
 ];
+
+const sharedLinks: NavLink[] = [
+    { name: 'المدونة', path: '/blog', mobileIcon: <BookOpen size={18} /> },
+    { name: 'عنا', path: '/about', mobileIcon: <Users size={18} /> },
+    { name: 'الدعم', path: '/support', mobileIcon: <HelpCircle size={18} /> },
+];
+
 
 const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -52,11 +54,13 @@ const Header: React.FC = () => {
       if (pathname === '/') {
           return 'portal';
       }
+      // Shared pages should default to the 'enha-lak' branding, or we can add a specific condition if needed
       return 'enha-lak';
   }
 
   const currentSection = getCurrentSection();
-  const navLinks = currentSection === 'enha-lak' ? enhaLakLinks : creativeWritingLinks;
+  const sectionSpecificLinks = currentSection === 'enha-lak' ? enhaLakLinks : creativeWritingLinks;
+  const navLinks = [...sectionSpecificLinks, ...sharedLinks];
   const homePath = currentSection === 'enha-lak' ? '/enha-lak' : '/creative-writing';
 
   const { logoUrl, logoAlt, isLoading } = useMemo(() => {
@@ -187,12 +191,12 @@ const Header: React.FC = () => {
                 <span>البوابة الرئيسية</span>
             </ReactRouterDOM.Link>
           </div>
-          <nav className="hidden md:flex items-center space-x-6 rtl:space-x-reverse">
+          <nav className="hidden lg:flex items-center space-x-6 rtl:space-x-reverse">
             {navLinks.map((link) => (
               <ReactRouterDOM.NavLink
                 key={link.name}
                 to={link.path}
-                className={({ isActive }) => `flex items-center gap-2 ${isActive ? activeLinkClass : inactiveLinkClass}`}
+                className={({ isActive }) => `flex items-center gap-2 whitespace-nowrap ${isActive ? activeLinkClass : inactiveLinkClass}`}
               >
                 {link.icon} {link.name}
               </ReactRouterDOM.NavLink>

@@ -9,6 +9,7 @@ import PageLoader from '../components/ui/PageLoader';
 import BookingSummary from '../components/creative-writing/BookingSummary';
 import { CheckCircle, AlertCircle, Package, User, Calendar, Send, Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { WeeklySchedule } from '../lib/database.types';
+import ShareButtons from '../components/shared/ShareButtons';
 
 type BookingStep = 'package' | 'instructor' | 'schedule' | 'confirm';
 
@@ -43,6 +44,7 @@ const CreativeWritingBookingPage: React.FC = () => {
     const [selectedDay, setSelectedDay] = useState<string | null>(null);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const pageUrl = window.location.href;
     
     useEffect(() => {
         const preselectedInstructorId = location.state?.instructorId;
@@ -241,6 +243,13 @@ const CreativeWritingBookingPage: React.FC = () => {
                     <p className="mt-4 max-w-3xl mx-auto text-lg text-gray-600">
                         ابدأ رحلة طفلك الإبداعية في خطوات بسيطة.
                     </p>
+                    <div className="mt-6 flex justify-center">
+                        <ShareButtons 
+                          title='احجز جلسة لطفلك في برنامج "بداية الرحلة" للكتابة الإبداعية' 
+                          url={pageUrl}
+                          label="شارك صفحة الحجز:"
+                        />
+                    </div>
                 </div>
                 
                 <StepIndicator currentStep={step} />

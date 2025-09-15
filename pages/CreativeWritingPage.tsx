@@ -4,6 +4,7 @@ import React from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 // FIX: Replaced non-existent 'PackageSelect' icon with 'Package'.
 import { Target, Book, Users, ArrowLeft, Calendar, CheckCircle, Package, CalendarCheck, Sparkles, Quote, Star, Award, HeartHandshake } from 'lucide-react';
+import ShareButtons from '../components/shared/ShareButtons';
 
 const FeatureCard: React.FC<{ title: string; description: string; link: string; icon: React.ReactNode; }> = ({ title, description, link, icon }) => (
     <div className="bg-white p-8 rounded-2xl shadow-lg text-center transform hover:-translate-y-2 transition-transform duration-300 h-full flex flex-col">
@@ -60,6 +61,7 @@ const TestimonialCard: React.FC<{ quote: string, author: string, role: string }>
 
 
 const CreativeWritingPage: React.FC = () => {
+  const pageUrl = window.location.href;
   return (
     <div className="bg-gray-50 animate-fadeIn">
       <section className="bg-gradient-to-br from-purple-50 via-blue-50 to-white py-16 sm:py-20 lg:py-24 text-center">
@@ -76,6 +78,13 @@ const CreativeWritingPage: React.FC = () => {
                     className="px-8 py-3 border border-transparent text-lg font-medium rounded-full text-white bg-blue-600 hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
                     اكتشف الباقات وابدأ الآن
                 </ReactRouterDOM.Link>
+            </div>
+            <div className="mt-8 flex justify-center">
+                <ShareButtons 
+                  title='اكتشف برنامج "بداية الرحلة" للكتابة الإبداعية وصقل موهبة طفلك' 
+                  url={pageUrl} 
+                  label="شارك البرنامج:"
+                />
             </div>
         </div>
       </section>

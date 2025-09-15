@@ -1,8 +1,7 @@
 
 import React from 'react';
-// FIX: Switched to namespace import for react-router-dom to fix module resolution issues.
-import * as ReactRouterDOM from 'react-router-dom';
-import { Shield, FileText, UserCheck, Lock, Database } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { FileText, UserCheck, ShieldCheck, CreditCard } from 'lucide-react';
 import { useAdmin } from '../contexts/AdminContext';
 import PageLoader from '../components/ui/PageLoader';
 
@@ -34,9 +33,9 @@ const SectionSkeleton: React.FC = () => (
     </div>
 )
 
-const PrivacyPolicyPage: React.FC = () => {
+const TermsOfUsePage: React.FC = () => {
   const { siteContent, loading } = useAdmin();
-  const privacyContent = siteContent.privacy || {};
+  const termsContent = siteContent.terms || {};
 
   if (loading) {
     return (
@@ -57,54 +56,42 @@ const PrivacyPolicyPage: React.FC = () => {
     <div className="bg-white py-16 sm:py-20 animate-fadeIn">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl">
         <div className="text-center mb-16">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-600">{privacyContent.main_title}</h1>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-600">{termsContent.main_title}</h1>
           <p className="mt-4 max-w-3xl mx-auto text-lg text-gray-600">
-            {privacyContent.main_subtitle}
+            {termsContent.main_subtitle}
           </p>
         </div>
-        
-        <Section title={privacyContent.intro_title || "مقدمة"} icon={<Shield size={24} />}>
-            <p>{privacyContent.intro_text}</p>
-            
-            <h3>{privacyContent.data_collection_title}</h3>
-            <ul>
-                {privacyContent.data_collection_list?.split('\n').map((item, i) => <li key={i}>{item}</li>)}
-            </ul>
 
-            <h3>{privacyContent.data_usage_title}</h3>
-            <ul>
-                 {privacyContent.data_usage_list?.split('\n').map((item, i) => <li key={i}>{item}</li>)}
-            </ul>
+        <Section title={termsContent.approval_title || 'الموافقة على الشروط'} icon={<UserCheck size={24} />}>
+            <p>{termsContent.approval_text}</p>
+        </Section>
 
-            <h3>{privacyContent.data_sharing_title}</h3>
-            <p>{privacyContent.data_sharing_text}</p>
+        <Section title={termsContent.accounts_title || 'الحسابات'} icon={<UserCheck size={24} />}>
+            <p>{termsContent.accounts_text}</p>
+        </Section>
+        
+        <Section title={termsContent.ip_title || 'الملكية الفكرية'} icon={<ShieldCheck size={24} />}>
+            {termsContent.ip_text?.split('\n').map((line, i) => <p key={i}>{line}</p>)}
+        </Section>
+        
+        <Section title={termsContent.payment_title || 'الطلبات والدفع'} icon={<CreditCard size={24} />}>
+            <p>{termsContent.payment_text}</p>
+        </Section>
+        
+        <Section title={termsContent.policy_changes_title || 'التغييرات على هذه الشروط'} icon={<FileText size={24} />}>
+            <p>{termsContent.policy_changes_text}</p>
+        </Section>
 
-            <h3>{privacyContent.children_title}</h3>
-            <p>{privacyContent.children_text}</p>
-        </Section>
-        
-        <Section title={privacyContent.security_title || "أمان البيانات"} icon={<Lock size={24} />}>
-            <p>{privacyContent.security_text}</p>
-        </Section>
-        
-        <Section title={privacyContent.rights_title || "حقوقك"} icon={<UserCheck size={24} />}>
-            <p>{privacyContent.rights_text}</p>
-        </Section>
-        
-         <Section title={privacyContent.policy_changes_title || 'التغييرات على هذه السياسة'} icon={<FileText size={24} />}>
-            <p>{privacyContent.policy_changes_text}</p>
-        </Section>
-        
-        <Section title={privacyContent.contact_us_title || 'اتصل بنا'} icon={<UserCheck size={24} />}>
+        <Section title={termsContent.contact_us_title || 'اتصل بنا'} icon={<UserCheck size={24} />}>
             <p>
-              {privacyContent.contact_us_text?.replace('الدعم والمساعدة', '')}
-              <ReactRouterDOM.Link to="/support" className="text-blue-600 hover:underline">الدعم والمساعدة</ReactRouterDOM.Link>.
+              {termsContent.contact_us_text?.replace('الدعم والمساعدة', '')}
+              <Link to="/support" className="text-blue-600 hover:underline">الدعم والمساعدة</Link>.
             </p>
         </Section>
-
+        
       </div>
     </div>
   );
 };
 
-export default PrivacyPolicyPage;
+export default TermsOfUsePage;

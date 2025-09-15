@@ -4,15 +4,20 @@ import { useAdmin } from '../contexts/AdminContext.tsx';
 import { useToast } from '../contexts/ToastContext.tsx';
 import { useNavigate } from 'react-router-dom';
 import { Star, Gift, CheckCircle, Package, Loader2 } from 'lucide-react';
+import { useProduct } from '../contexts/ProductContext.tsx';
+import PageLoader from '../components/ui/PageLoader.tsx';
+import ShareButtons from '../components/shared/ShareButtons.tsx';
 
 const SubscriptionPage: React.FC = () => {
     const { isLoggedIn, currentUser, childProfiles } = useAuth();
     const { createSubscription } = useAdmin();
+    const { prices, loading: pricesLoading } = useProduct();
     const { addToast } = useToast();
     const navigate = useNavigate();
 
     const [selectedChild, setSelectedChild] = useState<string>('');
     const [isSubscribing, setIsSubscribing] = useState(false);
+    const pageUrl = window.location.href;
 
     const handleSubscribe = async () => {
         if (!isLoggedIn || !currentUser) {
@@ -27,15 +32,31 @@ const SubscriptionPage: React.FC = () => {
 
         setIsSubscribing(true);
         try {
-            await createSubscription(currentUser.id, currentUser.name, selectedChild);
-            addToast(`تم تفعيل اشتراك "صندوق الرحلة" للطفل ${selectedChild} بنجاح!`, 'success');
-            navigate('/account');
+            const annualPrice = prices!.subscriptionBox * 12;
+            const newSubscription = await createSubscription(currentUser.id, currentUser.name, selectedChild, annualPrice);
+            
+            addToast('تم إنشاء طلب الاشتراك! سيتم توجيهك الآن لإتمام عملية الدفع.', 'success');
+
+            navigate('/checkout', {
+                state: {
+                    item: {
+                        id: newSubscription.id,
+                        type: 'subscription',
+                        total: newSubscription.price,
+                        summary: `اشتراك سنوي لصندوق الرحلة (${selectedChild})`
+                    }
+                }
+            });
         } catch (error: any) {
             addToast(`حدث خطأ: ${error.message}`, 'error');
         } finally {
             setIsSubscribing(false);
         }
     };
+
+    if (pricesLoading || !prices) {
+        return <PageLoader text="جاري تحميل تفاصيل الاشتراك..." />;
+    }
 
     return (
         <div className="bg-white py-16 sm:py-20 animate-fadeIn">
@@ -46,6 +67,13 @@ const SubscriptionPage: React.FC = () => {
                         <p className="mt-4 max-w-3xl mx-auto text-lg text-gray-600">
                             رحلة متجددة من الإبداع والمرح تصل إلى باب منزلكم كل شهر!
                         </p>
+                        <div className="mt-6 flex justify-center">
+                            <ShareButtons 
+                              title='اكتشف صندوق الرحلة الشهري - مغامرة إبداعية متجددة لطفلك!' 
+                              url={pageUrl}
+                              label="شارك الاشتراك:"
+                            />
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -67,8 +95,12 @@ const SubscriptionPage: React.FC = () => {
 
                     <div className="mt-20 bg-gray-50 p-8 sm:p-12 rounded-2xl shadow-inner border text-center">
                         <h2 className="text-3xl font-bold text-gray-800">اشترك الآن وابدأ الرحلة!</h2>
-                        <p className="mt-4 text-5xl font-extrabold text-orange-500">350 ج.م <span className="text-2xl text-gray-500 font-medium">/ شهرياً</span></p>
-                        <p className="mt-2 text-gray-500">(شامل الشحن داخل مصر)</p>
+                        <p className="mt-4 text-5xl font-extrabold text-orange-500">
+                           {prices.subscriptionBox * 12} ج.م <span className="text-2xl text-gray-500 font-medium">/ سنوياً</span>
+                        </p>
+                        <p className="mt-1 text-gray-500">(بواقع {prices.subscriptionBox} ج.م شهرياً)</p>
+                        <p className="mt-2 text-gray-500">(شامل الشحن داخل القاهرة فقط. تطبق رسوم شحن إضافية لباقي المحافظات)</p>
+
 
                         <div className="mt-8 max-w-md mx-auto">
                             {isLoggedIn ? (
@@ -97,9 +129,12 @@ const SubscriptionPage: React.FC = () => {
                                     <p className="text-gray-600">يرجى <a href="#/account" className="text-blue-600 hover:underline">إضافة ملف طفل</a> أولاً في حسابك لتتمكن من الاشتراك.</p>
                                 )
                             ) : (
-                                <a href="#/account" className="inline-block w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                                <button 
+                                    onClick={() => navigate('/account')}
+                                    className="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                                >
                                     سجل الدخول للاشتراك
-                                </a>
+                                </button>
                             )}
                         </div>
                     </div>
