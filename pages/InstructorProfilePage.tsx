@@ -4,8 +4,8 @@ import * as ReactRouterDOM from 'react-router-dom';
 import { useCreativeWritingAdmin } from '../contexts/admin/CreativeWritingAdminContext';
 import PageLoader from '../components/ui/PageLoader';
 import { ArrowLeft, Calendar, Star, User, Clock } from 'lucide-react';
-import { formatDate } from '../../utils/helpers.ts';
-import { WeeklySchedule } from '../../lib/database.types';
+import { formatDate } from '../utils/helpers.ts';
+import { WeeklySchedule } from '../lib/database.types';
 
 const StarRating: React.FC<{ rating: number; totalStars?: number }> = ({ rating, totalStars = 5 }) => {
     const fullStars = Math.floor(rating);
