@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { ShoppingBag, Gift, Users, DollarSign, Feather, CheckSquare } from 'lucide-react';
-import { useAdmin, IOrderDetails } from '../../contexts/AdminContext';
+import { ShoppingBag, Gift, Users, DollarSign, Feather, CheckSquare, Bell } from 'lucide-react';
+import { useAdmin, IOrderDetails, Subscription } from '../../contexts/AdminContext';
 import { useCreativeWritingAdmin } from '../../contexts/admin/CreativeWritingAdminContext';
 // FIX: Added .ts extension to resolve module error.
-import { getStatusColor } from '../../utils/helpers.ts';
+import { getStatusColor, formatDate } from '../../utils/helpers.ts';
+import AdminSection from '../../components/admin/AdminSection';
 import PageLoader from '../../components/ui/PageLoader';
 import BarChart from '../../components/admin/BarChart';
 import ViewOrderModal from '../../components/admin/ViewOrderModal';
@@ -37,7 +38,7 @@ const StatCard: React.FC<{ title: string, value: string, icon: React.ReactNode, 
 );
 
 const AdminDashboardPage: React.FC = () => {
-  const { orders, users, personalizedProducts, loading: adminLoading, error: adminError } = useAdmin();
+  const { orders, users, personalizedProducts, subscriptions, loading: adminLoading, error: adminError } = useAdmin();
   const { creativeWritingBookings, instructors, loading: cwLoading, error: cwError } = useCreativeWritingAdmin();
   const { currentUser } = useAuth();
   const role = currentUser?.role;
@@ -76,6 +77,25 @@ const AdminDashboardPage: React.FC = () => {
     };
   }, [orders, creativeWritingBookings]);
 
+  const upcomingRenewals = useMemo(() => {
+    if (!subscriptions) return [];
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return subscriptions
+        .filter(sub => sub.status === 'active')
+        .map(sub => {
+            const renewalDate = new Date(sub.next_renewal_date);
+            renewalDate.setHours(0, 0, 0, 0);
+            const diffTime = renewalDate.getTime() - today.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return { ...sub, daysUntilRenewal: diffDays };
+        })
+        .filter(sub => sub.daysUntilRenewal >= 0 && sub.daysUntilRenewal <= 7)
+        .sort((a, b) => a.daysUntilRenewal - b.daysUntilRenewal);
+  }, [subscriptions]);
+
   const recentOrders = orders.slice(0, 5);
   const recentBookings = creativeWritingBookings.slice(0, 5);
   
@@ -102,6 +122,12 @@ const AdminDashboardPage: React.FC = () => {
     value,
     color: statusColors[label] || '#6B7280', // default gray
   }));
+  
+  const getDaysRemainingColor = (days: number) => {
+    if (days <= 2) return 'text-red-600 font-bold';
+    if (days <= 5) return 'text-orange-600 font-semibold';
+    return 'text-yellow-700';
+  };
 
   return (
     <>
@@ -132,6 +158,26 @@ const AdminDashboardPage: React.FC = () => {
             <StatCard title="إجمالي الطلاب (الكتابة)" value={totalStudents.toString()} icon={<Users className="text-white" />} color="bg-pink-500" />
           )}
         </div>
+
+        {(role === 'super_admin' || role === 'enha_lak_supervisor') && upcomingRenewals.length > 0 && (
+             <div className="mt-12">
+                <AdminSection title="تنبيهات تجديد الاشتراك" icon={<Bell />}>
+                    <div className="space-y-4">
+                        {upcomingRenewals.map(sub => (
+                            <div key={sub.id} className="p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                <div>
+                                    <p className="font-bold text-gray-800">{sub.user_name} (الطفل: {sub.child_name})</p>
+                                    <p className="text-sm text-gray-600">تاريخ التجديد: {formatDate(sub.next_renewal_date)}</p>
+                                </div>
+                                <div className={`text-sm text-right ${getDaysRemainingColor(sub.daysUntilRenewal)}`}>
+                                   {sub.daysUntilRenewal === 0 ? 'اليوم' : `يتبقى ${sub.daysUntilRenewal} أيام`}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </AdminSection>
+             </div>
+        )}
 
         {(role === 'super_admin' || role === 'enha_lak_supervisor') && (
             <div className="mt-12">

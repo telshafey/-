@@ -22,7 +22,7 @@ const FileUpload: React.FC<{ file: File | null; setFile: (file: File | null) => 
         <div className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md transition-colors ${!disabled && 'hover:border-blue-400'}`}>
             <div className="space-y-1 text-center">
                 {preview ? (
-                     <img src={preview} alt="Preview" className="h-24 w-auto mx-auto rounded-md object-cover" />
+                     <img src={preview} alt="Preview" className="h-24 w-auto mx-auto rounded-md object-cover" loading="lazy" />
                 ) : (
                     <Upload className="mx-auto h-12 w-12 text-gray-400" />
                 )}

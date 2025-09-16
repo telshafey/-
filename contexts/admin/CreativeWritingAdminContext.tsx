@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
 import { useToast } from '../ToastContext';
 // FIX: Added .ts extension to resolve module error.
-import { Json, Instructor, CreativeWritingPackage, AdditionalService, CreativeWritingBooking, AvailableSlots, WeeklySchedule } from '../../lib/database.types.ts';
+import { Json, Instructor, CreativeWritingPackage, AdditionalService, CreativeWritingBooking, AvailableSlots, WeeklySchedule, InstructorReview } from '../../lib/database.types.ts';
 // FIX: Added .tsx extension to resolve module error.
 import { UserProfile } from '../AuthContext.tsx';
 
@@ -9,15 +9,20 @@ import { UserProfile } from '../AuthContext.tsx';
 export type { Instructor, CreativeWritingPackage, AdditionalService, CreativeWritingBooking, AvailableSlots };
 
 // --- Mock Data ---
+const MOCK_AVAILABILITY: { [instructorId: number]: AvailableSlots } = {
+    1: { '25': ['10:00 ص', '11:00 ص'], '27': ['02:00 م', '03:00 م', '04:00 م'] },
+    2: { '26': ['09:00 ص', '12:00 م'], '28': ['03:00 م', '04:00 م'] },
+};
+
 const MOCK_INSTRUCTORS: Instructor[] = [
-    { id: 1, user_id: 'd1e2f3a4-b5c6-d789-e123-f456a789b0cd', name: 'أحمد المصري', specialty: 'متخصص في كتابة القصة القصيرة', slug: 'ahmed-masri', bio: 'كاتب ومحرر شغوف، متخصص في مساعدة الأطفال على اكتشاف أصواتهم الإبداعية من خلال القصص. لديه خبرة 5 سنوات في ورش عمل الكتابة الإبداعية.', avatar_url: 'https://i.ibb.co/2S4xT8w/male-avatar.png', availability: { '25': ['10:00 ص', '11:00 ص'], '27': ['02:00 م'] }, weekly_schedule: { monday: ['10:00 ص', '11:00 ص'], wednesday: ['02:00 م'] }, schedule_status: 'approved' },
-    { id: 2, user_id: null, name: 'نورة خالد', specialty: 'خبيرة في الشعر والنصوص الحرة', slug: 'noura-khaled', bio: 'شاعرة وفنانة، تؤمن بأن لكل طفل قصة تستحق أن تروى. تستخدم أساليب مبتكرة لإطلاق العنان لخيال الأطفال وتحويل أفكارهم إلى كلمات.', avatar_url: 'https://i.ibb.co/yYg5b1c/alrehlah-logo.png', availability: { '26': ['09:00 ص', '12:00 م'], '28': ['03:00 م'] }, weekly_schedule: { tuesday: ['09:00 ص', '12:00 م'], thursday: ['03:00 م'] }, schedule_status: 'pending' },
+    { id: 1, user_id: 'd1e2f3a4-b5c6-d789-e123-f456a789b0cd', name: 'أحمد المصري', specialty: 'متخصص في كتابة القصة القصيرة', slug: 'ahmed-masri', bio: 'كاتب ومحرر شغوف، متخصص في مساعدة الأطفال على اكتشاف أصواتهم الإبداعية من خلال القصص. لديه خبرة 5 سنوات في ورش عمل الكتابة الإبداعية.', avatar_url: 'https://i.ibb.co/2S4xT8w/male-avatar.png', availability: null, weekly_schedule: { monday: ['10:00 ص', '11:00 ص'], wednesday: ['02:00 م'] }, schedule_status: 'approved' },
+    { id: 2, user_id: null, name: 'نورة خالد', specialty: 'خبيرة في الشعر والنصوص الحرة', slug: 'noura-khaled', bio: 'شاعرة وفنانة، تؤمن بأن لكل طفل قصة تستحق أن تروى. تستخدم أساليب مبتكرة لإطلاق العنان لخيال الأطفال وتحويل أفكارهم إلى كلمات.', avatar_url: 'https://i.ibb.co/yYg5b1c/alrehlah-logo.png', availability: null, weekly_schedule: { tuesday: ['09:00 ص', '12:00 م'], thursday: ['03:00 م'] }, schedule_status: 'pending' },
 ];
 
 const MOCK_CW_PACKAGES: CreativeWritingPackage[] = [
     { id: 1, name: 'الباقة التأسيسية', sessions: '3 جلسات فردية', price: 1200, features: ['جلسة تعريفية', '3 جلسات فردية', 'متابعة عبر البريد'], popular: false },
     { id: 2, name: 'الباقة التطويرية', sessions: '8 جلسات فردية', price: 2800, features: ['8 جلسات فردية', 'ملف إنجاز رقمي', 'جلسة ختامية مع ولي الأمر'], popular: true },
-    { id: 3, name: 'الباقة المتقدمة', sessions: '12 جلسة فردية', price: 4000, features: ['12 جلسة فردية', 'مشروع كتابي متكامل', 'نشر القصة في مدونة المنصة'], popular: false },
+    { id: 3, name: 'الباقة المتقدمة', sessions: '12 جلسة فردية', price: 4000, features: ['12 جلسات فردية', 'مشروع كتابي متكامل', 'نشر القصة في مدونة المنصة'], popular: false },
     { id: 4, name: 'جلسة استشارية', sessions: 'جلسة واحدة', price: 500, features: ['تقييم مستوى', 'خطة تطوير شخصية', 'إجابة على الاستفسارات'], popular: false },
 ];
 
@@ -31,23 +36,13 @@ const MOCK_CW_BOOKINGS: (CreativeWritingBooking & { instructors: Instructor | nu
     { id: 'BK-1', user_id: 'f1e2d3c4-b5a6-9870-4321-098765fedcba', user_name: 'فاطمة علي', instructor_id: 1, package_id: 2, package_name: 'الباقة التطويرية', booking_date: new Date('2024-07-25T10:00:00Z').toISOString(), booking_time: '10:00 ص', status: 'مكتمل', total: 2800, session_id: 'abc-123', receipt_url: 'https://example.com/receipt.jpg', admin_comment: null, progress_notes: 'أظهرت سارة تقدماً ملحوظاً في بناء الشخصيات. تحتاج للتركيز على الحوار.', instructors: MOCK_INSTRUCTORS[0] },
     { id: 'BK-2', user_id: '12345678-abcd-efgh-ijkl-mnopqrstuvwx', user_name: 'أحمد محمود', instructor_id: 2, package_id: 1, package_name: 'الباقة التأسيسية', booking_date: '2024-07-26', booking_time: '09:00 ص', status: 'بانتظار الدفع', total: 1200, session_id: null, receipt_url: null, admin_comment: null, progress_notes: null, instructors: MOCK_INSTRUCTORS[1] },
     { id: 'BK-3', user_id: 'student-id-123', user_name: 'الطالب عمر', instructor_id: 1, package_id: 2, package_name: 'الباقة التطويرية', booking_date: new Date().toISOString(), booking_time: '11:00 ص', status: 'مؤكد', total: 2800, session_id: 'def-456', receipt_url: 'https://example.com/receipt.jpg', admin_comment: null, progress_notes: 'الجلسة القادمة ستركز على الحبكة.', instructors: MOCK_INSTRUCTORS[0] },
+    { id: 'BK-4', user_id: 'student-id-123', user_name: 'الطالب عمر', instructor_id: 1, package_id: 2, package_name: 'الباقة التطويرية', booking_date: new Date('2024-07-20T10:00:00Z').toISOString(), booking_time: '11:00 ص', status: 'مكتمل', total: 2800, session_id: 'ghi-789', receipt_url: 'https://example.com/receipt.jpg', admin_comment: null, progress_notes: 'الجلسة كانت ممتازة.', instructors: MOCK_INSTRUCTORS[0] },
 
 ];
 
-// Helper to get next date for a given day of the week
-const getNextDateForDay = (dayOfWeek: keyof WeeklySchedule): Date => {
-    const dayMapping: { [key in keyof WeeklySchedule]: number } = {
-        'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3,
-        'thursday': 4, 'friday': 5, 'saturday': 6
-    };
-    const targetDay = dayMapping[dayOfWeek];
-    const today = new Date();
-    const currentDay = today.getDay();
-    const distance = (targetDay - currentDay + 7) % 7;
-    const nextDate = new Date(today);
-    nextDate.setDate(today.getDate() + distance);
-    return nextDate;
-};
+const MOCK_INSTRUCTOR_REVIEWS: InstructorReview[] = [
+    { id: 1, created_at: new Date('2024-07-26T10:00:00Z').toISOString(), user_id: 'f1e2d3c4-b5a6-9870-4321-098765fedcba', student_name: 'فاطمة علي', instructor_id: 1, rating: 5, comment: 'المدرب أحمد كان رائعاً جداً مع ابنتي! ساعدها على التعبير عن أفكارها بثقة وإبداع. شكراً جزيلاً.'},
+];
 
 
 // --- Context Definition ---
@@ -60,6 +55,7 @@ interface CreativeWritingAdminContextType {
     approveInstructorSchedule: (instructorId: number) => Promise<void>;
     rejectInstructorSchedule: (instructorId: number) => Promise<void>;
     requestScheduleChange: (instructorId: number, schedule: WeeklySchedule) => Promise<void>;
+    fetchInstructorAvailability: (instructorId: number) => Promise<void>;
 
     creativeWritingPackages: CreativeWritingPackage[];
     updateCreativeWritingPackages: (packages: CreativeWritingPackage[]) => Promise<void>;
@@ -70,8 +66,18 @@ interface CreativeWritingAdminContextType {
     creativeWritingBookings: (CreativeWritingBooking & { instructors: Instructor | null })[];
     updateBookingStatus: (bookingId: string, newStatus: CreativeWritingBooking['status']) => Promise<void>;
     updateBookingProgressNotes: (bookingId: string, notes: string) => Promise<void>;
-    createBooking: (payload: any) => Promise<void>;
+    createBooking: (payload: {
+        currentUser: UserProfile;
+        instructorId: number;
+        selectedPackage: CreativeWritingPackage;
+        selectedServices: AdditionalService[];
+        bookingDate: Date;
+        bookingTime: string;
+    }) => Promise<void>;
     generateAndSetSessionId: (bookingId: string) => Promise<string | null>;
+
+    reviews: InstructorReview[];
+    addReview: (payload: { instructorId: number; rating: number; comment: string; studentName: string; userId: string; }) => Promise<void>;
     
     loading: boolean;
     error: string | null;
@@ -79,11 +85,12 @@ interface CreativeWritingAdminContextType {
 
 const CreativeWritingAdminContext = createContext<CreativeWritingAdminContextType | undefined>(undefined);
 
-export const CreativeWritingAdminProvider: React.FC<{children: ReactNode}> = ({ children }) => {
+export const CreativeWritingAdminProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
     const [instructors, setInstructors] = useState<Instructor[]>([]);
     const [creativeWritingPackages, setCreativeWritingPackages] = useState<CreativeWritingPackage[]>([]);
     const [additionalServices, setAdditionalServices] = useState<AdditionalService[]>([]);
     const [creativeWritingBookings, setCreativeWritingBookings] = useState<(CreativeWritingBooking & { instructors: Instructor | null })[]>([]);
+    const [reviews, setReviews] = useState<InstructorReview[]>([]);
     
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -96,6 +103,7 @@ export const CreativeWritingAdminProvider: React.FC<{children: ReactNode}> = ({ 
         setCreativeWritingPackages(MOCK_CW_PACKAGES);
         setAdditionalServices(MOCK_ADDITIONAL_SERVICES);
         setCreativeWritingBookings(MOCK_CW_BOOKINGS);
+        setReviews(MOCK_INSTRUCTOR_REVIEWS);
         setLoading(false);
     }, []);
     
@@ -157,6 +165,23 @@ export const CreativeWritingAdminProvider: React.FC<{children: ReactNode}> = ({ 
         addToast('تم إرسال الجدول للمراجعة.', 'info');
     };
 
+    const fetchInstructorAvailability = async (instructorId: number) => {
+        // In a real app, this would be an API call.
+        await new Promise(res => setTimeout(res, 500)); // Simulate network delay
+        const availability = MOCK_AVAILABILITY[instructorId];
+        if (availability) {
+            setInstructors(prev =>
+                prev.map(i => i.id === instructorId ? { ...i, availability: availability as Json } : i)
+            );
+        } else {
+            addToast(`لم يتم العثور على مواعيد لهذا المدرب.`, 'error');
+            // Set empty availability to avoid re-fetching
+            setInstructors(prev =>
+                prev.map(i => i.id === instructorId ? { ...i, availability: {} as Json } : i)
+            );
+        }
+    };
+
     const updateCreativeWritingPackages = async (packages: CreativeWritingPackage[]) => {
         setCreativeWritingPackages(packages);
         addToast('تم تحديث الباقات بنجاح (تجريبيًا).', 'success');
@@ -167,8 +192,7 @@ export const CreativeWritingAdminProvider: React.FC<{children: ReactNode}> = ({ 
         addToast('تم تحديث الخدمات الإضافية بنجاح (تجريبيًا).', 'success');
     };
     
-    const createBooking = async (payload: { currentUser: UserProfile; instructorId: number; selectedPackage: CreativeWritingPackage; selectedServices: AdditionalService[]; recurringDay: keyof WeeklySchedule; recurringTime: string; }) => {
-        const bookingDate = getNextDateForDay(payload.recurringDay);
+    const createBooking = async (payload: { currentUser: UserProfile; instructorId: number; selectedPackage: CreativeWritingPackage; selectedServices: AdditionalService[]; bookingDate: Date; bookingTime: string; }) => {
         const total = payload.selectedPackage.price + payload.selectedServices.reduce((sum, s) => sum + s.price, 0);
 
         const newBooking: CreativeWritingBooking & { instructors: Instructor | null } = {
@@ -178,8 +202,8 @@ export const CreativeWritingAdminProvider: React.FC<{children: ReactNode}> = ({ 
             instructor_id: payload.instructorId,
             package_id: payload.selectedPackage.id,
             package_name: payload.selectedPackage.name,
-            booking_date: bookingDate.toISOString().split('T')[0],
-            booking_time: payload.recurringTime,
+            booking_date: payload.bookingDate.toISOString().split('T')[0],
+            booking_time: payload.bookingTime,
             status: 'بانتظار الدفع',
             total: total,
             session_id: null,
@@ -207,6 +231,20 @@ export const CreativeWritingAdminProvider: React.FC<{children: ReactNode}> = ({ 
         return newSessionId;
     };
 
+    const addReview = async (payload: { instructorId: number; rating: number; comment: string; studentName: string; userId: string; }) => {
+        const newReview: InstructorReview = {
+            id: Date.now(),
+            created_at: new Date().toISOString(),
+            user_id: payload.userId,
+            student_name: payload.studentName,
+            instructor_id: payload.instructorId,
+            rating: payload.rating,
+            comment: payload.comment,
+        };
+        setReviews(prev => [newReview, ...prev]);
+        addToast('تم إرسال مراجعتك بنجاح! شكراً لك.', 'success');
+    };
+
     return (
         <CreativeWritingAdminContext.Provider value={{
             instructors,
@@ -216,6 +254,7 @@ export const CreativeWritingAdminProvider: React.FC<{children: ReactNode}> = ({ 
             approveInstructorSchedule,
             rejectInstructorSchedule,
             requestScheduleChange,
+            fetchInstructorAvailability,
             creativeWritingPackages,
             updateCreativeWritingPackages,
             additionalServices,
@@ -225,6 +264,8 @@ export const CreativeWritingAdminProvider: React.FC<{children: ReactNode}> = ({ 
             updateBookingProgressNotes,
             createBooking,
             generateAndSetSessionId,
+            reviews,
+            addReview,
             loading,
             error,
         }}>

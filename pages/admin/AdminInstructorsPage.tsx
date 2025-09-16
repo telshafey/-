@@ -114,7 +114,7 @@ const InstructorModal: React.FC<{
                 </div>
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="flex items-center gap-4">
-                        <img src={preview || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} alt="Avatar" className="w-20 h-20 rounded-full object-cover bg-gray-200" />
+                        <img src={preview || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} alt="Avatar" className="w-20 h-20 rounded-full object-cover bg-gray-200" loading="lazy" />
                         <input type="file" onChange={handleFileChange} accept="image/*" className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
                     </div>
                     <div>
@@ -250,7 +250,7 @@ const AdminInstructorsPage: React.FC = () => {
                                 {instructors.map(instructor => (
                                     <tr key={instructor.id} className="border-b hover:bg-gray-50">
                                         <td className="py-4 px-4 flex items-center gap-3">
-                                            <img src={instructor.avatar_url || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} alt={instructor.name} className="w-10 h-10 rounded-full object-cover" />
+                                            <img src={instructor.avatar_url || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} alt={instructor.name} className="w-10 h-10 rounded-full object-cover" loading="lazy" />
                                             <span className="font-medium text-gray-800">{instructor.name}</span>
                                         </td>
                                         <td className="py-4 px-4 text-gray-600">{instructor.specialty}</td>

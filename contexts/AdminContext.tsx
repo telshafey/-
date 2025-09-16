@@ -236,6 +236,9 @@ const MOCK_BLOG_POSTS: BlogPost[] = [
     },
 ];
 
+const renewalDate = new Date();
+renewalDate.setDate(renewalDate.getDate() + 5);
+
 const MOCK_SUBSCRIPTIONS: Subscription[] = [
     {
         id: 'SUB-1',
@@ -243,8 +246,28 @@ const MOCK_SUBSCRIPTIONS: Subscription[] = [
         user_name: 'فاطمة علي',
         child_name: 'سارة',
         status: 'active',
-        start_date: new Date('2024-07-01T10:00:00Z').toISOString(),
-        next_renewal_date: new Date('2025-07-01T10:00:00Z').toISOString(),
+        start_date: new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString(),
+        next_renewal_date: renewalDate.toISOString(),
+        price: 4200
+    },
+    {
+        id: 'SUB-2',
+        user_id: '12345678-abcd-efgh-ijkl-mnopqrstuvwx',
+        user_name: 'أحمد محمود',
+        child_name: 'علي',
+        status: 'active',
+        start_date: new Date('2024-01-01T10:00:00Z').toISOString(),
+        next_renewal_date: new Date('2025-01-01T10:00:00Z').toISOString(),
+        price: 4200
+    },
+    {
+        id: 'SUB-3',
+        user_id: 'f1e2d3c4-b5a6-9870-4321-098765fedcba',
+        user_name: 'فاطمة علي',
+        child_name: 'يوسف',
+        status: 'cancelled',
+        start_date: new Date('2023-05-01T10:00:00Z').toISOString(),
+        next_renewal_date: new Date('2024-05-01T10:00:00Z').toISOString(),
         price: 4200
     }
 ];

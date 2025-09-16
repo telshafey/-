@@ -1,12 +1,13 @@
 
 
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { GoogleGenAI, Content, Type } from "@google/genai";
 import { Bot, User, Send, Loader2, Sparkles, ArrowLeft } from 'lucide-react';
 import { useProduct } from '../contexts/ProductContext';
 import { useAdmin } from '../contexts/AdminContext';
-// FIX: Replaced the 'react-router-dom' namespace import with a named import for 'Link' to resolve component resolution errors.
-import { Link } from 'react-router-dom';
+// FIX: Replaced named imports with a namespace import for 'react-router-dom' to resolve module resolution errors.
+import * as ReactRouterDOM from 'react-router-dom';
 
 // --- Static Data and Types ---
 
@@ -130,19 +131,29 @@ ${productInfoForPrompt}
 
 const ProductSuggestionCard: React.FC<{ productKey: string }> = ({ productKey }) => {
     const product = productDetails.find(p => p.key === productKey);
+    const [imageLoaded, setImageLoaded] = useState(false);
     if (!product) return null;
 
     return (
         <div className="mt-4 border-t border-white/20 pt-4">
             <div className="bg-white/10 p-3 rounded-lg flex items-center gap-4 text-white">
-                <img src={product.imageUrl} alt={product.title} className="w-20 h-20 rounded-md object-cover flex-shrink-0 bg-white" />
+                <div className="relative w-20 h-20 rounded-md flex-shrink-0 bg-white">
+                    {!imageLoaded && <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-md"></div>}
+                    <img 
+                        src={product.imageUrl} 
+                        alt={product.title} 
+                        className={`w-full h-full object-cover rounded-md transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                        loading="lazy"
+                        onLoad={() => setImageLoaded(true)}
+                    />
+                </div>
                 <div className="flex-grow">
                     <h4 className="font-bold">{product.title}</h4>
                     <p className="text-sm opacity-90 mb-3">{product.description}</p>
-                    <Link to={product.link} className="inline-flex items-center gap-2 bg-white text-blue-600 px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-gray-200 transition-colors">
+                    <ReactRouterDOM.Link to={product.link} className="inline-flex items-center gap-2 bg-white text-blue-600 px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-gray-200 transition-colors">
                         <span>اعرف المزيد</span>
                         <ArrowLeft size={16} />
-                    </Link>
+                    </ReactRouterDOM.Link>
                 </div>
             </div>
         </div>

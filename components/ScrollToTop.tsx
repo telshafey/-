@@ -1,10 +1,11 @@
 
+
 import { useEffect } from 'react';
-// FIX: Replaced the 'react-router-dom' namespace import with a named import for 'useLocation' to resolve hook resolution errors.
-import { useLocation } from 'react-router-dom';
+// FIX: Replaced named imports with a namespace import for 'react-router-dom' to resolve module resolution errors.
+import * as ReactRouterDOM from 'react-router-dom';
 
 const ScrollToTop: React.FC = () => {
-  const { pathname } = useLocation();
+  const { pathname } = ReactRouterDOM.useLocation();
 
   useEffect(() => {
     try {

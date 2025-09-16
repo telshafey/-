@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useAdmin } from '../contexts/AdminContext.tsx';
 import { useToast } from '../contexts/ToastContext.tsx';
-import { useNavigate } from 'react-router-dom';
+import * as ReactRouterDOM from 'react-router-dom';
 import { Star, Gift, CheckCircle, Package, Loader2 } from 'lucide-react';
 import { useProduct } from '../contexts/ProductContext.tsx';
 import PageLoader from '../components/ui/PageLoader.tsx';
@@ -13,7 +13,7 @@ const SubscriptionPage: React.FC = () => {
     const { createSubscription } = useAdmin();
     const { prices, loading: pricesLoading } = useProduct();
     const { addToast } = useToast();
-    const navigate = useNavigate();
+    const navigate = ReactRouterDOM.useNavigate();
 
     const [selectedChild, setSelectedChild] = useState<string>('');
     const [isSubscribing, setIsSubscribing] = useState(false);
@@ -78,7 +78,7 @@ const SubscriptionPage: React.FC = () => {
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         <div>
-                             <img src="https://i.ibb.co/dK5zZ7s/product-gift-box.png" alt="صندوق الرحلة الشهري" className="rounded-2xl shadow-xl w-full" />
+                             <img src="https://i.ibb.co/dK5zZ7s/product-gift-box.png" alt="صندوق الرحلة الشهري" className="rounded-2xl shadow-xl w-full" loading="lazy" />
                         </div>
                         <div className="space-y-6">
                             <h2 className="text-3xl font-bold text-gray-800">ماذا يوجد في الصندوق؟</h2>
@@ -119,30 +119,35 @@ const SubscriptionPage: React.FC = () => {
                                         <button 
                                             onClick={handleSubscribe} 
                                             disabled={isSubscribing || !selectedChild}
-                                            className="w-full flex items-center justify-center gap-2 bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors disabled:bg-gray-400"
+                                            className="w-full flex items-center justify-center gap-2 bg-orange-500 text-white font-bold py-3 px-4 rounded-full hover:bg-orange-600 transition-transform transform hover:scale-105 shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
                                         >
-                                           {isSubscribing ? <Loader2 className="animate-spin" /> : <Star />}
-                                           <span>{isSubscribing ? 'جاري الاشتراك...' : `اشترك الآن لـ ${selectedChild || ''}`}</span>
+                                            {isSubscribing ? <Loader2 className="animate-spin" /> : <Star />}
+                                            <span>{isSubscribing ? 'جاري إنشاء الاشتراك...' : 'الاشتراك الآن'}</span>
                                         </button>
                                     </div>
                                 ) : (
-                                    <p className="text-gray-600">يرجى <a href="#/account" className="text-blue-600 hover:underline">إضافة ملف طفل</a> أولاً في حسابك لتتمكن من الاشتراك.</p>
+                                    <div className="text-center p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                        <p className="text-blue-800">
+                                            يجب إضافة ملف طفل واحد على الأقل في <a href="#/account" className="font-bold underline">صفحة حسابك</a> لتتمكن من الاشتراك.
+                                        </p>
+                                    </div>
                                 )
                             ) : (
                                 <button 
-                                    onClick={() => navigate('/account')}
-                                    className="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                                    onClick={handleSubscribe} 
+                                    className="w-full flex items-center justify-center gap-2 bg-orange-500 text-white font-bold py-3 px-4 rounded-full hover:bg-orange-600 transition-transform transform hover:scale-105 shadow-lg"
                                 >
-                                    سجل الدخول للاشتراك
+                                    <Star />
+                                    <span>سجل الدخول للاشتراك</span>
                                 </button>
                             )}
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
     );
 };
 
+// FIX: Added default export to resolve lazy loading module error.
 export default SubscriptionPage;

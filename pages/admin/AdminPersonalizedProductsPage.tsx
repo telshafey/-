@@ -107,6 +107,7 @@ const AdminPersonalizedProductsPage: React.FC = () => {
                                             src={imagePreviews[product.id] || product.image_url || undefined} 
                                             alt={product.title} 
                                             className="w-40 h-40 object-contain rounded-md bg-white shadow-sm mb-3" 
+                                            loading="lazy"
                                         />
                                         <div className="relative">
                                             <input 

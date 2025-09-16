@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Link } from 'react-router-dom';
+import * as ReactRouterDOM from 'react-router-dom';
 import { FileText, UserCheck, ShieldCheck, CreditCard } from 'lucide-react';
 import { useAdmin } from '../contexts/AdminContext';
 import PageLoader from '../components/ui/PageLoader';
@@ -85,7 +84,7 @@ const TermsOfUsePage: React.FC = () => {
         <Section title={termsContent.contact_us_title || 'اتصل بنا'} icon={<UserCheck size={24} />}>
             <p>
               {termsContent.contact_us_text?.replace('الدعم والمساعدة', '')}
-              <Link to="/support" className="text-blue-600 hover:underline">الدعم والمساعدة</Link>.
+              <ReactRouterDOM.Link to="/support" className="text-blue-600 hover:underline">الدعم والمساعدة</ReactRouterDOM.Link>.
             </p>
         </Section>
         

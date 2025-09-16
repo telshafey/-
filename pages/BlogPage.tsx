@@ -1,15 +1,46 @@
 
 
 
-
-import React from 'react';
-// FIX: Replaced the 'react-router-dom' namespace import with a named import for 'Link' to resolve component resolution errors.
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+// FIX: Replaced named imports with a namespace import for 'react-router-dom' to resolve module resolution errors.
+import * as ReactRouterDOM from 'react-router-dom';
 import { useAdmin } from '../contexts/AdminContext';
 import PageLoader from '../components/ui/PageLoader';
 // FIX: Added .ts extension to resolve module error.
 import { formatDate } from '../utils/helpers.ts';
 import { ArrowLeft } from 'lucide-react';
+
+const PostCard: React.FC<{ post: any }> = ({ post }) => {
+    const [imageLoaded, setImageLoaded] = useState(false);
+    return (
+        <ReactRouterDOM.Link to={`/blog/${post.slug}`} className="group bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transform hover:-translate-y-2 transition-transform duration-300 border">
+            <div className="h-56 bg-gray-100 flex items-center justify-center overflow-hidden relative">
+                {!imageLoaded && <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>}
+                <img 
+                    src={post.image_url || 'https://i.ibb.co/RzJzQhL/hero-image-new.jpg'} 
+                    alt={post.title} 
+                    className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 transition-opacity ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    loading="lazy" 
+                    onLoad={() => setImageLoaded(true)}
+                />
+            </div>
+            <div className="p-6 flex flex-col flex-grow">
+                <h2 className="text-xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{post.title}</h2>
+                <p className="text-sm text-gray-500 mt-2">
+                    بواسطة {post.author_name} &bull; {formatDate(post.published_at)}
+                </p>
+                <p className="mt-4 text-gray-600 text-sm flex-grow line-clamp-3">
+                    {post.content}
+                </p>
+                <div className="mt-6 flex items-center font-semibold text-blue-600">
+                    <span>اقرأ المزيد</span>
+                    <ArrowLeft size={20} className="ms-2 transition-transform group-hover:-translate-x-1 rtl:group-hover:translate-x-1" />
+                </div>
+            </div>
+        </ReactRouterDOM.Link>
+    );
+};
+
 
 const BlogPage: React.FC = () => {
     const { blogPosts, loading, error } = useAdmin();
@@ -37,24 +68,7 @@ const BlogPage: React.FC = () => {
                 {publishedPosts.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {publishedPosts.map(post => (
-                            <Link key={post.id} to={`/blog/${post.slug}`} className="group bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transform hover:-translate-y-2 transition-transform duration-300 border">
-                                <div className="h-56 bg-gray-100 flex items-center justify-center overflow-hidden">
-                                    <img src={post.image_url || 'https://i.ibb.co/RzJzQhL/hero-image-new.jpg'} alt={post.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" />
-                                </div>
-                                <div className="p-6 flex flex-col flex-grow">
-                                    <h2 className="text-xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{post.title}</h2>
-                                    <p className="text-sm text-gray-500 mt-2">
-                                        بواسطة {post.author_name} &bull; {formatDate(post.published_at)}
-                                    </p>
-                                    <p className="mt-4 text-gray-600 text-sm flex-grow line-clamp-3">
-                                        {post.content}
-                                    </p>
-                                    <div className="mt-6 flex items-center font-semibold text-blue-600">
-                                        <span>اقرأ المزيد</span>
-                                        <ArrowLeft size={20} className="ms-2 transition-transform group-hover:-translate-x-1 rtl:group-hover:translate-x-1" />
-                                    </div>
-                                </div>
-                            </Link>
+                            <PostCard key={post.id} post={post} />
                         ))}
                     </div>
                 ) : (

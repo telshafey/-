@@ -173,6 +173,17 @@ export interface Database {
             price: number;
         }
       }
+      instructor_reviews: {
+        Row: {
+            id: number
+            created_at: string
+            user_id: string
+            student_name: string
+            instructor_id: number
+            rating: number
+            comment: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -202,6 +213,8 @@ export type CreativeWritingPackage = Database['public']['Tables']['creative_writ
 export type AdditionalService = Database['public']['Tables']['additional_services']['Row'];
 export type CreativeWritingBooking = Database['public']['Tables']['creative_writing_bookings']['Row'];
 export type Subscription = Database['public']['Tables']['subscriptions']['Row'];
+export type InstructorReview = Database['public']['Tables']['instructor_reviews']['Row'];
+
 
 // Specific JSON types
 export type OrderDetailsJson = {

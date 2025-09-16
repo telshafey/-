@@ -1,9 +1,9 @@
 
 
 
-import React from 'react';
-// FIX: Replaced the 'react-router-dom' namespace import with named imports to resolve component and hook resolution errors, and updated the code to use them directly.
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+// FIX: Replaced named imports with a namespace import for 'react-router-dom' to resolve module resolution errors.
+import * as ReactRouterDOM from 'react-router-dom';
 import { useAdmin, PersonalizedProduct } from '../contexts/AdminContext';
 import { useProduct, Prices } from '../contexts/ProductContext';
 import PageLoader from '../components/ui/PageLoader';
@@ -26,7 +26,8 @@ const getPriceForProduct = (productKey: string, prices: Prices) => {
 };
 
 const ProductCard: React.FC<{ product: PersonalizedProduct, price: string }> = ({ product, price }) => {
-    const navigate = useNavigate();
+    const navigate = ReactRouterDOM.useNavigate();
+    const [imageLoaded, setImageLoaded] = useState(false);
 
     const handleOrderNow = () => {
         navigate(`/order/${product.key}`);
@@ -34,8 +35,15 @@ const ProductCard: React.FC<{ product: PersonalizedProduct, price: string }> = (
 
     return (
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transform hover:-translate-y-2 transition-transform duration-300 border">
-            <div className="h-64 bg-gray-100 flex items-center justify-center p-4">
-                <img src={product.image_url || ''} alt={product.title} className="max-h-full max-w-full object-contain" loading="lazy" />
+            <div className="h-64 bg-gray-100 flex items-center justify-center p-4 relative">
+                {!imageLoaded && <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>}
+                <img 
+                    src={product.image_url || ''} 
+                    alt={product.title} 
+                    className={`max-h-full max-w-full object-contain transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    loading="lazy" 
+                    onLoad={() => setImageLoaded(true)}
+                />
             </div>
             <div className="p-6 flex flex-col flex-grow">
                 <h3 className="text-2xl font-bold text-gray-800">{product.title}</h3>

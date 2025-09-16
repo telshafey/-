@@ -143,7 +143,7 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({ order, isOpen, onClose 
                                 url ? (
                                     <div key={key}>
                                         <a href={url as string} target="_blank" rel="noopener noreferrer" className="block border rounded-lg overflow-hidden hover:ring-2 ring-blue-500">
-                                            <img src={url as string} alt={key} className="w-full h-auto aspect-square object-cover" />
+                                            <img src={url as string} alt={key} className="w-full h-auto aspect-square object-cover" loading="lazy" />
                                         </a>
                                     </div>
                                 ) : null

@@ -1,7 +1,8 @@
 
-import React, { useEffect } from 'react';
-// FIX: Replaced the 'react-router-dom' namespace import with named imports to resolve component and hook resolution errors, and updated the code to use them directly.
-import { useParams, Link } from 'react-router-dom';
+
+import React, { useEffect, useState } from 'react';
+// FIX: Replaced named imports with a namespace import for 'react-router-dom' to resolve module resolution errors.
+import * as ReactRouterDOM from 'react-router-dom';
 import { useAdmin } from '../contexts/AdminContext';
 import PageLoader from '../components/ui/PageLoader';
 // FIX: Added .ts extension to resolve module error.
@@ -10,8 +11,9 @@ import { ArrowLeft, User, Calendar } from 'lucide-react';
 import ShareButtons from '../components/shared/ShareButtons';
 
 const BlogPostPage: React.FC = () => {
-    const { slug } = useParams<{ slug: string }>();
+    const { slug } = ReactRouterDOM.useParams<{ slug: string }>();
     const { blogPosts, loading, error } = useAdmin();
+    const [imageLoaded, setImageLoaded] = useState(false);
     const postUrl = window.location.href;
 
     useEffect(() => {
@@ -32,9 +34,9 @@ const BlogPostPage: React.FC = () => {
         return (
             <div className="text-center py-20 min-h-[50vh] flex flex-col justify-center items-center">
                 <h1 className="text-2xl font-bold text-gray-800">لم يتم العثور على المقال</h1>
-                <Link to="/blog" className="text-blue-600 hover:underline mt-4 inline-block">
+                <ReactRouterDOM.Link to="/blog" className="text-blue-600 hover:underline mt-4 inline-block">
                     العودة إلى المدونة
-                </Link>
+                </ReactRouterDOM.Link>
             </div>
         );
     }
@@ -43,10 +45,10 @@ const BlogPostPage: React.FC = () => {
         <div className="bg-white py-16 sm:py-20 animate-fadeIn">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
                 <div className="mb-8">
-                    <Link to="/blog" className="flex items-center gap-2 text-gray-600 hover:text-blue-600 font-semibold transition-colors">
+                    <ReactRouterDOM.Link to="/blog" className="flex items-center gap-2 text-gray-600 hover:text-blue-600 font-semibold transition-colors">
                         <ArrowLeft size={20} />
                         <span>العودة إلى جميع المقالات</span>
-                    </Link>
+                    </ReactRouterDOM.Link>
                 </div>
 
                 <article>
@@ -68,8 +70,15 @@ const BlogPostPage: React.FC = () => {
                     </header>
 
                     {post.image_url && (
-                        <div className="my-10 rounded-2xl overflow-hidden shadow-xl">
-                            <img src={post.image_url} alt={post.title} className="w-full h-auto object-cover" loading="lazy" />
+                        <div className="my-10 rounded-2xl overflow-hidden shadow-xl relative min-h-[200px] bg-gray-200">
+                            {!imageLoaded && <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>}
+                            <img 
+                                src={post.image_url} 
+                                alt={post.title} 
+                                className={`w-full h-auto object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                                loading="lazy"
+                                onLoad={() => setImageLoaded(true)}
+                            />
                         </div>
                     )}
 

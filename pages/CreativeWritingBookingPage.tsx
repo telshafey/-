@@ -1,62 +1,77 @@
-
-
-import React, { useState, useEffect } from 'react';
-// FIX: Replaced the 'react-router-dom' namespace import with named imports to resolve component and hook resolution errors, and updated the code to use them directly.
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+// FIX: Replaced named imports with a namespace import for 'react-router-dom' to resolve module resolution errors.
+import * as ReactRouterDOM from 'react-router-dom';
 import { useCreativeWritingAdmin, Instructor, CreativeWritingPackage, AdditionalService } from '../contexts/admin/CreativeWritingAdminContext';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useToast } from '../contexts/ToastContext';
 import PageLoader from '../components/ui/PageLoader';
 import BookingSummary from '../components/creative-writing/BookingSummary';
 import { CheckCircle, AlertCircle, Package, User, Calendar, Send, Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
-import { WeeklySchedule } from '../lib/database.types';
+import BookingCalendar from '../components/BookingCalendar.tsx';
 import ShareButtons from '../components/shared/ShareButtons';
 
 type BookingStep = 'package' | 'instructor' | 'schedule' | 'confirm';
 
-const dayNames: { [key in keyof WeeklySchedule]: string } = {
-    sunday: 'الأحد',
-    monday: 'الاثنين',
-    tuesday: 'الثلاثاء',
-    wednesday: 'الأربعاء',
-    thursday: 'الخميس',
-    friday: 'الجمعة',
-    saturday: 'السبت',
-};
-
-
 const CreativeWritingBookingPage: React.FC = () => {
-    const location = useLocation();
-    const navigate = useNavigate();
+    const location = ReactRouterDOM.useLocation();
+    const navigate = ReactRouterDOM.useNavigate();
     const { 
         instructors, 
         creativeWritingPackages, 
         additionalServices, 
         createBooking, 
-        loading 
+        loading,
+        fetchInstructorAvailability 
     } = useCreativeWritingAdmin();
     const { currentUser, isLoggedIn } = useAuth();
     const { addToast } = useToast();
 
     const [step, setStep] = useState<BookingStep>('package');
-    const [selectedInstructor, setSelectedInstructor] = useState<Instructor | null>(null);
+    const [selectedInstructorId, setSelectedInstructorId] = useState<number | null>(null);
     const [selectedPackage, setSelectedPackage] = useState<CreativeWritingPackage | null>(null);
     const [selectedServices, setSelectedServices] = useState<AdditionalService[]>([]);
-    const [selectedDay, setSelectedDay] = useState<string | null>(null);
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [availabilityLoading, setAvailabilityLoading] = useState(false);
     const pageUrl = window.location.href;
     
-    useEffect(() => {
-        const preselectedInstructorId = location.state?.instructorId;
-        if (preselectedInstructorId && instructors.length > 0) {
-            const instructor = instructors.find(i => i.id === preselectedInstructorId);
-            if(instructor) {
-                setSelectedInstructor(instructor);
-                setStep('schedule'); // If coming from instructor page, go directly to schedule after picking a package
-            }
+    const selectedInstructor = useMemo(() => {
+        if (!selectedInstructorId) return null;
+        return instructors.find(i => i.id === selectedInstructorId);
+    }, [instructors, selectedInstructorId]);
+
+     useEffect(() => {
+        // This effect handles pre-selections from navigation state (e.g., from instructor profile)
+        const { instructorId, selectedDate, selectedTime } = location.state || {};
+
+        if (instructorId && instructors.length > 0) {
+            setSelectedInstructorId(instructorId);
+        }
+        if (selectedDate) {
+            setSelectedDate(new Date(selectedDate)); // Convert ISO string back to Date object
+        }
+        if (selectedTime) {
+            setSelectedTime(selectedTime);
         }
     }, [location.state, instructors]);
+
+
+    useEffect(() => {
+        if (step === 'schedule' && selectedInstructor && !selectedInstructor.availability) {
+            const fetchAvail = async () => {
+                setAvailabilityLoading(true);
+                try {
+                    await fetchInstructorAvailability(selectedInstructor.id);
+                } catch (e) {
+                    // error is handled and toasted in context
+                } finally {
+                    setAvailabilityLoading(false);
+                }
+            };
+            fetchAvail();
+        }
+    }, [step, selectedInstructor, fetchInstructorAvailability]);
 
     const handleSelectService = (service: AdditionalService) => {
         setSelectedServices(prev => 
@@ -66,8 +81,8 @@ const CreativeWritingBookingPage: React.FC = () => {
         );
     };
 
-    const handleTimeSelect = (day: string, time: string) => {
-        setSelectedDay(day);
+    const handleDateTimeSelect = (date: Date, time: string) => {
+        setSelectedDate(date);
         setSelectedTime(time);
         setStep('confirm');
     };
@@ -78,7 +93,7 @@ const CreativeWritingBookingPage: React.FC = () => {
             navigate('/account');
             return;
         }
-        if (!selectedInstructor || !selectedPackage || !selectedDay || !selectedTime) {
+        if (!selectedInstructor || !selectedPackage || !selectedDate || !selectedTime) {
             addToast('يرجى استكمال جميع خطوات الحجز.', 'warning');
             return;
         }
@@ -90,8 +105,8 @@ const CreativeWritingBookingPage: React.FC = () => {
                 instructorId: selectedInstructor.id,
                 selectedPackage,
                 selectedServices,
-                recurringDay: selectedDay,
-                recurringTime: selectedTime,
+                bookingDate: selectedDate,
+                bookingTime: selectedTime,
             });
             addToast('تم إنشاء حجزك بنجاح. يرجى إكمال الدفع من صفحة حسابك.', 'success');
             navigate('/account');
@@ -132,6 +147,21 @@ const CreativeWritingBookingPage: React.FC = () => {
         );
     };
 
+    const handleSelectPackage = (pkg: CreativeWritingPackage) => {
+        setSelectedPackage(pkg);
+        // If instructor and time are pre-selected, jump to confirm step
+        if (selectedInstructorId && selectedDate && selectedTime) {
+            setStep('confirm');
+        } else {
+            setStep(location.state?.instructorId ? 'schedule' : 'instructor');
+        }
+    };
+
+    const handleSelectInstructor = (instructor: Instructor) => {
+        setSelectedInstructorId(instructor.id);
+        setStep('schedule');
+    };
+
     const renderStepContent = () => {
         switch(step) {
             case 'package':
@@ -140,7 +170,7 @@ const CreativeWritingBookingPage: React.FC = () => {
                         <h2 className="text-2xl font-bold mb-6">1. اختر الباقة المناسبة</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                             {creativeWritingPackages.map(pkg => (
-                                <div key={pkg.id} onClick={() => { setSelectedPackage(pkg); setStep('instructor'); }} className="p-6 border-2 rounded-xl cursor-pointer transition-all border-gray-200 hover:border-blue-400 hover:bg-blue-50">
+                                <div key={pkg.id} onClick={() => handleSelectPackage(pkg)} className="p-6 border-2 rounded-xl cursor-pointer transition-all border-gray-200 hover:border-blue-400 hover:bg-blue-50">
                                     {pkg.popular && <div className="text-xs font-bold text-white bg-red-500 inline-block px-2 py-0.5 rounded-full mb-2">الأكثر شيوعاً</div>}
                                     <h3 className="text-xl font-bold text-gray-800">{pkg.name}</h3>
                                     <p className="text-2xl font-extrabold text-blue-600 my-2">{pkg.price} ج.م</p>
@@ -159,7 +189,7 @@ const CreativeWritingBookingPage: React.FC = () => {
                         <h2 className="text-2xl font-bold mb-6">2. اختر المدرب</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {instructors.map(i => (
-                                <div key={i.id} onClick={() => { setSelectedInstructor(i); setStep('schedule'); }} className="p-6 border-2 rounded-xl cursor-pointer text-center flex flex-col items-center border-gray-200 hover:border-blue-400 hover:bg-blue-50">
+                                <div key={i.id} onClick={() => handleSelectInstructor(i)} className="p-6 border-2 rounded-xl cursor-pointer text-center flex flex-col items-center border-gray-200 hover:border-blue-400 hover:bg-blue-50">
                                      <img src={i.avatar_url || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} alt={i.name} className="w-20 h-20 rounded-full object-cover mb-3 ring-2 ring-blue-100"/>
                                      <h3 className="text-lg font-bold">{i.name}</h3>
                                      <p className="text-sm text-blue-600 flex-grow">{i.specialty}</p>
@@ -172,37 +202,25 @@ const CreativeWritingBookingPage: React.FC = () => {
                     </div>
                 );
             case 'schedule':
-                const weeklySchedule = selectedInstructor?.weekly_schedule as WeeklySchedule || {};
-                const hasSchedule = Object.values(weeklySchedule).some(times => Array.isArray(times) && times.length > 0);
                 return (
                      <div>
-                        <h2 className="text-2xl font-bold mb-2">3. اختر الموعد الأسبوعي الثابت</h2>
-                        <p className="text-gray-600 mb-6">اختر الموعد الذي سيتكرر أسبوعيًا لجلسات: <span className="font-bold">{selectedInstructor?.name}</span></p>
+                        <h2 className="text-2xl font-bold mb-2">3. اختر الموعد المناسب</h2>
+                        <p className="text-gray-600 mb-6">تظهر في التقويم المواعيد المتاحة للمدرب: <span className="font-bold">{selectedInstructor?.name}</span></p>
                         
-                        {hasSchedule ? (
-                            <div className="space-y-4">
-                                {Object.entries(weeklySchedule).map(([day, times]) => (
-                                    (Array.isArray(times) && times.length > 0) &&
-                                    <div key={day}>
-                                        <h3 className="font-bold text-gray-700 mb-2">{dayNames[day as keyof typeof dayNames]}</h3>
-                                        <div className="flex flex-wrap gap-2">
-                                            {times.map(time => (
-                                                <button key={time} onClick={() => handleTimeSelect(day, time)} className="px-4 py-2 bg-white border border-gray-300 rounded-full hover:bg-blue-100 transition-colors">
-                                                    {time}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                ))}
+                        {availabilityLoading ? (
+                            <div className="flex justify-center items-center h-64">
+                                <Loader2 className="animate-spin text-blue-500" size={48} />
                             </div>
+                        ) : selectedInstructor ? (
+                            <BookingCalendar instructor={selectedInstructor} onDateTimeSelect={handleDateTimeSelect} />
                         ) : (
-                            <p className="text-center py-8 text-gray-500 bg-gray-100 rounded-lg">
-                                عذراً، هذا المدرب لم يحدد جدول مواعيده بعد.
+                             <p className="text-center py-8 text-gray-500 bg-gray-100 rounded-lg">
+                                حدث خطأ، يرجى العودة واختيار المدرب مرة أخرى.
                             </p>
                         )}
 
-                        <button onClick={() => setStep('instructor')} className="mt-8 flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600">
-                            <ArrowRight size={16}/> العودة لاختيار المدرب
+                        <button onClick={() => setStep(location.state?.instructorId ? 'package' : 'instructor')} className="mt-8 flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600">
+                            <ArrowRight size={16}/> العودة للخلف
                         </button>
                      </div>
                 );
@@ -266,7 +284,7 @@ const CreativeWritingBookingPage: React.FC = () => {
                                 instructor={selectedInstructor}
                                 selectedPackage={selectedPackage}
                                 selectedServices={selectedServices}
-                                selectedDay={selectedDay ? dayNames[selectedDay as keyof typeof dayNames] : null}
+                                selectedDate={selectedDate}
                                 selectedTime={selectedTime}
                             />
                         </div>

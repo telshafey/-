@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import * as ReactRouterDOM from 'react-router-dom';
 import { User, Heart, FileText, Plus, Edit, Trash, ChevronDown, ShoppingBag, CheckSquare, Star, Gift, Package, Frown } from 'lucide-react';
 // FIX: Added .tsx extension to resolve module error.
 import { useAuth, UserProfile } from '../contexts/AuthContext.tsx';
@@ -101,6 +101,7 @@ const ChildCard: React.FC<{
     onPay: (item: { id: string, type: 'order' | 'booking' | 'subscription', total: string | number | null, summary: string | null }) => void;
 }> = ({ child, orders, bookings, onEdit, onDelete, onPay }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+    const [imageLoaded, setImageLoaded] = useState(false);
     
     // This is a mock filter. In a real app, orders would be linked by child_id.
     const childOrders = orders.filter(o => {
@@ -112,7 +113,16 @@ const ChildCard: React.FC<{
         <div className="bg-white rounded-2xl shadow-lg border">
             <div className="p-6 flex justify-between items-center">
                 <div className="flex items-center gap-4">
-                    <img src={child.avatar_url || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} alt={child.name} className="w-16 h-16 rounded-full object-cover"/>
+                    <div className="relative w-16 h-16">
+                        {!imageLoaded && <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-full"></div>}
+                        <img 
+                            src={child.avatar_url || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} 
+                            alt={child.name} 
+                            className={`w-16 h-16 rounded-full object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                            loading="lazy"
+                            onLoad={() => setImageLoaded(true)}
+                        />
+                    </div>
                     <div>
                         <h3 className="text-xl font-bold text-gray-800">{child.name}</h3>
                         <p className="text-sm text-gray-500">{child.age} سنوات</p>
@@ -161,7 +171,7 @@ const AccountPage: React.FC = () => {
     const { isLoggedIn, currentUser, signOut, childProfiles, deleteChildProfile } = useAuth();
     const { orders, subscriptions } = useAdmin();
     const { creativeWritingBookings } = useCreativeWritingAdmin();
-    const navigate = useNavigate();
+    const navigate = ReactRouterDOM.useNavigate();
 
     const [activeTab, setActiveTab] = useState('family');
     const [isChildModalOpen, setIsChildModalOpen] = useState(false);

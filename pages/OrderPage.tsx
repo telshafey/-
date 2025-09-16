@@ -1,6 +1,7 @@
 
+
 import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import * as ReactRouterDOM from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useAdmin, PersonalizedProduct } from '../contexts/AdminContext.tsx';
 import { useProduct } from '../contexts/ProductContext.tsx';
@@ -36,7 +37,7 @@ const FileUpload: React.FC<{ id: string; label: string; onFileChange: (id: strin
             <label className="block text-sm font-bold text-gray-700 mb-2">{label}</label>
             <div className="mt-1 flex items-center gap-4">
                 <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
-                    {preview ? <img src={preview} alt="Preview" className="h-full w-full object-cover rounded-lg" /> : <Image className="text-gray-400" />}
+                    {preview ? <img src={preview} alt="Preview" className="h-full w-full object-cover rounded-lg" loading="lazy" /> : <Image className="text-gray-400" />}
                 </div>
                 <label htmlFor={id} className="cursor-pointer bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50">
                     <span>{file ? 'تغيير الصورة' : 'رفع صورة'}</span>
@@ -49,8 +50,8 @@ const FileUpload: React.FC<{ id: string; label: string; onFileChange: (id: strin
 
 
 const OrderPage: React.FC = () => {
-    const { productKey } = useParams<{ productKey: string }>();
-    const navigate = useNavigate();
+    const { productKey } = ReactRouterDOM.useParams<{ productKey: string }>();
+    const navigate = ReactRouterDOM.useNavigate();
     const { addToast } = useToast();
     const { currentUser, childProfiles } = useAuth();
     const { personalizedProducts, loading: adminLoading, createOrder } = useAdmin();
