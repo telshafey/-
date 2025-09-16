@@ -1,43 +1,13 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAdmin } from '../contexts/AdminContext';
 import { useToast } from '../contexts/ToastContext';
 import PageLoader from '../components/ui/PageLoader';
 import { ArrowLeft, CreditCard, Home, Loader2, Lock, Truck, Upload, Link as LinkIcon, AlertCircle } from 'lucide-react';
 import { EGYPTIAN_GOVERNORATES } from '../utils/governorates.ts';
+import ReceiptUpload from '../components/shared/ReceiptUpload.tsx';
 
 const PAYMENT_LINK = 'https://ipn.eg/S/gm2000/instapay/0dqErO';
-
-const FileUpload: React.FC<{ file: File | null; setFile: (file: File | null) => void; disabled?: boolean }> = ({ file, setFile, disabled }) => {
-    const [preview, setPreview] = useState<string | null>(null);
-
-    useEffect(() => {
-        if (!file) { setPreview(null); return; }
-        const objectUrl = URL.createObjectURL(file);
-        setPreview(objectUrl);
-        return () => URL.revokeObjectURL(objectUrl);
-    }, [file]);
-
-    return (
-        <div className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md transition-colors ${!disabled && 'hover:border-blue-400'}`}>
-            <div className="space-y-1 text-center">
-                {preview ? (
-                     <img src={preview} alt="Preview" className="h-24 w-auto mx-auto rounded-md object-cover" loading="lazy" />
-                ) : (
-                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                )}
-                <div className="flex text-sm text-gray-600 justify-center">
-                    <label htmlFor="receipt-file-upload" className={`relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500`}>
-                        <span>{file ? 'تغيير الملف' : 'اختر ملفًا'}</span>
-                        <input id="receipt-file-upload" name="receipt-file-upload" type="file" className="sr-only" onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)} accept="image/*" required disabled={disabled} />
-                    </label>
-                    <p className="ps-1">{file ? file.name : 'أو اسحبه هنا'}</p>
-                </div>
-                <p className="text-xs text-gray-500">PNG, JPG, PDF up to 10MB</p>
-            </div>
-        </div>
-    );
-};
 
 const CheckoutPage: React.FC = () => {
     const location = useLocation();
@@ -155,7 +125,7 @@ const CheckoutPage: React.FC = () => {
                                     <span>يرجى ملاحظة أن هذا الرابط سينقلك إلى موقع خارجي لإتمام عملية الدفع.</span>
                                 </div>
                                 <p className="font-semibold text-gray-700 mt-6">2. ارفع صورة إيصال الدفع هنا:</p>
-                                <FileUpload file={receiptFile} setFile={setReceiptFile} disabled={isSubmitting} />
+                                <ReceiptUpload file={receiptFile} setFile={setReceiptFile} disabled={isSubmitting} />
                             </div>
                         </section>
                     </div>

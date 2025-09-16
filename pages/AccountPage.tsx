@@ -10,86 +10,8 @@ import { useCreativeWritingAdmin, CreativeWritingBooking } from '../contexts/adm
 // FIX: Added .ts extension to resolve module error.
 import { getStatusColor, formatDate } from '../utils/helpers.ts';
 import ChildProfileModal from '../components/order/ChildProfileModal';
-
-// Auth Components
-const AuthForm: React.FC = () => {
-    const { signIn, signUp, loading, error } = useAuth();
-    const [isLogin, setIsLogin] = useState(true);
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [name, setName] = useState('');
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (isLogin) {
-            signIn(email, password);
-        } else {
-            signUp(email, password, name);
-        }
-    };
-
-    return (
-        <div className="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-lg">
-            <h2 className="text-2xl font-bold text-center mb-6">{isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-                {!isLogin && (
-                    <div>
-                        <label className="block text-sm font-bold mb-2">الاسم</label>
-                        <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full p-2 border rounded" required />
-                    </div>
-                )}
-                <div>
-                    <label className="block text-sm font-bold mb-2">البريد الإلكتروني</label>
-                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full p-2 border rounded" required />
-                </div>
-                <div>
-                    <label className="block text-sm font-bold mb-2">كلمة المرور</label>
-                    <input type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full p-2 border rounded" required />
-                </div>
-                {error && <p className="text-red-500 text-sm">{error}</p>}
-                <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:bg-blue-400">
-                    {loading ? 'جاري...' : (isLogin ? 'دخول' : 'إنشاء حساب')}
-                </button>
-            </form>
-            <p className="text-center mt-4 text-sm">
-                {isLogin ? 'ليس لديك حساب؟' : 'لديك حساب بالفعل؟'}
-                <button onClick={() => setIsLogin(!isLogin)} className="text-blue-600 hover:underline font-semibold ms-2">
-                    {isLogin ? 'أنشئ حسابًا' : 'سجل الدخول'}
-                </button>
-            </p>
-        </div>
-    );
-};
-
-const DemoLogins: React.FC = () => {
-    const { signInAsDemoUser } = useAuth();
-
-    const roles: { role: UserProfile['role']; label: string }[] = [
-        { role: 'super_admin', label: 'مدير عام' },
-        { role: 'enha_lak_supervisor', label: 'مشرف "إنها لك"' },
-        { role: 'creative_writing_supervisor', label: 'مشرف "بداية الرحلة"' },
-        { role: 'instructor', label: 'مدرب' },
-        { role: 'user', label: 'ولي أمر' },
-        { role: 'student', label: 'طالب' },
-    ];
-
-    return (
-        <div className="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-lg mt-8 border-t-4 border-blue-100">
-            <h3 className="text-lg font-bold text-center text-gray-700 mb-4">تسجيل الدخول السريع (للتجربة)</h3>
-            <div className="grid grid-cols-1 gap-3">
-                {roles.map(({ role, label }) => (
-                    <button
-                        key={role}
-                        onClick={() => signInAsDemoUser(role)}
-                        className="w-full bg-gray-100 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
-                    >
-                        الدخول كـ {label}
-                    </button>
-                ))}
-            </div>
-        </div>
-    );
-};
+import AuthForm from '../components/auth/AuthForm.tsx';
+import DemoLogins from '../components/auth/DemoLogins.tsx';
 
 // Child Card Component
 const ChildCard: React.FC<{

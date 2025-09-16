@@ -10,6 +10,7 @@ import BarChart from '../../components/admin/BarChart';
 import ViewOrderModal from '../../components/admin/ViewOrderModal';
 // FIX: Added .tsx extension to resolve module error.
 import { useAuth } from '../../contexts/AuthContext.tsx';
+import StatCard from '../../components/admin/StatCard.tsx';
 
 const statusColors: { [key: string]: string } = {
     'تم التسليم': '#10B981', 
@@ -23,19 +24,6 @@ const statusColors: { [key: string]: string } = {
     'ملغي': '#EF4444',
     'نشط': '#6366F1',
 };
-
-
-const StatCard: React.FC<{ title: string, value: string, icon: React.ReactNode, color: string }> = ({ title, value, icon, color }) => (
-    <div className="bg-white p-6 rounded-2xl shadow-md flex items-center justify-between transition-transform transform hover:-translate-y-1">
-        <div>
-            <p className="text-sm font-medium text-gray-500">{title}</p>
-            <p className="text-3xl font-extrabold text-gray-800">{value}</p>
-        </div>
-        <div className={`w-16 h-16 rounded-full flex items-center justify-center ${color}`}>
-            {icon}
-        </div>
-    </div>
-);
 
 const AdminDashboardPage: React.FC = () => {
   const { orders, users, personalizedProducts, subscriptions, loading: adminLoading, error: adminError } = useAdmin();

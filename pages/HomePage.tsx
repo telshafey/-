@@ -9,6 +9,8 @@ import { useProduct } from '../contexts/ProductContext';
 import { useAdmin } from '../contexts/AdminContext';
 import PageLoader from '../components/ui/PageLoader';
 import ShareButtons from '../components/shared/ShareButtons';
+import TestimonialCard from '../components/shared/TestimonialCard.tsx';
+import HowItWorksStep from '../components/shared/HowItWorksStep.tsx';
 
 const heroContent = {
     title: 'اجعل طفلك بطل قصته التي لا تُنسى',
@@ -22,34 +24,6 @@ const ProductShowcaseCard: React.FC<{ icon: React.ReactNode, title: string, desc
       </div>
       <h3 className="text-2xl font-bold text-gray-800">{title}</h3>
       <p className="mt-4 text-gray-600 flex-grow">{description}</p>
-    </div>
-);
-
-const HowItWorksStep: React.FC<{ icon: React.ReactNode, title: string, description: string }> = ({ icon, title, description }) => (
-    <div className="flex flex-col items-center text-center">
-        <div className="flex items-center justify-center w-24 h-24 bg-blue-100 rounded-full mb-4">
-        {icon}
-        </div>
-        <h3 className="text-xl font-bold text-gray-800">{title}</h3>
-        <p className="mt-2 text-gray-600">{description}</p>
-    </div>
-);
-
-const TestimonialCard: React.FC<{ quote: string, author: string, role: string }> = ({ quote, author, role }) => (
-    <div className="bg-white p-8 rounded-2xl shadow-lg h-full flex flex-col">
-        <Quote className="w-10 h-10 text-blue-100 transform rotate-180 mb-2" />
-        <div className="flex">
-            <Star className="text-yellow-400 me-1" fill="currentColor" />
-            <Star className="text-yellow-400 me-1" fill="currentColor" />
-            <Star className="text-yellow-400 me-1" fill="currentColor" />
-            <Star className="text-yellow-400 me-1" fill="currentColor" />
-            <Star className="text-yellow-400 mb-4" fill="currentColor" />
-        </div>
-        <p className="text-gray-600 italic mb-6 flex-grow">"{quote}"</p>
-        <div>
-            <p className="font-bold text-gray-800">{author}</p>
-            <p className="text-sm text-gray-500">{role}</p>
-        </div>
     </div>
 );
 

@@ -1,22 +1,10 @@
 
 import React from 'react';
-import { Target, BookHeart, Award, Feather } from 'lucide-react';
+import { Target, BookHeart, Feather } from 'lucide-react';
 import { useProduct } from '../contexts/ProductContext';
 import { useAdmin } from '../contexts/AdminContext';
 import PageLoader from '../components/ui/PageLoader';
-
-const ProjectSection: React.FC<{ title: string; icon: React.ReactNode; text: string; }> = ({ title, icon, text }) => (
-    <div className="bg-white p-8 rounded-2xl shadow-lg border h-full transform hover:-translate-y-2 transition-transform duration-300">
-        <div className="flex items-center mb-4">
-            <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-blue-100 rounded-full text-blue-600">
-                {icon}
-            </div>
-            <h3 className="text-2xl font-bold text-gray-800 ms-4">{title}</h3>
-        </div>
-        <p className="text-gray-600 leading-relaxed">{text}</p>
-    </div>
-);
-
+import Section from '../components/ui/Section.tsx';
 
 const AboutPage: React.FC = () => {
   const { loading: brandingLoading } = useProduct();
@@ -46,16 +34,20 @@ const AboutPage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-stretch mb-20">
-            <ProjectSection 
+            <Section 
                 title={aboutContent.project1_title || ''}
-                text={aboutContent.project1_text || ''}
                 icon={<BookHeart size={24} />}
-            />
-             <ProjectSection 
+                className="!mb-0 border h-full transform hover:-translate-y-2 transition-transform duration-300"
+            >
+              <p className="text-gray-600 leading-relaxed">{aboutContent.project1_text || ''}</p>
+            </Section>
+             <Section 
                 title={aboutContent.project2_title || ''}
-                text={aboutContent.project2_text || ''}
                 icon={<Feather size={24} />}
-            />
+                className="!mb-0 border h-full transform hover:-translate-y-2 transition-transform duration-300"
+            >
+              <p className="text-gray-600 leading-relaxed">{aboutContent.project2_text || ''}</p>
+            </Section>
         </div>
 
         <div className="max-w-5xl mx-auto text-center">

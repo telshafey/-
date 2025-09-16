@@ -5,40 +5,7 @@ import { useCommunication, JoinRequest } from '../../contexts/admin/Communicatio
 import { formatDate } from '../../utils/helpers.ts';
 import AdminSection from '../../components/admin/AdminSection';
 import PageLoader from '../../components/ui/PageLoader';
-
-const ViewRequestModal: React.FC<{
-    request: JoinRequest | null;
-    isOpen: boolean;
-    onClose: () => void;
-}> = ({ request, isOpen, onClose }) => {
-    if (!isOpen || !request) return null;
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center" onClick={onClose}>
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 m-4" onClick={e => e.stopPropagation()}>
-                 <h3 className="text-xl font-bold text-gray-800 mb-4">تفاصيل الطلب</h3>
-                 <div className="space-y-4 text-sm">
-                    <p><span className="font-semibold text-gray-500">الاسم:</span> {request.name}</p>
-                    <p><span className="font-semibold text-gray-500">البريد الإلكتروني:</span> {request.email}</p>
-                    <p><span className="font-semibold text-gray-500">مهتم بالانضمام كـ:</span> {request.role}</p>
-                     {request.portfolio_url && (
-                        <p className="flex items-center gap-2">
-                           <span className="font-semibold text-gray-500">معرض الأعمال:</span> 
-                           <a href={request.portfolio_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-1">
-                             <LinkIcon size={14}/> <span>رابط</span>
-                           </a>
-                        </p>
-                    )}
-                    <div className="p-3 bg-gray-50 rounded-lg border max-h-60 overflow-y-auto">
-                        <p className="whitespace-pre-wrap">{request.message}</p>
-                    </div>
-                 </div>
-                 <div className="mt-6 text-right">
-                    <button onClick={onClose} className="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700">إغلاق</button>
-                 </div>
-            </div>
-        </div>
-    );
-};
+import ViewJoinRequestModal from '../../components/admin/ViewJoinRequestModal.tsx';
 
 const AdminJoinRequestsPage: React.FC = () => {
     const { joinRequests, updateJoinRequestStatus, loading, error } = useCommunication();
@@ -67,7 +34,7 @@ const AdminJoinRequestsPage: React.FC = () => {
 
     return (
         <>
-            <ViewRequestModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} request={selectedRequest} />
+            <ViewJoinRequestModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} request={selectedRequest} />
             <div className="animate-fadeIn space-y-12">
                 <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-800">طلبات الانضمام</h1>
                 <AdminSection title="الطلبات الواردة" icon={<UserPlus />}>

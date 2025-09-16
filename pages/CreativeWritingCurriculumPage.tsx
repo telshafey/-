@@ -1,19 +1,6 @@
 import React from 'react';
 import { Book, Award, FileText, GraduationCap } from 'lucide-react';
-
-const Section: React.FC<{ title: string; icon: React.ReactNode; children: React.ReactNode; id?: string; }> = ({ title, icon, children, id }) => (
-    <div id={id} className="bg-white p-8 rounded-2xl shadow-lg mb-12 scroll-mt-24">
-      <div className="flex items-center mb-6">
-        <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-blue-100 rounded-full text-blue-600">
-          {icon}
-        </div>
-        <h2 className="text-3xl font-bold text-gray-800 ms-4">{title}</h2>
-      </div>
-      <div className="text-gray-600 leading-relaxed text-lg">
-          {children}
-      </div>
-    </div>
-);
+import Section from '../components/ui/Section.tsx';
 
 const CreativeWritingCurriculumPage: React.FC = () => {
     return (

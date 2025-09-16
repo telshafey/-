@@ -7,6 +7,8 @@ import * as ReactRouterDOM from 'react-router-dom';
 // FIX: Replaced non-existent 'PackageSelect' icon with 'Package'.
 import { Target, Book, Users, ArrowLeft, Calendar, CheckCircle, Package, CalendarCheck, Sparkles, Quote, Star, Award, HeartHandshake } from 'lucide-react';
 import ShareButtons from '../components/shared/ShareButtons';
+import TestimonialCard from '../components/shared/TestimonialCard.tsx';
+import HowItWorksStep from '../components/shared/HowItWorksStep.tsx';
 
 const FeatureCard: React.FC<{ title: string; description: string; link: string; icon: React.ReactNode; }> = ({ title, description, link, icon }) => (
     <div className="bg-white p-8 rounded-2xl shadow-lg text-center transform hover:-translate-y-2 transition-transform duration-300 h-full flex flex-col">
@@ -22,16 +24,6 @@ const FeatureCard: React.FC<{ title: string; description: string; link: string; 
     </div>
 );
 
-const HowItWorksStep: React.FC<{ icon: React.ReactNode, title: string, description: string }> = ({ icon, title, description }) => (
-    <div className="flex flex-col items-center text-center">
-        <div className="flex items-center justify-center w-24 h-24 bg-blue-100 rounded-full mb-4">
-        {icon}
-        </div>
-        <h3 className="text-xl font-bold text-gray-800">{title}</h3>
-        <p className="mt-2 text-gray-600">{description}</p>
-    </div>
-);
-
 const BenefitCard: React.FC<{ icon: React.ReactNode, title: string, description: string }> = ({ icon, title, description }) => (
     <div className="bg-white p-8 rounded-2xl shadow-lg text-center transform hover:-translate-y-2 transition-transform duration-300">
         <div className="flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-green-100 text-green-600 mb-6 mx-auto">
@@ -41,26 +33,6 @@ const BenefitCard: React.FC<{ icon: React.ReactNode, title: string, description:
         <p className="mt-4 text-gray-600">{description}</p>
     </div>
 );
-
-
-const TestimonialCard: React.FC<{ quote: string, author: string, role: string }> = ({ quote, author, role }) => (
-    <div className="bg-white p-8 rounded-2xl shadow-lg h-full flex flex-col">
-        <Quote className="w-10 h-10 text-blue-100 transform rotate-180 mb-2" />
-        <div className="flex">
-            <Star className="text-yellow-400 me-1" fill="currentColor" />
-            <Star className="text-yellow-400 me-1" fill="currentColor" />
-            <Star className="text-yellow-400 me-1" fill="currentColor" />
-            <Star className="text-yellow-400 me-1" fill="currentColor" />
-            <Star className="text-yellow-400 mb-4" fill="currentColor" />
-        </div>
-        <p className="text-gray-600 italic mb-6 flex-grow">"{quote}"</p>
-        <div>
-            <p className="font-bold text-gray-800">{author}</p>
-            <p className="text-sm text-gray-500">{role}</p>
-        </div>
-    </div>
-);
-
 
 const CreativeWritingPage: React.FC = () => {
   const pageUrl = window.location.href;

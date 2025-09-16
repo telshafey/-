@@ -10,6 +10,7 @@ import InteractivePreview from '../components/order/InteractivePreview';
 import { User, Heart, Image, Edit, Plus, Send, Loader2, AlertCircle, Truck, Sparkles, X } from 'lucide-react';
 import { EGYPTIAN_GOVERNORATES } from '../utils/governorates.ts';
 import { GoogleGenAI, Type } from "@google/genai";
+import ImageUpload from '../components/order/ImageUpload.tsx';
 
 
 const storyGoals = [
@@ -47,32 +48,6 @@ const systemInstruction = `You are a creative storyteller for "Alrehla", a platf
 
 
 // Form Components
-const FileUpload: React.FC<{ id: string; label: string; onFileChange: (id: string, file: File | null) => void; file: File | null }> = ({ id, label, onFileChange, file }) => {
-    const [preview, setPreview] = useState<string | null>(null);
-    useEffect(() => {
-        if (!file) { setPreview(null); return; }
-        const objectUrl = URL.createObjectURL(file);
-        setPreview(objectUrl);
-        return () => URL.revokeObjectURL(objectUrl);
-    }, [file]);
-
-    return (
-        <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">{label}</label>
-            <div className="mt-1 flex items-center gap-4">
-                <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
-                    {preview ? <img src={preview} alt="Preview" className="h-full w-full object-cover rounded-lg" loading="lazy" /> : <Image className="text-gray-400" />}
-                </div>
-                <label htmlFor={id} className="cursor-pointer bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50">
-                    <span>{file ? 'تغيير الصورة' : 'رفع صورة'}</span>
-                    <input id={id} name={id} type="file" className="sr-only" onChange={(e) => onFileChange(id, e.target.files ? e.target.files[0] : null)} accept="image/*" />
-                </label>
-            </div>
-        </div>
-    );
-};
-
-
 const StoryIdeaGeneratorModal: React.FC<{
     isOpen: boolean;
     onClose: () => void;
@@ -355,9 +330,9 @@ const OrderPage: React.FC = () => {
                                     <h2 className="text-xl font-bold mb-4">2. صور الطفل</h2>
                                     <p className="text-sm text-gray-600 mb-4">ارفع 3 صور واضحة للطفل (وجه كامل، جانب، وجسم كامل) لنستخدمها في الرسومات. <span className="font-bold text-red-600">صورة الوجه إلزامية.</span></p>
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                                        <FileUpload id="image1" label="صورة 1 (الوجه)*" file={files.image1} onFileChange={handleFileChange} />
-                                        <FileUpload id="image2" label="صورة 2 (جانبية)" file={files.image2} onFileChange={handleFileChange} />
-                                        <FileUpload id="image3" label="صورة 3 (كاملة)" file={files.image3} onFileChange={handleFileChange} />
+                                        <ImageUpload id="image1" label="صورة 1 (الوجه)*" file={files.image1} onFileChange={handleFileChange} />
+                                        <ImageUpload id="image2" label="صورة 2 (جانبية)" file={files.image2} onFileChange={handleFileChange} />
+                                        <ImageUpload id="image3" label="صورة 3 (كاملة)" file={files.image3} onFileChange={handleFileChange} />
                                     </div>
                                 </section>
                                 
