@@ -1,22 +1,11 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
-import { useToast } from '../ToastContext';
-// FIX: Added .ts extension to resolve module error.
-import { SupportTicket, JoinRequest } from '../../lib/database.types.ts';
+// FIX: Added .tsx extension to useToast import to resolve module error.
+import { useToast } from '../ToastContext.tsx';
+import { supabase } from '../../lib/supabaseClient.ts';
+import { SupportTicket, JoinRequest, Database } from '../../lib/database.types.ts';
 
 // --- Re-export types ---
 export type { SupportTicket, JoinRequest };
-
-
-// --- Mock Data ---
-const MOCK_SUPPORT_TICKETS: SupportTicket[] = [
-    { id: 'TKT-1', name: 'سارة إبراهيم', email: 'sara@example.com', subject: 'استفسار عن الشحن', message: 'مرحباً، أود أن أسأل عن مدة الشحن لمدينة الإسكندرية. شكراً لكم.', created_at: new Date('2024-07-20T10:00:00Z').toISOString(), status: 'جديدة' },
-    { id: 'TKT-2', name: 'محمد حسن', email: 'mohamed@example.com', subject: 'مشكلة في الدفع', message: 'أواجه مشكلة عند محاولة الدفع باستخدام بطاقة الائتمان، هل هناك طريقة أخرى؟', created_at: new Date('2024-07-19T14:20:00Z').toISOString(), status: 'تمت المراجعة' },
-];
-
-const MOCK_JOIN_REQUESTS: JoinRequest[] = [
-    { id: 'JOIN-1', name: 'نور الهدى', email: 'nour@artist.com', role: 'رسام/مصمم جرافيك', portfolio_url: 'https://portfolio.example.com/nour', message: 'أنا رسامة متخصصة في كتب الأطفال وأحببت مشروعكم كثيراً. أتمنى أن تتاح لي فرصة التعاون معكم. هذا رابط أعمالي.', created_at: new Date('2024-07-18T09:00:00Z').toISOString(), status: 'جديد' },
-];
-
 
 // --- Context Definition ---
 
@@ -48,42 +37,78 @@ export const CommunicationProvider: React.FC<{children: ReactNode}> = ({ childre
 
     const fetchData = useCallback(async () => {
         setLoading(true);
-        await new Promise(res => setTimeout(res, 200)); 
-        setSupportTickets(MOCK_SUPPORT_TICKETS);
-        setJoinRequests(MOCK_JOIN_REQUESTS);
-        setLoading(false);
-    }, []);
+        setError(null);
+        try {
+            const [ticketsRes, requestsRes] = await Promise.all([
+                supabase.from('support_tickets').select('*').order('created_at', { ascending: false }),
+                supabase.from('join_requests').select('*').order('created_at', { ascending: false })
+            ]);
+
+            if (ticketsRes.error) throw ticketsRes.error;
+            if (requestsRes.error) throw requestsRes.error;
+
+            setSupportTickets(ticketsRes.data || []);
+            setJoinRequests(requestsRes.data || []);
+        } catch (e: any) {
+            setError('فشل تحميل بيانات التواصل.');
+            addToast(e.message, 'error');
+        } finally {
+            setLoading(false);
+        }
+    }, [addToast]);
     
     useEffect(() => {
         fetchData();
     }, [fetchData]);
 
     const createSupportTicket = async (payload: CreateSupportTicketPayload) => {
-        const newTicket: SupportTicket = {
+        const newTicketData: Database['public']['Tables']['support_tickets']['Insert'] = {
             id: `TKT-${Date.now()}`,
             ...payload,
-            created_at: new Date().toISOString(),
             status: 'جديدة',
         };
-        setSupportTickets(prev => [newTicket, ...prev]);
+        const { data, error } = await supabase.from('support_tickets').insert([newTicketData]).select().single();
+        if (error) {
+            addToast(`فشل إرسال الرسالة: ${error.message}`, 'error');
+            throw error;
+        }
+        if (data) {
+            setSupportTickets(prev => [data, ...prev]);
+        }
     };
 
     const updateSupportTicketStatus = async (ticketId: string, newStatus: SupportTicket['status']) => {
+        const { error } = await supabase.from('support_tickets').update({ status: newStatus }).eq('id', ticketId);
+        if (error) {
+            addToast('فشل تحديث حالة الرسالة.', 'error');
+            throw error;
+        }
         setSupportTickets(prev => prev.map(t => t.id === ticketId ? { ...t, status: newStatus } : t));
         addToast('تم تحديث حالة الرسالة.', 'success');
     };
 
     const createJoinRequest = async (payload: CreateJoinRequestPayload) => {
-        const newRequest: JoinRequest = {
+        const newRequestData: Database['public']['Tables']['join_requests']['Insert'] = {
             id: `JOIN-${Date.now()}`,
             ...payload,
-            created_at: new Date().toISOString(),
             status: 'جديد',
         };
-        setJoinRequests(prev => [newRequest, ...prev]);
+        const { data, error } = await supabase.from('join_requests').insert([newRequestData]).select().single();
+        if (error) {
+            addToast(`فشل إرسال الطلب: ${error.message}`, 'error');
+            throw error;
+        }
+        if (data) {
+            setJoinRequests(prev => [data, ...prev]);
+        }
     };
 
     const updateJoinRequestStatus = async (requestId: string, newStatus: JoinRequest['status']) => {
+        const { error } = await supabase.from('join_requests').update({ status: newStatus }).eq('id', requestId);
+        if (error) {
+            addToast('فشل تحديث حالة الطلب.', 'error');
+            throw error;
+        }
         setJoinRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: newStatus } : r));
         addToast('تم تحديث حالة الطلب.', 'success');
     };

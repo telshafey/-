@@ -20,6 +20,8 @@ const ChildProfileModal: React.FC<ChildProfileModalProps> = ({ isOpen, onClose, 
     const [gender, setGender] = useState<'ذكر' | 'أنثى'>('ذكر');
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
+    const [interests, setInterests] = useState('');
+    const [strengths, setStrengths] = useState('');
     const modalRef = useRef<HTMLDivElement>(null);
     const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -31,11 +33,15 @@ const ChildProfileModal: React.FC<ChildProfileModalProps> = ({ isOpen, onClose, 
                 setAge(childToEdit.age.toString());
                 setGender(childToEdit.gender);
                 setPreview(childToEdit.avatar_url);
+                setInterests((childToEdit.interests || []).join(', '));
+                setStrengths((childToEdit.strengths || []).join(', '));
             } else {
                 setName('');
                 setAge('');
                 setGender('ذكر');
                 setPreview(null);
+                setInterests('');
+                setStrengths('');
             }
             setAvatarFile(null);
         }
@@ -104,18 +110,21 @@ const ChildProfileModal: React.FC<ChildProfileModalProps> = ({ isOpen, onClose, 
         e.preventDefault();
         setIsSaving(true);
         try {
+            const interestsArray = interests.split(',').map(s => s.trim()).filter(Boolean);
+            const strengthsArray = strengths.split(',').map(s => s.trim()).filter(Boolean);
+
             const profileData = {
                 name,
                 age: parseInt(age),
                 gender,
                 avatarFile,
+                interests: interestsArray,
+                strengths: strengthsArray,
             };
             if (childToEdit) {
                 await updateChildProfile({ ...profileData, id: childToEdit.id, avatar_url: childToEdit.avatar_url });
             } else {
-                // FIX: Add avatar_url to satisfy the type requirement for addChildProfile.
-                // The argument was missing the `avatar_url` property which is required by the function's type signature.
-                await addChildProfile({ ...profileData, avatar_url: null });
+                await addChildProfile(profileData);
             }
             onClose();
         } catch (error) {
@@ -128,7 +137,7 @@ const ChildProfileModal: React.FC<ChildProfileModalProps> = ({ isOpen, onClose, 
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="child-profile-modal-title">
-            <div ref={modalRef} className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 m-4 animate-fadeIn" onClick={e => e.stopPropagation()}>
+            <div ref={modalRef} className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-8 m-4 animate-fadeIn max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                 <div className="flex justify-between items-center mb-6">
                     <h2 id="child-profile-modal-title" className="text-2xl font-bold text-gray-800">{childToEdit ? 'تعديل ملف الطفل' : 'إضافة طفل جديد'}</h2>
                     <button ref={closeButtonRef} onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={24} /></button>
@@ -158,6 +167,17 @@ const ChildProfileModal: React.FC<ChildProfileModalProps> = ({ isOpen, onClose, 
                             </select>
                         </div>
                     </div>
+                     <div>
+                        <label htmlFor="interests" className="block text-sm font-bold text-gray-700 mb-2">اهتمامات الطفل</label>
+                        <textarea id="interests" value={interests} onChange={(e) => setInterests(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-lg" rows={2} placeholder="مثال: الديناصورات، الرسم، كرة القدم"></textarea>
+                        <p className="text-xs text-gray-500 mt-1">افصل بين كل اهتمام بفاصلة (,)</p>
+                    </div>
+                     <div>
+                        <label htmlFor="strengths" className="block text-sm font-bold text-gray-700 mb-2">نقاط قوة الطفل</label>
+                        <textarea id="strengths" value={strengths} onChange={(e) => setStrengths(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-lg" rows={2} placeholder="مثال: شجاع، خياله واسع، يحب مساعدة الآخرين"></textarea>
+                         <p className="text-xs text-gray-500 mt-1">افصل بين كل نقطة قوة بفاصلة (,)</p>
+                    </div>
+
                     <div className="flex justify-end gap-4 pt-4 mt-8 border-t">
                         <button type="button" onClick={onClose} disabled={isSaving} className="px-6 py-2 rounded-full text-gray-700 bg-gray-100 hover:bg-gray-200">إلغاء</button>
                         <button type="submit" disabled={isSaving} className="w-32 flex items-center justify-center px-6 py-2 rounded-full text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400">

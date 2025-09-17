@@ -1,10 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { ShoppingBag, Filter, Search, Eye } from 'lucide-react';
-import { useAdmin, IOrderDetails } from '../../contexts/AdminContext';
+// FIX: Added .tsx extension to the import of AdminContext to resolve module loading error.
+import { useAdmin, IOrderDetails } from '../../contexts/AdminContext.tsx';
 import { getStatusColor, formatDate } from '../../utils/helpers.ts';
-import AdminSection from '../../components/admin/AdminSection';
-import PageLoader from '../../components/ui/PageLoader';
-import ViewOrderModal from '../../components/admin/ViewOrderModal';
+// FIX: Added .tsx extension to AdminSection import to resolve module error.
+import AdminSection from '../../components/admin/AdminSection.tsx';
+// FIX: Added .tsx extension to PageLoader import to resolve module error.
+import PageLoader from '../../components/ui/PageLoader.tsx';
+// FIX: Added .tsx extension to ViewOrderModal import to resolve module error.
+import ViewOrderModal from '../../components/admin/ViewOrderModal.tsx';
 
 const orderStatusOptions: IOrderDetails['status'][] = ["بانتظار الدفع", "بانتظار المراجعة", "قيد التجهيز", "يحتاج مراجعة", "تم الشحن", "تم التسليم", "ملغي"];
 

@@ -1,25 +1,25 @@
-
-
-import React, { Suspense } from 'react';
-// FIX: Replaced named imports with a namespace import for 'react-router-dom' to resolve module resolution errors.
-import * as ReactRouterDOM from 'react-router-dom';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import ScrollToTop from './components/ScrollToTop';
-import FloatingAiButton from './components/FloatingAiButton';
-import PageLoader from './components/ui/PageLoader';
-
-// Admin Contexts
-import { AdminProvider } from './contexts/AdminContext';
-import { CreativeWritingAdminProvider } from './contexts/admin/CreativeWritingAdminContext';
-import { CommunicationProvider } from './contexts/admin/CommunicationContext';
-
-// FIX: Added .tsx extension to resolve module error.
+import React, { Suspense, useState } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+// FIX: Added .tsx extension to Header import to resolve module error.
+import Header from './components/Header.tsx';
+// FIX: Added .tsx extension to Footer import to resolve module error.
+import Footer from './components/Footer.tsx';
+// FIX: Added .tsx extension to ScrollToTop import to resolve module error.
+import ScrollToTop from './components/ScrollToTop.tsx';
+// FIX: Added .tsx extension to FloatingAiButton import to resolve module error.
+import FloatingAiButton from './components/FloatingAiButton.tsx';
+// FIX: Added .tsx extension to PageLoader import to resolve module error.
+import PageLoader from './components/ui/PageLoader.tsx';
+import { AdminProvider } from './contexts/AdminContext.tsx';
+import { CreativeWritingAdminProvider } from './contexts/admin/CreativeWritingAdminContext.tsx';
+import { CommunicationProvider } from './contexts/admin/CommunicationContext.tsx';
 import { useAuth } from './contexts/AuthContext.tsx';
+import { isSupabaseConfigured } from './lib/supabaseClient.ts';
+// FIX: Added .tsx extension to ChatWidget import to resolve module error.
+import ChatWidget from './components/ChatWidget.tsx';
 
 // Lazy load all pages
-// FIX: Add .tsx extension to all lazy-loaded page components to resolve module loading errors.
-const HomePage = React.lazy(() => import('./pages/HomePage.tsx'));
+const EnhaLakHomePage = React.lazy(() => import('./pages/HomePage.tsx'));
 const AboutPage = React.lazy(() => import('./pages/AboutPage.tsx'));
 const PersonalizedStoriesPage = React.lazy(() => import('./pages/PersonalizedStoriesPage.tsx'));
 const OrderPage = React.lazy(() => import('./pages/OrderPage.tsx'));
@@ -29,7 +29,6 @@ const JoinUsPage = React.lazy(() => import('./pages/JoinUsPage.tsx'));
 const PrivacyPolicyPage = React.lazy(() => import('./pages/PrivacyPolicyPage.tsx'));
 const TermsOfUsePage = React.lazy(() => import('./pages/TermsOfUsePage.tsx'));
 const PortalPage = React.lazy(() => import('./pages/PortalPage.tsx'));
-const GeminiPage = React.lazy(() => import('./pages/GeminiPage.tsx'));
 const CreativeWritingPage = React.lazy(() => import('./pages/CreativeWritingPage.tsx'));
 const CreativeWritingAboutPage = React.lazy(() => import('./pages/CreativeWritingAboutPage.tsx'));
 const CreativeWritingCurriculumPage = React.lazy(() => import('./pages/CreativeWritingCurriculumPage.tsx'));
@@ -45,6 +44,8 @@ const BlogPostPage = React.lazy(() => import('./pages/BlogPostPage.tsx'));
 const SubscriptionPage = React.lazy(() => import('./pages/SubscriptionPage.tsx'));
 const AdminLayout = React.lazy(() => import('./components/admin/AdminLayout.tsx'));
 const CheckoutPage = React.lazy(() => import('./pages/CheckoutPage.tsx'));
+const PaymentStatusPage = React.lazy(() => import('./pages/PaymentStatusPage.tsx'));
+const SupabaseSetup = React.lazy(() => import('./components/setup/SupabaseSetup.tsx'));
 
 
 const ProtectedRoute: React.FC<{ children: React.ReactElement, adminOnly?: boolean, studentOnly?: boolean }> = ({ children, adminOnly, studentOnly }) => {
@@ -52,15 +53,15 @@ const ProtectedRoute: React.FC<{ children: React.ReactElement, adminOnly?: boole
     
     if (!isLoggedIn) {
         const target = studentOnly ? '/student-login' : '/account';
-        return <ReactRouterDOM.Navigate to={target} replace />;
+        return <Navigate to={target} replace />;
     }
     
     if (adminOnly && !hasAdminAccess) {
-        return <ReactRouterDOM.Navigate to="/" replace />;
+        return <Navigate to="/" replace />;
     }
 
     if (studentOnly && currentUser?.role !== 'student') {
-        return <ReactRouterDOM.Navigate to="/" replace />;
+        return <Navigate to="/" replace />;
     }
 
     return children;
@@ -68,50 +69,52 @@ const ProtectedRoute: React.FC<{ children: React.ReactElement, adminOnly?: boole
 
 
 const AppContent: React.FC = () => {
-    const location = ReactRouterDOM.useLocation();
+    const location = useLocation();
+    const [isChatOpen, setIsChatOpen] = useState(false);
+
     const isAdminRoute = location.pathname.startsWith('/admin');
     const isSessionRoute = location.pathname.startsWith('/session');
-    const isPortalRoute = location.pathname === '/';
     const isStudentLoginRoute = location.pathname.startsWith('/student-login');
     const isCheckoutRoute = location.pathname.startsWith('/checkout');
+    const isPaymentStatusRoute = location.pathname.startsWith('/payment/status');
 
-    const shouldShowHeaderFooter = !isAdminRoute && !isSessionRoute && !isPortalRoute && !isStudentLoginRoute && !isCheckoutRoute;
+    const shouldShowHeaderFooter = !isAdminRoute && !isSessionRoute && !isStudentLoginRoute && !isCheckoutRoute && !isPaymentStatusRoute;
 
     return (
-        <>
+        <div className="flex flex-col min-h-screen">
             {shouldShowHeaderFooter && <Header />}
-            <main className="flex-grow">
+            <main className="flex-grow flex">
                 <Suspense fallback={<PageLoader />}>
-                    <ReactRouterDOM.Routes>
-                        <ReactRouterDOM.Route path="/" element={<PortalPage />} />
+                    <Routes>
+                        <Route path="/" element={<PortalPage />} />
                         
                         {/* Enha Lak */}
-                        <ReactRouterDOM.Route path="/enha-lak" element={<HomePage />} />
-                        <ReactRouterDOM.Route path="/store" element={<PersonalizedStoriesPage />} />
-                        <ReactRouterDOM.Route path="/order/:productKey" element={<ProtectedRoute><OrderPage /></ProtectedRoute>} />
-                        <ReactRouterDOM.Route path="/join-us" element={<JoinUsPage />} />
-                        <ReactRouterDOM.Route path="/subscription" element={<SubscriptionPage />} />
+                        <Route path="/enha-lak" element={<EnhaLakHomePage />} />
+                        <Route path="/enha-lak/store" element={<PersonalizedStoriesPage />} />
+                        <Route path="/enha-lak/order/:productKey" element={<ProtectedRoute><OrderPage /></ProtectedRoute>} />
+                        <Route path="/enha-lak/join-us" element={<JoinUsPage />} />
+                        <Route path="/enha-lak/subscription" element={<SubscriptionPage />} />
 
                         {/* Creative Writing */}
-                        <ReactRouterDOM.Route path="/creative-writing" element={<CreativeWritingPage />} />
-                        <ReactRouterDOM.Route path="/creative-writing/about" element={<CreativeWritingAboutPage />} />
-                        <ReactRouterDOM.Route path="/creative-writing/curriculum" element={<CreativeWritingCurriculumPage />} />
-                        <ReactRouterDOM.Route path="/creative-writing/instructors" element={<CreativeWritingInstructorsPage />} />
-                        <ReactRouterDOM.Route path="/instructor/:slug" element={<InstructorProfilePage />} />
-                        <ReactRouterDOM.Route path="/creative-writing/booking" element={<CreativeWritingBookingPage />} />
-                        <ReactRouterDOM.Route path="/creative-writing/join-us" element={<CreativeWritingJoinUsPage />} />
+                        <Route path="/creative-writing" element={<CreativeWritingPage />} />
+                        <Route path="/creative-writing/about" element={<CreativeWritingAboutPage />} />
+                        <Route path="/creative-writing/curriculum" element={<CreativeWritingCurriculumPage />} />
+                        <Route path="/creative-writing/instructors" element={<CreativeWritingInstructorsPage />} />
+                        <Route path="/instructor/:slug" element={<InstructorProfilePage />} />
+                        <Route path="/creative-writing/booking" element={<CreativeWritingBookingPage />} />
+                        <Route path="/creative-writing/join-us" element={<CreativeWritingJoinUsPage />} />
                         
                          {/* Shared Pages */}
-                        <ReactRouterDOM.Route path="/about" element={<AboutPage />} />
-                        <ReactRouterDOM.Route path="/blog" element={<BlogPage />} />
-                        <ReactRouterDOM.Route path="/blog/:slug" element={<BlogPostPage />} />
-                        <ReactRouterDOM.Route path="/support" element={<SupportPage />} />
-                        <ReactRouterDOM.Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-                        <ReactRouterDOM.Route path="/terms-of-use" element={<TermsOfUsePage />} />
+                        <Route path="/about" element={<AboutPage />} />
+                        <Route path="/blog" element={<BlogPage />} />
+                        <Route path="/blog/:slug" element={<BlogPostPage />} />
+                        <Route path="/support" element={<SupportPage />} />
+                        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                        <Route path="/terms-of-use" element={<TermsOfUsePage />} />
 
                         {/* Student Routes */}
-                        <ReactRouterDOM.Route path="/student-login" element={<StudentLoginPage />} />
-                         <ReactRouterDOM.Route 
+                        <Route path="/student-login" element={<StudentLoginPage />} />
+                         <Route 
                             path="/student/dashboard" 
                             element={
                                 <ProtectedRoute studentOnly>
@@ -119,14 +122,14 @@ const AppContent: React.FC = () => {
                                 </ProtectedRoute>
                             } 
                         />
-                        <ReactRouterDOM.Route path="/session/:sessionId" element={<ProtectedRoute><SessionPage /></ProtectedRoute>} />
+                        <Route path="/session/:sessionId" element={<ProtectedRoute><SessionPage /></ProtectedRoute>} />
 
                         {/* System Pages */}
-                        <ReactRouterDOM.Route path="/account" element={<AccountPage />} />
-                        <ReactRouterDOM.Route path="/ai-guide" element={<GeminiPage />} />
-                        <ReactRouterDOM.Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+                        <Route path="/account" element={<AccountPage />} />
+                        <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+                        <Route path="/payment/status" element={<ProtectedRoute><PaymentStatusPage /></ProtectedRoute>} />
                         
-                        <ReactRouterDOM.Route 
+                        <Route 
                             path="/admin/*" 
                             element={
                                 <ProtectedRoute adminOnly>
@@ -134,18 +137,33 @@ const AppContent: React.FC = () => {
                                 </ProtectedRoute>
                             } 
                         />
-                    </ReactRouterDOM.Routes>
+                    </Routes>
                 </Suspense>
             </main>
             {shouldShowHeaderFooter && <Footer />}
-            {shouldShowHeaderFooter && <FloatingAiButton />}
-        </>
+            {shouldShowHeaderFooter && (
+                <>
+                    <FloatingAiButton onClick={() => setIsChatOpen(true)} isChatOpen={isChatOpen} />
+                    <ChatWidget isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+                </>
+            )}
+        </div>
     );
 };
 
 const App: React.FC = () => {
+    const configured = isSupabaseConfigured();
+
+    if (!configured) {
+        return (
+            <Suspense fallback={<PageLoader />}>
+                <SupabaseSetup />
+            </Suspense>
+        );
+    }
+
     return (
-        <ReactRouterDOM.HashRouter>
+        <>
             <ScrollToTop />
             <AdminProvider>
                 <CreativeWritingAdminProvider>
@@ -154,7 +172,7 @@ const App: React.FC = () => {
                     </CommunicationProvider>
                 </CreativeWritingAdminProvider>
             </AdminProvider>
-        </ReactRouterDOM.HashRouter>
+        </>
     );
 };
 

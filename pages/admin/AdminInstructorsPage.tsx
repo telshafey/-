@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Users, Plus, Edit, X, Save, Loader2, Calendar, Check, XCircle } from 'lucide-react';
-import { useCreativeWritingAdmin } from '../../contexts/admin/CreativeWritingAdminContext';
-import AdminSection from '../../components/admin/AdminSection';
-import PageLoader from '../../components/ui/PageLoader';
-import AvailabilityManager from '../../components/admin/AvailabilityManager';
+// FIX: Corrected import path for useCreativeWritingAdmin.
+import { useCreativeWritingAdmin } from '../../contexts/admin/CreativeWritingAdminContext.tsx';
+// FIX: Added .tsx extension to AdminSection import to resolve module error.
+import AdminSection from '../../components/admin/AdminSection.tsx';
+// FIX: Added .tsx extension to PageLoader import to resolve module error.
+import PageLoader from '../../components/ui/PageLoader.tsx';
+// FIX: Added .tsx extension to AvailabilityManager import to resolve module error.
+import AvailabilityManager from '../../components/admin/AvailabilityManager.tsx';
 // FIX: Added .ts extension to resolve module error.
 import { WeeklySchedule, Instructor } from '../../lib/database.types.ts';
 import InstructorModal from '../../components/admin/InstructorModal.tsx';

@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { MessageSquare, Eye, Inbox } from 'lucide-react';
-import { useCommunication, SupportTicket } from '../../contexts/admin/CommunicationContext';
+// FIX: Added .tsx extension to useCommunication import to resolve module error.
+import { useCommunication, SupportTicket } from '../../contexts/admin/CommunicationContext.tsx';
 // FIX: Added .ts extension to resolve module error.
 import { formatDate } from '../../utils/helpers.ts';
-import AdminSection from '../../components/admin/AdminSection';
-import PageLoader from '../../components/ui/PageLoader';
+// FIX: Added .tsx extension to AdminSection import to resolve module error.
+import AdminSection from '../../components/admin/AdminSection.tsx';
+// FIX: Added .tsx extension to PageLoader import to resolve module error.
+import PageLoader from '../../components/ui/PageLoader.tsx';
 import ViewTicketModal from '../../components/admin/ViewTicketModal.tsx';
 
 const AdminSupportPage: React.FC = () => {

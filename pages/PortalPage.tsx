@@ -1,12 +1,8 @@
-
-
-
 import React from 'react';
-// FIX: Replaced named imports with a namespace import for 'react-router-dom' to resolve module resolution errors.
-import * as ReactRouterDOM from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { BookOpen, Feather } from 'lucide-react';
-import { useProduct } from '../contexts/ProductContext';
-import PageLoader from '../components/ui/PageLoader';
+import { useProduct } from '../contexts/ProductContext.tsx';
+import PageLoader from '../components/ui/PageLoader.tsx';
 
 const PortalCard: React.FC<{
   title: string;
@@ -18,7 +14,7 @@ const PortalCard: React.FC<{
   colorClasses: string;
 }> = ({ title, description, link, imageUrl, Icon, buttonText, colorClasses }) => (
     <div 
-        className="relative w-full h-full flex flex-col items-center justify-center text-center p-8 transition-all duration-500 ease-in-out bg-cover bg-center group"
+        className="relative w-full flex-1 flex flex-col items-center justify-center text-center p-8 transition-all duration-500 ease-in-out bg-cover bg-center group"
         style={{ backgroundImage: imageUrl ? `url(${imageUrl})` : 'none' }}
     >
         <div className={`absolute inset-0 bg-black/50 transition-all duration-500 group-hover:bg-black/70 ${colorClasses}`}></div>
@@ -30,12 +26,12 @@ const PortalCard: React.FC<{
             <p className="mt-4 max-w-sm text-lg text-white/90">
                 {description}
             </p>
-            <ReactRouterDOM.Link 
+            <Link 
                 to={link}
                 className="mt-8 px-10 py-4 border-2 border-white text-lg font-bold rounded-full bg-white/10 backdrop-blur-sm hover:bg-white hover:text-gray-900 transition-all duration-300"
             >
                 {buttonText}
-            </ReactRouterDOM.Link>
+            </Link>
         </div>
     </div>
 );
@@ -48,7 +44,7 @@ const PortalPage: React.FC = () => {
     }
 
     return (
-        <div className="w-screen h-screen flex flex-col md:flex-row animate-fadeIn">
+        <div className="w-full h-full flex flex-col md:flex-row animate-fadeIn">
             <PortalCard 
                 title='مشروع "إنها لك"'
                 description="نصنع بحب وشغف قصصاً مخصصة تجعل من طفلك بطل حكايته الخاصة، لتعزيز هويته وغرس أسمى القيم."
@@ -62,7 +58,7 @@ const PortalPage: React.FC = () => {
                 title='برنامج "بداية الرحلة"'
                 description="برنامج متكامل لتنمية مهارات الكتابة الإبداعية لدى الأطفال والشباب في بيئة آمنة وملهمة."
                 link="/creative-writing"
-                imageUrl="https://i.ibb.co/Xz9d9J2/creative-writing-promo.jpg"
+                imageUrl={siteBranding.creativeWritingPortalImageUrl}
                 Icon={Feather}
                 buttonText="استكشف البرنامج"
                 colorClasses="bg-gradient-to-tr from-purple-500/30 to-indigo-500/30"

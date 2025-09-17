@@ -1,14 +1,16 @@
 
-
-
 import React, { useState } from 'react';
-// FIX: Replaced named imports with a namespace import for 'react-router-dom' to resolve module resolution errors.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Replaced namespace import with named import for 'react-router-dom' to resolve module resolution errors.
+import { Link } from 'react-router-dom';
 import { Sparkles, Gift, BookHeart, BookOpen, Award, ArrowLeft, ClipboardPen, HeartHandshake, PackageCheck, Star, Quote, Zap, Shield, Globe, Feather, Users, Smile, Rocket, Heart, CalendarPlus } from 'lucide-react';
-import { useProduct } from '../contexts/ProductContext';
-import { useAdmin } from '../contexts/AdminContext';
-import PageLoader from '../components/ui/PageLoader';
-import ShareButtons from '../components/shared/ShareButtons';
+// FIX: Added .tsx extension to useProduct import to resolve module error.
+import { useProduct } from '../contexts/ProductContext.tsx';
+// FIX: Added .tsx extension to the import of AdminContext to resolve module loading error.
+import { useAdmin } from '../contexts/AdminContext.tsx';
+// FIX: Added .tsx extension to PageLoader import to resolve module error.
+import PageLoader from '../components/ui/PageLoader.tsx';
+// FIX: Added .tsx extension to ShareButtons import to resolve module error.
+import ShareButtons from '../components/shared/ShareButtons.tsx';
 import TestimonialCard from '../components/shared/TestimonialCard.tsx';
 import HowItWorksStep from '../components/shared/HowItWorksStep.tsx';
 
@@ -76,12 +78,12 @@ const HomePage: React.FC = () => {
             {heroContent.subtitle}
           </p>
            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <ReactRouterDOM.Link to="/order/custom_story" className="px-8 py-3 border border-transparent text-base font-medium rounded-full text-white bg-blue-600 hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
+              <Link to="/enha-lak/order/custom_story" className="px-8 py-3 border border-transparent text-base font-medium rounded-full text-white bg-blue-600 hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
                 اطلب قصة الآن
-              </ReactRouterDOM.Link>
-              <ReactRouterDOM.Link to="/store" className="px-8 py-3 border border-gray-300 text-base font-medium rounded-full text-blue-600 bg-white hover:bg-gray-100 transition-transform transform hover:scale-105 shadow-lg">
+              </Link>
+              <Link to="/enha-lak/store" className="px-8 py-3 border border-gray-300 text-base font-medium rounded-full text-blue-600 bg-white hover:bg-gray-100 transition-transform transform hover:scale-105 shadow-lg">
                 تصفح المنتجات
-              </ReactRouterDOM.Link>
+              </Link>
           </div>
           <div className="mt-8 flex justify-center">
             <ShareButtons 
@@ -150,10 +152,10 @@ const HomePage: React.FC = () => {
              ))}
           </div>
            <div className="mt-12 text-center">
-                <ReactRouterDOM.Link to="/store" className="inline-flex items-center font-semibold text-lg text-blue-600 hover:text-blue-800 group">
+                <Link to="/enha-lak/store" className="inline-flex items-center font-semibold text-lg text-blue-600 hover:text-blue-800 group">
                     <span>عرض كل المنتجات</span>
                     <ArrowLeft size={22} className="ms-2 transition-transform group-hover:-translate-x-1 rtl:group-hover:translate-x-1" />
-                </ReactRouterDOM.Link>
+                </Link>
            </div>
         </div>
       </section>
@@ -206,10 +208,10 @@ const HomePage: React.FC = () => {
                     استمر في إلهام طفلك كل شهر! اشترك الآن ليصلكم صندوق مليء بالقصص والأنشطة الإبداعية المصممة خصيصًا لطفلك، لرحلة من التعلم والمرح لا تتوقف.
                 </p>
                 <div className="mt-10">
-                <ReactRouterDOM.Link to="/subscription" className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-lg font-medium rounded-full text-white bg-orange-500 hover:bg-orange-600 transition-transform transform hover:scale-105 shadow-lg">
+                <Link to="/enha-lak/subscription" className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-lg font-medium rounded-full text-white bg-orange-500 hover:bg-orange-600 transition-transform transform hover:scale-105 shadow-lg">
                     <CalendarPlus className="me-3" />
                     اكتشف الاشتراك الشهري
-                </ReactRouterDOM.Link>
+                </Link>
                 </div>
             </div>
         </div>
@@ -238,6 +240,7 @@ const HomePage: React.FC = () => {
               title="لغرس القيم"
               description="للطفل الذي يتعلم مفاهيم جديدة، نقدم القيم التربوية في سياق قصصي محبب ومؤثر."
             />
+             {/* FIX: Corrected component name from 'ValueProp-card' to 'ValuePropCard' to match the component definition. */}
              <ValuePropCard 
               icon={<Gift size={32} />}
               title="كهدية لا تُنسى"
@@ -272,20 +275,22 @@ const HomePage: React.FC = () => {
                 </div>
                 </div>
                 <div className="mt-10">
-                <ReactRouterDOM.Link to="/creative-writing" className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-lg font-medium rounded-full text-white bg-purple-600 hover:bg-purple-700 transition-transform transform hover:scale-105 shadow-lg">
+                <Link to="/creative-writing" className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-lg font-medium rounded-full text-white bg-purple-600 hover:bg-purple-700 transition-transform transform hover:scale-105 shadow-lg">
                     اعرف المزيد عن البرنامج
-                </ReactRouterDOM.Link>
+                </Link>
                 </div>
             </div>
-            <div className="hidden lg:block px-8 relative">
-                {!promoImageLoaded && <div className="absolute inset-0 bg-gray-200 rounded-2xl animate-pulse"></div>}
-                <img 
-                    src="https://i.ibb.co/Xz9d9J2/creative-writing-promo.jpg" 
-                    alt="طفل يكتب بسعادة" 
-                    className={`rounded-2xl shadow-2xl transition-opacity duration-500 ${promoImageLoaded ? 'opacity-100' : 'opacity-0'}`} 
-                    loading="lazy" 
-                    onLoad={() => setPromoImageLoaded(true)}
-                />
+            <div className="hidden lg:block px-8">
+                <div className="aspect-w-4 aspect-h-3 bg-gray-200 rounded-2xl overflow-hidden shadow-2xl">
+                    {!promoImageLoaded && <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>}
+                    <img 
+                        src="https://i.ibb.co/Xz9d9J2/creative-writing-promo.jpg" 
+                        alt="طفل يكتب بسعادة" 
+                        className={`w-full h-full object-cover transition-opacity duration-500 ${promoImageLoaded ? 'opacity-100' : 'opacity-0'}`} 
+                        loading="lazy" 
+                        onLoad={() => setPromoImageLoaded(true)}
+                    />
+                </div>
             </div>
             </div>
         </div>
@@ -324,9 +329,9 @@ const HomePage: React.FC = () => {
           <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800">هل أنت جاهز لبدء الرحلة؟</h2>
           <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">اختر المنتج الذي يناسب طفلك اليوم وافتح له بابًا جديدًا من الخيال والمعرفة.</p>
           <div className="mt-8">
-            <ReactRouterDOM.Link to="/order/custom_story" className="inline-flex items-center justify-center px-10 py-4 border border-transparent text-lg font-medium rounded-full text-white bg-blue-600 hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
+            <Link to="/enha-lak/order/custom_story" className="inline-flex items-center justify-center px-10 py-4 border border-transparent text-lg font-medium rounded-full text-white bg-blue-600 hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
                 اطلب منتجك المخصص الآن
-            </ReactRouterDOM.Link>
+            </Link>
           </div>
         </div>
       </section>

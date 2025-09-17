@@ -1,14 +1,15 @@
-
-
-
 import React, { useState } from 'react';
-// FIX: Replaced named imports with a namespace import for 'react-router-dom' to resolve module resolution errors.
-import * as ReactRouterDOM from 'react-router-dom';
-import { useAdmin, PersonalizedProduct } from '../contexts/AdminContext';
-import { useProduct, Prices } from '../contexts/ProductContext';
-import PageLoader from '../components/ui/PageLoader';
+// FIX: Replaced namespace import with named import for 'react-router-dom' to resolve module resolution errors.
+import { useNavigate } from 'react-router-dom';
+// FIX: Added .tsx extension to the import of AdminContext to resolve module loading error.
+import { useAdmin, PersonalizedProduct } from '../contexts/AdminContext.tsx';
+// FIX: Added .tsx extension to useProduct import to resolve module error.
+import { useProduct, Prices } from '../contexts/ProductContext.tsx';
+// FIX: Added .tsx extension to PageLoader import to resolve module error.
+import PageLoader from '../components/ui/PageLoader.tsx';
 import { ArrowLeft, Check } from 'lucide-react';
-import ShareButtons from '../components/shared/ShareButtons';
+// FIX: Added .tsx extension to ShareButtons import to resolve module error.
+import ShareButtons from '../components/shared/ShareButtons.tsx';
 
 const getPriceForProduct = (productKey: string, prices: Prices) => {
     switch(productKey) {
@@ -26,21 +27,21 @@ const getPriceForProduct = (productKey: string, prices: Prices) => {
 };
 
 const ProductCard: React.FC<{ product: PersonalizedProduct, price: string }> = ({ product, price }) => {
-    const navigate = ReactRouterDOM.useNavigate();
+    const navigate = useNavigate();
     const [imageLoaded, setImageLoaded] = useState(false);
 
     const handleOrderNow = () => {
-        navigate(`/order/${product.key}`);
+        navigate(`/enha-lak/order/${product.key}`);
     };
 
     return (
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transform hover:-translate-y-2 transition-transform duration-300 border">
-            <div className="h-64 bg-gray-100 flex items-center justify-center p-4 relative">
+            <div className="aspect-w-1 aspect-h-1 w-full bg-gray-100 flex items-center justify-center p-4 relative">
                 {!imageLoaded && <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>}
                 <img 
                     src={product.image_url || ''} 
                     alt={product.title} 
-                    className={`max-h-full max-w-full object-contain transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    className={`w-full h-full object-contain transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                     loading="lazy" 
                     onLoad={() => setImageLoaded(true)}
                 />

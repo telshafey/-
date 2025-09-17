@@ -1,154 +1,268 @@
-
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
-import { useToast } from './ToastContext';
-// FIX: Added .ts extension to resolve module error.
-import { ChildProfile } from '../lib/database.types.ts';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabaseClient.ts';
+import { useToast } from './ToastContext.tsx';
+import type { ChildProfile } from '../lib/database.types.ts';
+import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 
 export interface UserProfile {
     id: string;
     email: string;
     name: string;
-    role: 'user' | 'super_admin' | 'enha_lak_supervisor' | 'creative_writing_supervisor' | 'instructor' | 'student';
+    // FIX: Added created_at to the UserProfile interface to match database schema and fix type errors.
+    created_at: string;
+    role: 'user' | 'super_admin' | 'enha_lak_supervisor' | 'creative_writing_supervisor' | 'instructor' | 'student' | 'content_editor' | 'support_agent';
 }
+
+interface AddChildProfilePayload {
+    name: string;
+    age: number;
+    gender: 'ذكر' | 'أنثى';
+    avatarFile: File | null;
+    interests?: string[];
+    strengths?: string[];
+}
+
+interface UpdateChildProfilePayload extends Partial<ChildProfile> {
+    id: number;
+    avatarFile?: File | null;
+}
+
 
 interface AuthContextType {
-  currentUser: UserProfile | null;
-  isLoggedIn: boolean;
-  hasAdminAccess: boolean;
-  loading: boolean;
-  error: string | null;
-  signIn: (email: string, pass: string) => Promise<void>;
-  signUp: (email: string, pass: string, name: string) => Promise<void>;
-  signOut: () => Promise<void>;
-  signInAsDemoUser: (role: UserProfile['role']) => void;
-  childProfiles: ChildProfile[];
-  addChildProfile: (profile: Omit<ChildProfile, 'id' | 'user_id' | 'created_at'> & { avatarFile: File | null }) => Promise<void>;
-  updateChildProfile: (profile: Omit<ChildProfile, 'user_id' | 'created_at'> & { avatarFile: File | null }) => Promise<void>;
-  deleteChildProfile: (profileId: number) => Promise<void>;
+    isLoggedIn: boolean;
+    currentUser: UserProfile | null;
+    currentChildProfile: ChildProfile | null;
+    hasAdminAccess: boolean;
+    childProfiles: ChildProfile[];
+    loading: boolean;
+    error: string | null;
+    signIn: (email: string, pass: string) => Promise<void>;
+    signUp: (email: string, pass: string, name: string) => Promise<void>;
+    signOut: () => Promise<void>;
+    addChildProfile: (profileData: AddChildProfilePayload) => Promise<void>;
+    updateChildProfile: (profileData: UpdateChildProfilePayload) => Promise<void>;
+    deleteChildProfile: (childId: number) => Promise<void>;
+    fetchAiChatHistory: () => Promise<any[]>;
+    saveAiChatHistory: (history: any[]) => Promise<void>;
 }
-
-// MOCK DATA
-const MOCK_DEMO_USERS: { [key in UserProfile['role']]: UserProfile } = {
-    super_admin: { id: 'a1b2c3d4-e5f6-7890-1234-567890abcdef', email: 'admin@alrehlah.com', name: 'المدير العام', role: 'super_admin' },
-    enha_lak_supervisor: { id: 'enha-lak-supervisor-id', email: 'enhalak@example.com', name: 'مشرف إنها لك', role: 'enha_lak_supervisor' },
-    creative_writing_supervisor: { id: 'cw-supervisor-id', email: 'cw@example.com', name: 'مشرف بداية الرحلة', role: 'creative_writing_supervisor' },
-    instructor: { id: 'd1e2f3a4-b5c6-d789-e123-f456a789b0cd', email: 'instructor@example.com', name: 'أحمد المصري (مدرب)', role: 'instructor' },
-    user: { id: 'f1e2d3c4-b5a6-9870-4321-098765fedcba', email: 'user@alrehlah.com', name: 'فاطمة علي (مستخدم)', role: 'user' },
-    student: { id: 'student-id-123', email: 'student@alrehlah.com', name: 'الطالب عمر', role: 'student' },
-};
-
-const MOCK_USER: UserProfile = MOCK_DEMO_USERS.user;
-const MOCK_ADMIN: UserProfile = MOCK_DEMO_USERS.super_admin;
-
-const MOCK_CHILD_PROFILES: ChildProfile[] = [
-    { id: 1, user_id: 'f1e2d3c4-b5a6-9870-4321-098765fedcba', name: 'سارة', age: 5, gender: 'أنثى', avatar_url: null, created_at: new Date().toISOString() },
-    { id: 2, user_id: 'f1e2d3c4-b5a6-9870-4321-098765fedcba', name: 'يوسف', age: 8, gender: 'ذكر', avatar_url: null, created_at: new Date().toISOString() }
-];
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+    const [currentChildProfile, setCurrentChildProfile] = useState<ChildProfile | null>(null);
+    const [childProfiles, setChildProfiles] = useState<ChildProfile[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [childProfiles, setChildProfiles] = useState<ChildProfile[]>([]);
     const { addToast } = useToast();
+    const navigate = useNavigate();
 
-    const fetchMockData = useCallback(() => {
-        setLoading(true);
-        // Simulate checking session.
-        setCurrentUser(null); 
-        setChildProfiles(MOCK_CHILD_PROFILES);
-        setLoading(false);
+    const fetchUserProfile = useCallback(async (user: SupabaseUser | null): Promise<UserProfile | null> => {
+        if (!user) return null;
+        const { data, error } = await supabase.from('users').select('*').eq('id', user.id).single();
+        if (error) {
+            console.error("Error fetching user profile:", error);
+            return null;
+        }
+        return data as UserProfile;
+    }, []);
+
+    const fetchChildProfiles = useCallback(async (userId: string) => {
+        const { data, error } = await supabase.from('child_profiles').select('*').eq('user_id', userId);
+        if (error) {
+            addToast('فشل تحميل ملفات الأطفال.', 'error');
+            return;
+        }
+        setChildProfiles(data || []);
+    }, [addToast]);
+    
+    const fetchCurrentChildProfileForStudent = useCallback(async (studentUserId: string) => {
+        const { data, error } = await supabase.from('child_profiles').select('*').eq('student_user_id', studentUserId).single();
+        if (error) {
+            console.warn("Could not find linked child profile for student:", error.message);
+            return;
+        }
+        setCurrentChildProfile(data);
     }, []);
 
     useEffect(() => {
-        fetchMockData();
-    }, [fetchMockData]);
-    
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            setLoading(true);
+            const user = session?.user ?? null;
+            const profile = await fetchUserProfile(user);
+            setCurrentUser(profile);
+            if (profile) {
+                if (profile.role === 'student') {
+                    await fetchCurrentChildProfileForStudent(profile.id);
+                } else {
+                    await fetchChildProfiles(profile.id);
+                }
+            } else {
+                setChildProfiles([]);
+                setCurrentChildProfile(null);
+            }
+            setLoading(false);
+        });
+
+        return () => subscription.unsubscribe();
+    }, [fetchUserProfile, fetchChildProfiles, fetchCurrentChildProfileForStudent]);
+
     const signIn = async (email: string, pass: string) => {
-        setLoading(true); setError(null);
-        await new Promise(res => setTimeout(res, 500));
-        if (email === 'admin@alrehlah.com') {
-            setCurrentUser(MOCK_ADMIN);
-            addToast('مرحباً بعودتك أيها المدير!', 'success');
+        setLoading(true);
+        setError(null);
+        const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+        if (error) {
+            setError(error.message);
+            addToast('فشل تسجيل الدخول. تحقق من بياناتك.', 'error');
         } else {
-            setCurrentUser(MOCK_USER);
             addToast('تم تسجيل الدخول بنجاح!', 'success');
+            const { data: { user } } = await supabase.auth.getUser();
+            const profile = await fetchUserProfile(user);
+            if (profile?.role === 'student') {
+                navigate('/student/dashboard');
+            } else if (profile && ['super_admin', 'enha_lak_supervisor', 'creative_writing_supervisor', 'instructor', 'content_editor', 'support_agent'].includes(profile.role)) {
+                navigate('/admin');
+            } else {
+                 navigate('/account');
+            }
         }
         setLoading(false);
     };
-
-    const signInAsDemoUser = (role: UserProfile['role']) => {
-        const userToSignIn = MOCK_DEMO_USERS[role];
-        if (userToSignIn) {
-            setCurrentUser(userToSignIn);
-            addToast(`تم تسجيل الدخول كـ "${userToSignIn.name}"`, 'info');
-        } else {
-            addToast('الدور المحدد غير موجود.', 'error');
-        }
-    };
-
+    
     const signUp = async (email: string, pass: string, name: string) => {
-        setLoading(true); setError(null);
-        await new Promise(res => setTimeout(res, 500));
-        const newUser = { ...MOCK_USER, email, name };
-        setCurrentUser(newUser);
-        addToast('تم إنشاء حسابك بنجاح!', 'success');
+        setLoading(true);
+        setError(null);
+        const { data, error } = await supabase.auth.signUp({ 
+            email, 
+            password: pass,
+            options: {
+                data: {
+                    name: name
+                }
+            }
+        });
+        if (error) {
+            setError(error.message);
+            addToast(`فشل إنشاء الحساب: ${error.message}`, 'error');
+        } else if (data.user) {
+            const { error: profileError } = await supabase.from('users').insert({
+                id: data.user.id,
+                email: data.user.email!,
+                name: name,
+                role: 'user'
+            });
+            if (profileError) {
+                 setError(profileError.message);
+                 addToast(`فشل إنشاء ملف المستخدم: ${profileError.message}`, 'error');
+            } else {
+                addToast('تم إنشاء الحساب بنجاح! يرجى التحقق من بريدك الإلكتروني.', 'success');
+                navigate('/account');
+            }
+        }
         setLoading(false);
     };
 
     const signOut = async () => {
+        await supabase.auth.signOut();
         setCurrentUser(null);
-        addToast('تم تسجيل الخروج.', 'info');
+        setChildProfiles([]);
+        setCurrentChildProfile(null);
+        navigate('/');
     };
+    
+    const addChildProfile = async (profileData: AddChildProfilePayload) => {
+        if (!currentUser) throw new Error("User not logged in");
 
-    const addChildProfile = async (profile: Omit<ChildProfile, 'id' | 'user_id' | 'created_at'> & { avatarFile: File | null }) => {
-        if(!currentUser) throw new Error("User not logged in");
-        const newProfile: ChildProfile = {
-            id: Date.now(),
+        let avatar_url = null;
+        if (profileData.avatarFile) {
+            const filePath = `${currentUser.id}/${Date.now()}-${profileData.avatarFile.name}`;
+            const { error: uploadError } = await supabase.storage.from('child_avatars').upload(filePath, profileData.avatarFile);
+            if (uploadError) throw uploadError;
+            const { data } = supabase.storage.from('child_avatars').getPublicUrl(filePath);
+            avatar_url = data.publicUrl;
+        }
+
+        const { error } = await supabase.from('child_profiles').insert({
             user_id: currentUser.id,
-            created_at: new Date().toISOString(),
-            name: profile.name,
-            age: profile.age,
-            gender: profile.gender,
-            avatar_url: profile.avatarFile ? URL.createObjectURL(profile.avatarFile) : null,
-        };
-        setChildProfiles(prev => [...prev, newProfile]);
-        addToast(`تمت إضافة ملف ${profile.name} بنجاح!`, 'success');
+            name: profileData.name,
+            age: profileData.age,
+            gender: profileData.gender,
+            avatar_url: avatar_url,
+            interests: profileData.interests,
+            strengths: profileData.strengths,
+        });
+        if (error) { addToast(error.message, 'error'); throw error; }
+        addToast('تمت إضافة الطفل بنجاح!', 'success');
+        await fetchChildProfiles(currentUser.id);
     };
 
-    const updateChildProfile = async (profile: Omit<ChildProfile, 'user_id' | 'created_at'> & { avatarFile: File | null }) => {
-        setChildProfiles(prev => prev.map(p => p.id === profile.id ? { 
-            ...p, 
-            name: profile.name, 
-            age: profile.age, 
-            gender: profile.gender,
-            avatar_url: profile.avatarFile ? URL.createObjectURL(profile.avatarFile) : profile.avatar_url,
-        } : p));
-        addToast(`تم تحديث ملف ${profile.name} بنجاح!`, 'success');
+    const updateChildProfile = async (profileData: UpdateChildProfilePayload) => {
+        if (!currentUser) throw new Error("User not logged in");
+        let avatar_url = profileData.avatar_url;
+        if (profileData.avatarFile) {
+             const filePath = `${currentUser.id}/${profileData.id}/${Date.now()}-${profileData.avatarFile.name}`;
+             const { error: uploadError } = await supabase.storage.from('child_avatars').upload(filePath, profileData.avatarFile);
+             if (uploadError) throw uploadError;
+             const { data } = supabase.storage.from('child_avatars').getPublicUrl(filePath);
+             avatar_url = data.publicUrl;
+        }
+        
+        const { error } = await supabase.from('child_profiles').update({
+            name: profileData.name,
+            age: profileData.age,
+            gender: profileData.gender,
+            avatar_url,
+            interests: profileData.interests,
+            strengths: profileData.strengths,
+        }).eq('id', profileData.id);
+        
+        if (error) { addToast(error.message, 'error'); throw error; }
+        addToast('تم تحديث ملف الطفل بنجاح!', 'success');
+        await fetchChildProfiles(currentUser.id);
     };
-
-    const deleteChildProfile = async (profileId: number) => {
-        setChildProfiles(prev => prev.filter(p => p.id !== profileId));
+    
+    const deleteChildProfile = async (childId: number) => {
+        if (!currentUser) throw new Error("User not logged in");
+        const { error } = await supabase.from('child_profiles').delete().eq('id', childId).eq('user_id', currentUser.id);
+        if (error) { addToast(error.message, 'error'); throw error; }
         addToast('تم حذف ملف الطفل.', 'success');
+        await fetchChildProfiles(currentUser.id);
     };
-
-
+    
+    const fetchAiChatHistory = async (): Promise<any[]> => {
+        if (!currentUser) return [];
+        // FIX: The 'ai_chat_history' table does not exist in the database.
+        // This function is modified to return an empty array immediately to prevent runtime errors.
+        // The chat will still function but history will not be persisted across sessions.
+        console.warn("Bypassing fetchAiChatHistory: 'ai_chat_history' table not found in the database.");
+        return [];
+    };
+    
+    const saveAiChatHistory = async (history: any[]) => {
+        if (!currentUser) return;
+        // FIX: The 'ai_chat_history' table does not exist.
+        // This function is modified to do nothing to prevent errors.
+        console.warn("Bypassing saveAiChatHistory: 'ai_chat_history' table not found in the database.");
+        return;
+    };
+    
     const value = {
-        currentUser,
         isLoggedIn: !!currentUser,
+        currentUser,
+        currentChildProfile,
         hasAdminAccess: !!currentUser && currentUser.role !== 'user' && currentUser.role !== 'student',
+        childProfiles,
         loading,
         error,
         signIn,
         signUp,
         signOut,
-        signInAsDemoUser,
-        childProfiles,
         addChildProfile,
         updateChildProfile,
         deleteChildProfile,
+        fetchAiChatHistory,
+        saveAiChatHistory,
     };
 
     return (

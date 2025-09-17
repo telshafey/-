@@ -1,44 +1,50 @@
-
-
 import React, { useState, useEffect } from 'react';
-// FIX: Replaced named imports with a namespace import for 'react-router-dom' to resolve module resolution errors.
-import * as ReactRouterDOM from 'react-router-dom';
-import { Save, Calendar, CheckSquare, Package, Settings, Loader2, Video, Eye } from 'lucide-react';
-import { useCreativeWritingAdmin, CreativeWritingPackage, CreativeWritingBooking, AdditionalService } from '../../contexts/admin/CreativeWritingAdminContext';
+// FIX: Replaced namespace import with a named import for 'react-router-dom' to resolve module resolution errors.
+import { useNavigate } from 'react-router-dom';
+import { Save, Calendar, CheckSquare, Package, Settings, Loader2, Video, Eye, Plus } from 'lucide-react';
+import { useCreativeWritingAdmin, CreativeWritingPackage, CreativeWritingBooking, AdditionalService } from '../../contexts/admin/CreativeWritingAdminContext.tsx';
 // FIX: Added .ts extension to resolve module error.
 import { getStatusColor } from '../../utils/helpers.ts';
 import AdminSection from '../../components/admin/AdminSection';
 import PageLoader from '../../components/ui/PageLoader';
-import { useToast } from '../../contexts/ToastContext';
+import { useToast } from '../../contexts/ToastContext.tsx';
 // FIX: Added .ts extension to resolve module error.
 import { Instructor } from '../../lib/database.types.ts';
-import BookingDetailsModal from '../../components/admin/BookingDetailsModal';
+import BookingDetailsModal from '../../components/admin/BookingDetailsModal.tsx';
+import CWSettingsModal from '../../components/admin/CWSettingsModal.tsx';
+
 
 const bookingStatusOptions: CreativeWritingBooking['status'][] = ['بانتظار الدفع', 'بانتظار المراجعة', 'مؤكد', 'مكتمل', 'ملغي'];
 
 const AdminCreativeWritingPage: React.FC = () => {
     const { 
-        creativeWritingPackages, updateCreativeWritingPackages, 
+        creativeWritingPackages, updateCreativeWritingPackages, addCreativeWritingPackage,
         creativeWritingBookings, updateBookingStatus, generateAndSetSessionId,
-        additionalServices, updateAdditionalServices,
+        additionalServices, updateAdditionalServices, addAdditionalService,
         loading, error
     } = useCreativeWritingAdmin();
-    const navigate = ReactRouterDOM.useNavigate();
+    const navigate = useNavigate();
     const { addToast } = useToast();
 
     const [editablePackages, setEditablePackages] = useState<CreativeWritingPackage[]>([]);
     const [editableServices, setEditableServices] = useState<AdditionalService[]>([]);
-    const [isSaving, setIsSaving] = useState(false);
+    const [isSavingPackages, setIsSavingPackages] = useState(false);
+    const [isSavingServices, setIsSavingServices] = useState(false);
     const [startingSession, setStartingSession] = useState<string | null>(null);
     const [selectedBooking, setSelectedBooking] = useState<CreativeWritingBooking | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+    
+    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+    const [modalItemType, setModalItemType] = useState<'package' | 'service' | null>(null);
+    const [isSavingModal, setIsSavingModal] = useState(false);
+
 
     useEffect(() => {
-        setEditablePackages(creativeWritingPackages);
+        setEditablePackages(JSON.parse(JSON.stringify(creativeWritingPackages)));
     }, [creativeWritingPackages]);
     
     useEffect(() => {
-        setEditableServices(additionalServices);
+        setEditableServices(JSON.parse(JSON.stringify(additionalServices)));
     }, [additionalServices]);
 
     const handlePackageChange = (index: number, field: keyof CreativeWritingPackage, value: string | number | string[] | boolean) => {
@@ -77,7 +83,6 @@ const AdminCreativeWritingPage: React.FC = () => {
             if (confirmed) {
                 await updateBookingStatus(bookingId, newStatus);
             } else {
-                // Revert the select element's value visually
                 e.target.value = currentStatus;
             }
         } else {
@@ -85,23 +90,42 @@ const AdminCreativeWritingPage: React.FC = () => {
         }
     };
 
-    const handleSaveChanges = async () => {
-        setIsSaving(true);
+    const handleSavePackages = async () => {
+        setIsSavingPackages(true);
+        await updateCreativeWritingPackages(editablePackages);
+        setIsSavingPackages(false);
+    };
+    
+    const handleSaveServices = async () => {
+        setIsSavingServices(true);
+        await updateAdditionalServices(editableServices);
+        setIsSavingServices(false);
+    };
+    
+    const handleOpenSettingsModal = (type: 'package' | 'service') => {
+        setModalItemType(type);
+        setIsSettingsModalOpen(true);
+    };
+
+    const handleSaveFromModal = async (payload: any) => {
+        setIsSavingModal(true);
         try {
-            await Promise.all([
-                updateCreativeWritingPackages(editablePackages),
-                updateAdditionalServices(editableServices)
-            ]);
-        } catch (error) {
-            console.error(error);
+            if (modalItemType === 'package') {
+                await addCreativeWritingPackage(payload);
+            } else if (modalItemType === 'service') {
+                await addAdditionalService(payload);
+            }
+            setIsSettingsModalOpen(false);
+        } catch (e) {
+            console.error(e);
         } finally {
-            setIsSaving(false);
+            setIsSavingModal(false);
         }
     };
     
     const handleViewBooking = (booking: CreativeWritingBooking) => {
         setSelectedBooking(booking);
-        setIsModalOpen(true);
+        setIsBookingModalOpen(true);
     };
 
     const handleStartSession = async (booking: CreativeWritingBooking) => {
@@ -131,16 +155,28 @@ const AdminCreativeWritingPage: React.FC = () => {
     return (
         <>
             <BookingDetailsModal 
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                isOpen={isBookingModalOpen}
+                onClose={() => setIsBookingModalOpen(false)}
                 booking={selectedBooking}
+            />
+             <CWSettingsModal
+                isOpen={isSettingsModalOpen}
+                onClose={() => setIsSettingsModalOpen(false)}
+                onSave={handleSaveFromModal}
+                isSaving={isSavingModal}
+                itemType={modalItemType!}
             />
             <div className="animate-fadeIn space-y-12">
                 <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-800">إدارة برنامج "بداية الرحلة"</h1>
                 
                 <AdminSection title="إدارة الباقات والخدمات" icon={<Package />}>
                     <div className="space-y-6">
-                        <h3 className="text-lg font-bold text-gray-700">الباقات الرئيسية</h3>
+                        <div className="flex justify-between items-center">
+                            <h3 className="text-lg font-bold text-gray-700">الباقات الرئيسية</h3>
+                            <button onClick={() => handleOpenSettingsModal('package')} className="flex items-center gap-2 text-sm bg-blue-100 text-blue-700 font-semibold px-3 py-1 rounded-full hover:bg-blue-200">
+                                <Plus size={16}/> إضافة باقة
+                            </button>
+                        </div>
                         {editablePackages.map((pkg, index) => (
                             <div key={pkg.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 bg-gray-50 rounded-lg border">
                                 <input type="text" value={pkg.name} onChange={(e) => handlePackageChange(index, 'name', e.target.value)} placeholder="اسم الباقة" className="md:col-span-2 w-full px-3 py-2 border border-gray-300 rounded-lg" />
@@ -149,17 +185,28 @@ const AdminCreativeWritingPage: React.FC = () => {
                                     <input type="number" value={pkg.price} onChange={(e) => handlePackageChange(index, 'price', e.target.value)} placeholder="السعر" className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
                                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">ج.م</span>
                                 </div>
-                                <textarea value={pkg.features.join(', ')} onChange={(e) => handlePackageChange(index, 'features', e.target.value)} placeholder="الميزات (افصل بينها بفاصلة)" className="md:col-span-4 w-full px-3 py-2 border border-gray-300 rounded-lg" rows={1}></textarea>
+                                <textarea value={(pkg.features || []).join(', ')} onChange={(e) => handlePackageChange(index, 'features', e.target.value)} placeholder="الميزات (افصل بينها بفاصلة)" className="md:col-span-4 w-full px-3 py-2 border border-gray-300 rounded-lg" rows={1}></textarea>
                                 <label className="md:col-span-2 flex items-center justify-center gap-2 cursor-pointer text-sm">
-                                    <input type="checkbox" checked={pkg.popular} onChange={(e) => handlePackageChange(index, 'popular', e.target.checked)} className="h-4 w-4 rounded text-blue-600 focus:ring-blue-500" />
+                                    <input type="checkbox" checked={pkg.popular || false} onChange={(e) => handlePackageChange(index, 'popular', e.target.checked)} className="h-4 w-4 rounded text-blue-600 focus:ring-blue-500" />
                                     <span>الأكثر شيوعاً</span>
                                 </label>
                             </div>
                         ))}
+                         <div className="mt-4 flex justify-end">
+                            <button onClick={handleSavePackages} disabled={isSavingPackages} className="flex items-center gap-2 bg-blue-600 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-700 transition-colors shadow-lg disabled:bg-blue-400 disabled:cursor-not-allowed">
+                                {isSavingPackages ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+                                <span>{isSavingPackages ? 'جاري الحفظ...' : 'حفظ تغييرات الباقات'}</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div className="space-y-4 mt-8">
-                        <h3 className="text-lg font-bold text-gray-700">الخدمات الإضافية</h3>
+                         <div className="flex justify-between items-center">
+                            <h3 className="text-lg font-bold text-gray-700">الخدمات الإضافية</h3>
+                            <button onClick={() => handleOpenSettingsModal('service')} className="flex items-center gap-2 text-sm bg-blue-100 text-blue-700 font-semibold px-3 py-1 rounded-full hover:bg-blue-200">
+                                <Plus size={16}/> إضافة خدمة
+                            </button>
+                        </div>
                         {editableServices.map((service, index) => (
                             <div key={service.id} className="grid grid-cols-1 md:grid-cols-6 gap-4 items-center p-4 bg-gray-50 rounded-lg border">
                                 <input type="text" value={service.name} onChange={(e) => handleServiceChange(index, 'name', e.target.value)} placeholder="اسم الخدمة" className="md:col-span-2 w-full px-3 py-2 border border-gray-300 rounded-lg" />
@@ -170,13 +217,12 @@ const AdminCreativeWritingPage: React.FC = () => {
                                 <input type="text" value={service.description || ''} onChange={(e) => handleServiceChange(index, 'description', e.target.value)} placeholder="وصف الخدمة" className="md:col-span-3 w-full px-3 py-2 border border-gray-300 rounded-lg" />
                             </div>
                         ))}
-                    </div>
-                    
-                    <div className="mt-8 flex justify-end">
-                        <button onClick={handleSaveChanges} disabled={isSaving} className="flex items-center gap-2 bg-blue-600 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-700 transition-colors shadow-lg disabled:bg-blue-400 disabled:cursor-not-allowed">
-                            {isSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
-                            <span>{isSaving ? 'جاري الحفظ...' : 'حفظ كل التغييرات'}</span>
-                        </button>
+                         <div className="mt-4 flex justify-end">
+                            <button onClick={handleSaveServices} disabled={isSavingServices} className="flex items-center gap-2 bg-blue-600 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-700 transition-colors shadow-lg disabled:bg-blue-400 disabled:cursor-not-allowed">
+                                {isSavingServices ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+                                <span>{isSavingServices ? 'جاري الحفظ...' : 'حفظ تغييرات الخدمات'}</span>
+                            </button>
+                        </div>
                     </div>
                 </AdminSection>
 

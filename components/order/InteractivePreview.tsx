@@ -1,6 +1,7 @@
 import React from 'react';
 import { Package, User, Palette, Sparkles } from 'lucide-react';
-import { PersonalizedProduct } from '../../contexts/AdminContext';
+// FIX: Added .tsx extension to the import of PersonalizedProduct from AdminContext to resolve module loading error.
+import { PersonalizedProduct } from '../../contexts/AdminContext.tsx';
 
 const storyGoals = [
     { key: 'respect', title: 'الاستئذان والاحترام' },

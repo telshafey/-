@@ -1,9 +1,9 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Target, Star, Eye, Shield, Users, CheckCircle } from 'lucide-react';
 import Section from '../components/ui/Section.tsx';
 
 const CreativeWritingAboutPage: React.FC = () => {
+    const [imageLoaded, setImageLoaded] = useState(false);
     return (
         <div className="bg-gray-50 py-16 sm:py-20 animate-fadeIn">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -14,11 +14,31 @@ const CreativeWritingAboutPage: React.FC = () => {
                     </p>
                 </div>
 
-                <Section title="ماذا نقدم؟" icon={<Target size={24} />}>
-                    <p>
-                        نحن لا نقدم دروسًا، بل نقدم رحلة شخصية بصحبة مرشد متخصص. في جلسات فردية مباشرة، نأخذ بيد طفلك بعيدًا عن سطوة القواعد الصارمة والتقييم، ونمنحه حرية الورقة البيضاء. هنا، لا توجد إجابات صحيحة أو خاطئة؛ يوجد فقط صوت طفلك، خياله، وقصته التي تنتظر أن تُروى.
-                    </p>
-                </Section>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+                     <div className="p-8 bg-white rounded-2xl shadow-lg border border-gray-200">
+                        <div className="space-y-6">
+                            <h2 className="text-3xl font-bold text-gray-800">رحلة شخصية، وليست درساً</h2>
+                            <p className="text-gray-600 leading-relaxed">
+                                نحن لا نقدم دروسًا، بل نقدم رحلة شخصية بصحبة مرشد متخصص. في جلسات فردية مباشرة، نأخذ بيد طفلك بعيدًا عن سطوة القواعد الصارمة والتقييم، ونمنحه حرية الورقة البيضاء. هنا، لا توجد إجابات صحيحة أو خاطئة؛ يوجد فقط صوت طفلك، خياله، وقصته التي تنتظر أن تُروى.
+                            </p>
+                            <ul className="space-y-3">
+                                <li className="flex items-start"><CheckCircle className="text-green-500 mt-1 me-3 flex-shrink-0"/><span>جلسات فردية مباشرة وتفاعلية.</span></li>
+                                <li className="flex items-start"><CheckCircle className="text-green-500 mt-1 me-3 flex-shrink-0"/><span>بيئة آمنة وداعمة خالية من النقد.</span></li>
+                                <li className="flex items-start"><CheckCircle className="text-green-500 mt-1 me-3 flex-shrink-0"/><span>منهجية تركز على الممارسة العملية والإبداع.</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                     <div className="relative">
+                        {!imageLoaded && <div className="absolute inset-0 bg-gray-200 rounded-2xl animate-pulse"></div>}
+                        <img 
+                            src="https://i.ibb.co/n7ZJv9V/child-learning-online.jpg"
+                            alt="طفل يشارك في جلسة كتابة إبداعية عبر الإنترنت"
+                            className={`rounded-2xl shadow-2xl transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                            loading="lazy"
+                            onLoad={() => setImageLoaded(true)}
+                        />
+                    </div>
+                </div>
 
                 <Section title="التحول الذي نصنعه" icon={<Star size={24} />}>
                     <p>مع نهاية الرحلة، لا يحصل طفلك على مجرد نصوص مكتوبة، بل يحصل على ما هو أثمن:</p>

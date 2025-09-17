@@ -1,13 +1,14 @@
 
-
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { GoogleGenAI, Content, Type } from "@google/genai";
+import { GoogleGenAI, Type, Content } from "@google/genai";
 import { Bot, User, Send, Loader2, Sparkles, ArrowLeft } from 'lucide-react';
-import { useProduct } from '../contexts/ProductContext';
-import { useAdmin } from '../contexts/AdminContext';
-// FIX: Replaced named imports with a namespace import for 'react-router-dom' to resolve module resolution errors.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Added .tsx extension to useProduct import to resolve module error.
+import { useProduct } from '../contexts/ProductContext.tsx';
+// FIX: Added .tsx extension to the import of AdminContext to resolve module loading error.
+import { useAdmin } from '../contexts/AdminContext.tsx';
+// FIX: Replaced namespace import with a named import for 'react-router-dom' to resolve module resolution errors.
+import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext.tsx';
 
 // --- Static Data and Types ---
 
@@ -42,17 +43,6 @@ const productDetails = [
     },
 ];
 
-interface ProductSuggestion {
-  key: string;
-}
-
-interface DisplayMessage {
-  id: number;
-  role: 'user' | 'model';
-  text: string;
-  productSuggestion?: ProductSuggestion;
-}
-
 const responseSchema = {
   type: Type.OBJECT,
   properties: {
@@ -68,8 +58,16 @@ const responseSchema = {
   required: ['responseText', 'suggestedProductKey']
 };
 
+interface ProductSuggestion {
+  key: string;
+}
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+interface DisplayMessage {
+  id: number;
+  role: 'user' | 'model';
+  text: string;
+  productSuggestion?: ProductSuggestion;
+}
 
 const generateSystemInstruction = (prices, siteContent) => {
     if (!prices || !siteContent?.about?.intro_text) {
@@ -150,10 +148,10 @@ const ProductSuggestionCard: React.FC<{ productKey: string }> = ({ productKey })
                 <div className="flex-grow">
                     <h4 className="font-bold">{product.title}</h4>
                     <p className="text-sm opacity-90 mb-3">{product.description}</p>
-                    <ReactRouterDOM.Link to={product.link} className="inline-flex items-center gap-2 bg-white text-blue-600 px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-gray-200 transition-colors">
+                    <Link to={product.link} className="inline-flex items-center gap-2 bg-white text-blue-600 px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-gray-200 transition-colors">
                         <span>اعرف المزيد</span>
                         <ArrowLeft size={16} />
-                    </ReactRouterDOM.Link>
+                    </Link>
                 </div>
             </div>
         </div>
@@ -191,9 +189,11 @@ const GeminiPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
 
   const { prices, loading: pricesLoading } = useProduct();
   const { siteContent, loading: adminLoading } = useAdmin();
+  const { fetchAiChatHistory, saveAiChatHistory, isLoggedIn } = useAuth();
 
   const isDataLoading = pricesLoading || adminLoading;
 
@@ -208,43 +208,41 @@ const GeminiPage: React.FC = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatHistory, isLoading]);
 
-  // Load chat history from sessionStorage on initial load
   useEffect(() => {
-    try {
-      const storedHistory = sessionStorage.getItem('geminiChatHistory');
-      if (storedHistory) {
-        setChatHistory(JSON.parse(storedHistory));
-      } else if (!isDataLoading) {
-        // Only set welcome message if there's no stored history
-        setChatHistory([
-          {
-            id: Date.now(),
-            role: 'model',
-            text: 'أهلاً بك في منصة الرحلة! أنا "المرشد الإبداعي" هنا لمساعدتك في اختيار الهدية والقصة المثالية لطفلك. كيف يمكنني أن أخدمك اليوم؟',
-          },
-        ]);
-      }
-    } catch (error) {
-      console.error("Failed to parse chat history from sessionStorage", error);
-      // Fallback to welcome message if parsing fails
-       if (!isDataLoading) {
-        setChatHistory([
-          {
-            id: Date.now(),
-            role: 'model',
-            text: 'أهلاً بك في منصة الرحلة! أنا "المرشد الإبداعي" هنا لمساعدتك في اختيار الهدية والقصة المثالية لطفلك. كيف يمكنني أن أخدمك اليوم؟',
-          },
-        ]);
-      }
-    }
-  }, [isDataLoading]);
-
-  // Save chat history to sessionStorage whenever it changes
-  useEffect(() => {
-    if (chatHistory.length > 0) {
-      sessionStorage.setItem('geminiChatHistory', JSON.stringify(chatHistory));
-    }
-  }, [chatHistory]);
+    const loadHistory = async () => {
+        if (!isDataLoading && isLoggedIn) {
+            try {
+                const history = await fetchAiChatHistory();
+                if (history && history.length > 0) {
+                    setChatHistory(history);
+                } else {
+                     setChatHistory([
+                        {
+                            id: Date.now(),
+                            role: 'model',
+                            text: 'أهلاً بك في منصة الرحلة! أنا "المرشد الإبداعي" هنا لمساعدتك في اختيار الهدية والقصة المثالية لطفلك. كيف يمكنني أن أخدمك اليوم؟',
+                        },
+                    ]);
+                }
+            } catch (e) {
+                console.error("Failed to load chat history", e);
+                setError("لم نتمكن من تحميل سجل المحادثة السابق.");
+            } finally {
+                setHistoryLoaded(true);
+            }
+        } else if (!isLoggedIn) {
+             setChatHistory([
+                {
+                    id: Date.now(),
+                    role: 'model',
+                    text: 'أهلاً بك في منصة الرحلة! أنا "المرشد الإبداعي" هنا لمساعدتك. يرجى تسجيل الدخول لحفظ محادثاتك.',
+                },
+            ]);
+            setHistoryLoaded(true);
+        }
+    };
+    loadHistory();
+  }, [isDataLoading, fetchAiChatHistory, isLoggedIn]);
   
   const handleSendMessage = async (prompt?: string) => {
     const originalMessage = prompt || userInput;
@@ -256,32 +254,58 @@ const GeminiPage: React.FC = () => {
     }
     
     const userMessage: DisplayMessage = { id: Date.now(), role: 'user', text: originalMessage };
-    const newDisplayHistory = [...chatHistory, userMessage];
-    setChatHistory(newDisplayHistory);
+    
+    setChatHistory(prev => [...prev, userMessage]);
     setUserInput('');
     setIsLoading(true);
     setError(null);
     
-    const apiHistory: Content[] = newDisplayHistory
-        .filter(m => m.role === 'user' || (m.role === 'model' && m.text))
+    const apiHistory: Content[] = [...chatHistory, userMessage]
         .map(msg => ({
             role: msg.role,
             parts: [{ text: msg.text }]
         }));
+    
+    // --- Client-side Gemini Call ---
+    const API_KEY = "YOUR_GEMINI_API_KEY_HERE"; // Placeholder
+    if (API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
+        console.warn(
+`****************************************************************
+* WARNING: Gemini API Key is not configured.                   *
+*--------------------------------------------------------------*
+* Please replace the placeholder API Key in 'pages/GeminiPage.tsx' *
+* The AI chat feature will not work until this is done.        *
+****************************************************************`
+        );
+        const mockResponse = {
+            responseText: "مرحباً! يبدو أن مفتاح الواجهة البرمجية غير مهيأ. يرجى إعداده للمتابعة.",
+            suggestedProductKey: ""
+        };
+        const modelMessage: DisplayMessage = {
+            id: Date.now() + 1,
+            role: 'model',
+            text: mockResponse.responseText,
+            productSuggestion: undefined
+        };
+        setChatHistory(prev => [...prev, modelMessage]);
+        setIsLoading(false);
+        return;
+    }
 
     try {
+      const ai = new GoogleGenAI({ apiKey: API_KEY });
+
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: apiHistory,
         config: {
-          systemInstruction: systemInstruction,
-          responseMimeType: "application/json",
-          responseSchema: responseSchema,
+            systemInstruction: systemInstruction,
+            responseMimeType: "application/json",
+            responseSchema: responseSchema,
         }
       });
-      
-      const responseText = response.text;
-      const parsedJson = JSON.parse(responseText.trim());
+
+      const parsedJson = JSON.parse(response.text.trim());
 
       const modelMessage: DisplayMessage = {
         id: Date.now() + 1,
@@ -290,9 +314,15 @@ const GeminiPage: React.FC = () => {
         productSuggestion: parsedJson.suggestedProductKey ? { key: parsedJson.suggestedProductKey } : undefined
       };
       
-      setChatHistory(prev => [...prev, modelMessage]);
+      setChatHistory(prev => {
+        const newHistory = [...prev, modelMessage];
+        if (historyLoaded && isLoggedIn) {
+          saveAiChatHistory(newHistory);
+        }
+        return newHistory;
+      });
 
-    } catch (err) {
+    } catch (err: any) {
       console.error("Gemini API Error:", err);
       setError('عذراً، حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى لاحقاً.');
       setChatHistory(prev => prev.filter(m => m.id !== userMessage.id));

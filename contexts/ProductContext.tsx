@@ -1,145 +1,159 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
-import { useToast } from './ToastContext';
+import { useToast } from './ToastContext.tsx';
+import { supabase } from '../lib/supabaseClient.ts';
+// FIX: Added .ts extension to database.types import to resolve module error.
+import { Json } from '../lib/database.types.ts';
+import { EGYPTIAN_GOVERNORATES } from '../utils/governorates.ts';
 
-// Define types
 export interface Prices {
-    story: { printed: number, electronic: number };
+    story: {
+        printed: number;
+        electronic: number;
+    };
     coloringBook: number;
     duaBooklet: number;
-    giftBox: number;
     valuesStory: number;
     skillsStory: number;
+    giftBox: number;
     subscriptionBox: number;
 }
 
 export interface SiteBranding {
     logoUrl: string | null;
+    creativeWritingLogoUrl: string | null;
     heroImageUrl: string | null;
     aboutImageUrl: string | null;
-    creativeWritingLogoUrl: string | null;
+    creativeWritingPortalImageUrl: string | null;
 }
 
-export type ShippingCosts = { [key: string]: number };
+export interface ShippingCosts {
+    [governorate: string]: number;
+}
 
 interface ProductContextType {
-  prices: Prices | null;
-  setPrices: (newPrices: Prices) => Promise<void>;
-  siteBranding: SiteBranding | null;
-  setSiteBranding: (newBranding: Partial<SiteBranding>) => Promise<void>;
-  shippingCosts: ShippingCosts | null;
-  setShippingCosts: (newCosts: ShippingCosts) => Promise<void>;
-  loading: boolean;
-  error: string | null;
+    prices: Prices | null;
+    setPrices: (newPrices: Prices) => Promise<void>;
+    shippingCosts: ShippingCosts | null;
+    setShippingCosts: (newCosts: ShippingCosts) => Promise<void>;
+    siteBranding: SiteBranding | null;
+    setSiteBranding: (brandingChanges: Partial<SiteBranding>) => Promise<void>;
+    loading: boolean;
+    error: string | null;
 }
 
-// --- Mock Data ---
-const MOCK_PRICES: Prices = {
-    story: { printed: 700, electronic: 450 },
-    coloringBook: 150,
-    duaBooklet: 250,
-    giftBox: 1200,
-    valuesStory: 350,
-    skillsStory: 350,
-    subscriptionBox: 350,
-};
-
-const MOCK_SITE_BRANDING: SiteBranding = {
-    logoUrl: 'https://i.ibb.co/7JdC01C/Enha-Lak-Logo.png',
-    heroImageUrl: 'https://i.ibb.co/RzJzQhL/hero-image-new.jpg',
-    aboutImageUrl: 'https://i.ibb.co/8XYt2s5/about-us-image.jpg',
-    creativeWritingLogoUrl: 'https://i.ibb.co/bF9gYq2/Bidayat-Alrehla-Logo.png',
-};
-
-const MOCK_SHIPPING_COSTS: ShippingCosts = {
-    "القاهرة": 0,
-    "الجيزة": 35,
-    "الإسكندرية": 50,
-    "الدقهلية": 60,
-    "البحر الأحمر": 70,
-    "البحيرة": 60,
-    "الفيوم": 55,
-    "الغربية": 60,
-    "الإسماعيلية": 55,
-    "المنوفية": 60,
-    "المنيا": 65,
-    "القليوبية": 35,
-    "الوادي الجديد": 80,
-    "السويس": 55,
-    "اسوان": 75,
-    "اسيوط": 70,
-    "بني سويف": 60,
-    "بورسعيد": 55,
-    "دمياط": 60,
-    "الشرقية": 60,
-    "جنوب سيناء": 80,
-    "كفر الشيخ": 60,
-    "مطروح": 75,
-    "الأقصر": 75,
-    "قنا": 70,
-    "شمال سيناء": 80,
-    "سوهاج": 70
-};
-
-// Create Context
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
-// Create Provider
-export const ProductProvider: React.FC<{children: ReactNode}> = ({ children }) => {
-  const [prices, setPricesState] = useState<Prices | null>(null);
-  const [siteBranding, setSiteBrandingState] = useState<SiteBranding | null>(null);
-  const [shippingCosts, setShippingCostsState] = useState<ShippingCosts | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { addToast } = useToast();
+export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const [prices, setPricesState] = useState<Prices | null>(null);
+    const [siteBranding, setSiteBrandingState] = useState<SiteBranding | null>(null);
+    const [shippingCosts, setShippingCostsState] = useState<ShippingCosts | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const { addToast } = useToast();
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    // Simulate async fetch
-    await new Promise(res => setTimeout(res, 200)); 
-    setPricesState(MOCK_PRICES);
-    setSiteBrandingState(MOCK_SITE_BRANDING);
-    setShippingCostsState(MOCK_SHIPPING_COSTS);
-    setLoading(false);
-  }, []);
-  
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const { data, error: fetchError } = await supabase
+                .from('site_settings')
+                .select('*')
+                .eq('id', 1)
+                .single();
 
-  const updatePrices = async (newPrices: Prices) => {
-    setPricesState(newPrices); 
-    console.log("Mock update prices:", newPrices);
-    addToast('تم تحديث الأسعار بنجاح (تجريبيًا)!', 'success');
-  };
+            if (fetchError) throw fetchError;
+            
+            if (data) {
+                // FIX: Cast to 'unknown' first to handle Supabase's broad 'Json' type safely.
+                setPricesState(data.prices as unknown as Prices);
+                // FIX: Cast to 'unknown' first to handle Supabase's broad 'Json' type safely.
+                setSiteBrandingState(data.site_branding as unknown as SiteBranding);
+                setShippingCostsState(data.shipping_costs as ShippingCosts);
+            } else {
+                 throw new Error("لم يتم العثور على إعدادات الموقع. يرجى التأكد من تهيئة قاعدة البيانات.");
+            }
+        } catch (e: any) {
+            console.error("Fetch product data error:", e.message || e);
+            setError(`فشل الاتصال بقاعدة البيانات: ${e.message}`);
+            addToast(`فشل الاتصال بقاعدة البيانات. تأكد من صحة بيانات الاتصال.`, 'error');
+        } finally {
+            setLoading(false);
+        }
+    }, [addToast]);
+    
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
-  const updateSiteBranding = async (newBranding: Partial<SiteBranding>) => {
-    setSiteBrandingState(prev => prev ? { ...prev, ...newBranding } : null);
-    console.log("Mock update branding:", newBranding);
-    // Toast is handled in the settings page for a unified message.
-  };
+    const setPrices = async (newPrices: Prices) => {
+        const { error: updateError } = await supabase
+            .from('site_settings')
+            .update({ prices: newPrices as unknown as Json })
+            .eq('id', 1);
+        
+        if (updateError) { addToast('فشل تحديث الأسعار.', 'error'); throw updateError; }
+        setPricesState(newPrices);
+        addToast('تم تحديث الأسعار بنجاح.', 'success');
+    };
 
-  const updateShippingCosts = async (newCosts: ShippingCosts) => {
-    setShippingCostsState(newCosts);
-    addToast('تم تحديث تكاليف الشحن بنجاح (تجريبيًا)!', 'success');
-  };
+    const setShippingCosts = async (newCosts: ShippingCosts) => {
+        const { error: updateError } = await supabase
+            .from('site_settings')
+            .update({ shipping_costs: newCosts as Json })
+            .eq('id', 1);
+            
+        if (updateError) { addToast('فشل تحديث تكاليف الشحن.', 'error'); throw updateError; }
+        setShippingCostsState(newCosts);
+        addToast('تم تحديث تكاليف الشحن بنجاح.', 'success');
+    };
 
-  return (
-    <ProductContext.Provider value={{ 
-        prices, setPrices: updatePrices, 
-        siteBranding, setSiteBranding: updateSiteBranding,
-        shippingCosts, setShippingCosts: updateShippingCosts,
-        loading, error
-    }}>
-      {children}
-    </ProductContext.Provider>
-  );
+    const setSiteBranding = async (brandingChanges: Partial<SiteBranding>) => {
+        const { data: currentSettings, error: fetchError } = await supabase
+            .from('site_settings')
+            .select('site_branding')
+            .eq('id', 1)
+            .single();
+
+        if (fetchError) { addToast('فشل جلب بيانات العلامة التجارية الحالية.', 'error'); throw fetchError; }
+        
+        if (!currentSettings) { addToast('فشل جلب الإعدادات الحالية.', 'error'); throw new Error("Could not fetch current settings."); }
+
+        // FIX: Cast to 'unknown' first to handle Supabase's broad 'Json' type safely.
+        const currentBranding = (currentSettings.site_branding || {}) as unknown as SiteBranding;
+        const newBranding = { ...currentBranding, ...brandingChanges };
+        
+        const { error: updateError } = await supabase
+            .from('site_settings')
+            .update({ site_branding: newBranding as Json })
+            .eq('id', 1);
+        
+        if (updateError) { addToast('فشل تحديث العلامة التجارية للموقع.', 'error'); throw updateError; }
+        setSiteBrandingState(newBranding);
+        addToast('تم تحديث العلامة التجارية للموقع.', 'success');
+    };
+    
+    const value = {
+        prices,
+        setPrices,
+        shippingCosts,
+        setShippingCosts,
+        siteBranding,
+        setSiteBranding,
+        loading,
+        error
+    };
+
+    return (
+        <ProductContext.Provider value={value}>
+            {children}
+        </ProductContext.Provider>
+    );
 };
 
-// Create Hook
 export const useProduct = (): ProductContextType => {
-  const context = useContext(ProductContext);
-  if (context === undefined) {
-    throw new Error('useProduct must be used within a ProductProvider');
-  }
-  return context;
+    const context = useContext(ProductContext);
+    if (context === undefined) {
+        throw new Error('useProduct must be used within a ProductProvider');
+    }
+    return context;
 };

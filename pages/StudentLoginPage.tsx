@@ -1,9 +1,10 @@
-
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext.tsx';
 
 const StudentLoginPage: React.FC = () => {
-    const { signInAsDemoUser, loading } = useAuth();
+    const { signIn, loading } = useAuth();
+    const DEMO_STUDENT_EMAIL = 'student@alrehlah.com';
+    const DEMO_PASSWORD = '123456';
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -16,11 +17,11 @@ const StudentLoginPage: React.FC = () => {
                 <div className="space-y-4">
                     {/* In a real app, this would be a form with username/password */}
                     <button
-                        onClick={() => signInAsDemoUser('student')}
+                        onClick={() => signIn(DEMO_STUDENT_EMAIL, DEMO_PASSWORD)}
                         disabled={loading}
                         className="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-400"
                     >
-                        {loading ? 'جاري الدخول...' : 'الدخول كـ طالب (تجريبي)'}
+                        {loading ? 'جاري الدخول...' : 'الدخول كـ طالب'}
                     </button>
                 </div>
                  <p className="text-xs text-gray-500 mt-6">

@@ -19,7 +19,8 @@ export const AuthForm: React.FC = () => {
 
     return (
         <div className="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-lg">
-            <h2 className="text-2xl font-bold text-center mb-6">{isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}</h2>
+            <h2 className="text-2xl font-bold text-center mb-2">{isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}</h2>
+            <p className="text-center text-xs text-gray-500 mb-6">هذا النموذج للحسابات الحقيقية. لتجربة المنصة، استخدم أزرار الدخول السريع في الأسفل.</p>
             <form onSubmit={handleSubmit} className="space-y-4">
                 {!isLogin && (
                     <div>

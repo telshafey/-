@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Loader2, FileText } from 'lucide-react';
-import { useAdmin, TextContent } from '../../contexts/AdminContext';
-import { useToast } from '../../contexts/ToastContext';
-import PageLoader from '../../components/ui/PageLoader';
-import Accordion from '../../components/ui/Accordion';
+// FIX: Added .tsx extension to the import of AdminContext to resolve module loading error.
+import { useAdmin, TextContent } from '../../contexts/AdminContext.tsx';
+// FIX: Added .tsx extension to useToast import to resolve module error.
+import { useToast } from '../../contexts/ToastContext.tsx';
+// FIX: Added .tsx extension to PageLoader import to resolve module error.
+import PageLoader from '../../components/ui/PageLoader.tsx';
+// FIX: Added .tsx extension to Accordion import to resolve module error.
+import Accordion from '../../components/ui/Accordion.tsx';
 
 interface TextInputProps {
     label: string;

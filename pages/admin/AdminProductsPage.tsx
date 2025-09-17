@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Loader2 } from 'lucide-react';
-import { useProduct } from '../../contexts/ProductContext';
-import type { Prices } from '../../contexts/ProductContext';
-import { useToast } from '../../contexts/ToastContext';
+// FIX: Added .tsx extension to ProductContext imports to resolve module errors.
+import { useProduct, Prices } from '../../contexts/ProductContext.tsx';
+import { useToast } from '../../contexts/ToastContext.tsx';
 
 interface PriceInputProps {
     label: string;
@@ -13,12 +13,13 @@ interface PriceInputProps {
 
 const PriceInput: React.FC<PriceInputProps> = ({ label, name, value, onChange }) => (
     <div>
-        <label htmlFor={name} className="block text-sm font-bold text-gray-700 mb-2">{label}</label>
+        <label htmlFor={name as string} className="block text-sm font-bold text-gray-700 mb-2">{label}</label>
         <div className="relative">
             <input 
                 type="number" 
-                id={name} 
-                name={name} 
+                // FIX: Cast 'name' prop to string to resolve type errors.
+                id={name as string} 
+                name={name as string} 
                 value={value} 
                 onChange={onChange} 
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" 

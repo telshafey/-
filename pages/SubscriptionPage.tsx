@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.tsx';
+// FIX: Added .tsx extension to the import of AdminContext to resolve module loading error.
 import { useAdmin } from '../contexts/AdminContext.tsx';
 import { useToast } from '../contexts/ToastContext.tsx';
-import * as ReactRouterDOM from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Star, Gift, CheckCircle, Package, Loader2 } from 'lucide-react';
 import { useProduct } from '../contexts/ProductContext.tsx';
 import PageLoader from '../components/ui/PageLoader.tsx';
@@ -13,9 +14,9 @@ const SubscriptionPage: React.FC = () => {
     const { createSubscription } = useAdmin();
     const { prices, loading: pricesLoading } = useProduct();
     const { addToast } = useToast();
-    const navigate = ReactRouterDOM.useNavigate();
+    const navigate = useNavigate();
 
-    const [selectedChild, setSelectedChild] = useState<string>('');
+    const [selectedChildId, setSelectedChildId] = useState<string>('');
     const [isSubscribing, setIsSubscribing] = useState(false);
     const pageUrl = window.location.href;
 
@@ -25,15 +26,16 @@ const SubscriptionPage: React.FC = () => {
             navigate('/account');
             return;
         }
-        if (!selectedChild) {
+        if (!selectedChildId) {
             addToast('يرجى اختيار الطفل الذي سيحصل على الاشتراك.', 'warning');
             return;
         }
 
         setIsSubscribing(true);
         try {
+            const childName = childProfiles.find(c => c.id.toString() === selectedChildId)?.name || '';
             const annualPrice = prices!.subscriptionBox * 12;
-            const newSubscription = await createSubscription(currentUser.id, currentUser.name, selectedChild, annualPrice);
+            const newSubscription = await createSubscription(currentUser.id, currentUser.name, parseInt(selectedChildId), childName, annualPrice);
             
             addToast('تم إنشاء طلب الاشتراك! سيتم توجيهك الآن لإتمام عملية الدفع.', 'success');
 
@@ -43,7 +45,7 @@ const SubscriptionPage: React.FC = () => {
                         id: newSubscription.id,
                         type: 'subscription',
                         total: newSubscription.price,
-                        summary: `اشتراك سنوي لصندوق الرحلة (${selectedChild})`
+                        summary: `اشتراك سنوي لصندوق الرحلة (${childName})`
                     }
                 }
             });
@@ -107,18 +109,18 @@ const SubscriptionPage: React.FC = () => {
                                 childProfiles.length > 0 ? (
                                     <div className="space-y-4">
                                         <select
-                                            value={selectedChild}
-                                            onChange={(e) => setSelectedChild(e.target.value)}
+                                            value={selectedChildId}
+                                            onChange={(e) => setSelectedChildId(e.target.value)}
                                             className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white"
                                         >
                                             <option value="">-- اختر الطفل --</option>
                                             {childProfiles.map(child => (
-                                                <option key={child.id} value={child.name}>{child.name}</option>
+                                                <option key={child.id} value={child.id}>{child.name}</option>
                                             ))}
                                         </select>
                                         <button 
                                             onClick={handleSubscribe} 
-                                            disabled={isSubscribing || !selectedChild}
+                                            disabled={isSubscribing || !selectedChildId}
                                             className="w-full flex items-center justify-center gap-2 bg-orange-500 text-white font-bold py-3 px-4 rounded-full hover:bg-orange-600 transition-transform transform hover:scale-105 shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
                                         >
                                             {isSubscribing ? <Loader2 className="animate-spin" /> : <Star />}
@@ -127,8 +129,8 @@ const SubscriptionPage: React.FC = () => {
                                     </div>
                                 ) : (
                                     <div className="text-center p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                                        <p className="text-blue-800">
-                                            يجب إضافة ملف طفل واحد على الأقل في <a href="#/account" className="font-bold underline">صفحة حسابك</a> لتتمكن من الاشتراك.
+                                        <p className="text-sm text-blue-800">
+                                            يجب إضافة ملف طفل واحد على الأقل في <Link to="/account" className="font-bold underline">صفحة حسابك</Link> لتتمكن من الاشتراك.
                                         </p>
                                     </div>
                                 )

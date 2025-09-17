@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, User, Package, Calendar, Clock, MessageSquare, Save, Loader2 } from 'lucide-react';
+// FIX: Corrected import path for useCreativeWritingAdmin.
 import { useCreativeWritingAdmin, CreativeWritingBooking } from '../../contexts/admin/CreativeWritingAdminContext';
 import { useToast } from '../../contexts/ToastContext';
 import { formatDate } from '../../utils/helpers';

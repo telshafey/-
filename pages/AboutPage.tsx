@@ -1,19 +1,21 @@
-
-import React from 'react';
-import { Target, BookHeart, Feather } from 'lucide-react';
-import { useProduct } from '../contexts/ProductContext';
-import { useAdmin } from '../contexts/AdminContext';
-import PageLoader from '../components/ui/PageLoader';
-import Section from '../components/ui/Section.tsx';
+import React, { useState } from 'react';
+import { Target, BookHeart, Feather, Heart, Rocket, Shield, UserCheck, Award } from 'lucide-react';
+// FIX: Added .tsx extension to useProduct import to resolve module error.
+import { useProduct } from '../contexts/ProductContext.tsx';
+// FIX: Added .tsx extension to the import of AdminContext to resolve module loading error.
+import { useAdmin } from '../contexts/AdminContext.tsx';
+// FIX: Added .tsx extension to PageLoader import to resolve module error.
+import PageLoader from '../components/ui/PageLoader.tsx';
 
 const AboutPage: React.FC = () => {
-  const { loading: brandingLoading } = useProduct();
+  const { siteBranding, loading: brandingLoading } = useProduct();
   const { siteContent, loading: contentLoading } = useAdmin();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const isLoading = brandingLoading || contentLoading;
   const aboutContent = siteContent.about || {};
   
-  if (isLoading) {
+  if (isLoading || !siteBranding) {
       return <PageLoader text="جاري تحميل صفحة عنا..." />;
   }
 
@@ -33,21 +35,72 @@ const AboutPage: React.FC = () => {
             <p className="text-gray-700 leading-relaxed text-lg text-center">{aboutContent.intro_text}</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-stretch mb-20">
-            <Section 
-                title={aboutContent.project1_title || ''}
-                icon={<BookHeart size={24} />}
-                className="!mb-0 border h-full transform hover:-translate-y-2 transition-transform duration-300"
-            >
-              <p className="text-gray-600 leading-relaxed">{aboutContent.project1_text || ''}</p>
-            </Section>
-             <Section 
-                title={aboutContent.project2_title || ''}
-                icon={<Feather size={24} />}
-                className="!mb-0 border h-full transform hover:-translate-y-2 transition-transform duration-300"
-            >
-              <p className="text-gray-600 leading-relaxed">{aboutContent.project2_text || ''}</p>
-            </Section>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20 max-w-6xl mx-auto">
+            <div className="relative order-last lg:order-first">
+                {!imageLoaded && <div className="absolute inset-0 bg-gray-200 rounded-2xl animate-pulse"></div>}
+                <img 
+                    src={siteBranding.aboutImageUrl || ''} 
+                    alt="طفلة تقرأ وتتعلم بشغف" 
+                    className={`rounded-2xl shadow-2xl transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    loading="lazy"
+                    onLoad={() => setImageLoaded(true)}
+                />
+            </div>
+             <div className="p-8 bg-white rounded-2xl shadow-lg border border-gray-200">
+                <div className="space-y-8">
+                    {/* ENHA LAK Section */}
+                    <div>
+                        <h3 className="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-3">
+                            <BookHeart className="text-blue-500" /> {aboutContent.project1_title || ''}
+                        </h3>
+                        <p className="text-gray-600 leading-relaxed">{aboutContent.project1_text || ''}</p>
+                        
+                        <div className="mt-6">
+                            <h4 className="font-bold text-lg text-gray-700">رسالتنا: أكثر من مجرد قصة</h4>
+                            <ul className="space-y-3 mt-3 text-gray-600">
+                                <li className="flex items-start">
+                                    <Heart className="w-5 h-5 text-pink-500 me-3 mt-1 flex-shrink-0" />
+                                    <span><span className="font-semibold text-gray-800">تعزيز الهوية:</span> نحول الطفل من قارئ إلى بطل، مما يعزز صورته الذاتية الإيجابية.</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <Rocket className="w-5 h-5 text-orange-500 me-3 mt-1 flex-shrink-0" />
+                                    <span><span className="font-semibold text-gray-800">بناء الثقة بالنفس:</span> رؤية نفسه ناجحًا في القصة يمنحه الشجاعة لمواجهة تحديات الواقع.</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <Shield className="w-5 h-5 text-green-500 me-3 mt-1 flex-shrink-0" />
+                                    <span><span className="font-semibold text-gray-800">غرس القيم:</span> نقدم المفاهيم التربوية في سياق قصصي محبب ومؤثر يتقبله الطفل بسهولة.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <hr className="border-gray-200" />
+                    {/* BIDAYAT ALREHLA Section */}
+                    <div>
+                        <h3 className="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-3">
+                            <Feather className="text-purple-500" /> {aboutContent.project2_title || ''}
+                        </h3>
+                        <p className="text-gray-600 leading-relaxed">{aboutContent.project2_text || ''}</p>
+                        
+                        <div className="mt-6">
+                            <h4 className="font-bold text-lg text-gray-700">منهجيتنا: الإلهام قبل القواعد</h4>
+                            <ul className="space-y-3 mt-3 text-gray-600">
+                                <li className="flex items-start">
+                                    <UserCheck className="w-5 h-5 text-indigo-500 me-3 mt-1 flex-shrink-0" />
+                                    <span><span className="font-semibold text-gray-800">جلسات فردية مباشرة:</span> تركيز كامل على صوت الطفل واحتياجاته الإبداعية الفريدة.</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <Shield className="w-5 h-5 text-teal-500 me-3 mt-1 flex-shrink-0" />
+                                    <span><span className="font-semibold text-gray-800">بيئة آمنة وداعمة:</span> مساحة خالية من النقد، تشجع على التجربة والخطأ كجزء من عملية التعلم.</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <Award className="w-5 h-5 text-yellow-500 me-3 mt-1 flex-shrink-0" />
+                                    <span><span className="font-semibold text-gray-800">مخرجات ملموسة:</span> ينهي الطالب البرنامج بمحفظة أعمال رقمية وشهادة إتمام، مما يمنحه شعورًا بالإنجاز.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div className="max-w-5xl mx-auto text-center">

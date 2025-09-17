@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Image as ImageIcon, X, Loader2, Share2 } from 'lucide-react';
-import { useAdmin, TextContent } from '../../contexts/AdminContext';
-// FIX: Added .ts extension to resolve module error.
+// FIX: Added .tsx extension to the import of AdminContext to resolve module loading error.
+import { useAdmin, TextContent } from '../../contexts/AdminContext.tsx';
+// FIX: Added .ts extension to database.types import to resolve module error.
 import type { SocialLinks } from '../../lib/database.types.ts';
-import { useToast } from '../../contexts/ToastContext';
-import { useProduct, SiteBranding } from '../../contexts/ProductContext';
+import { useToast } from '../../contexts/ToastContext.tsx';
+// FIX: Added .tsx extension to ProductContext import to resolve module error.
+import { useProduct, SiteBranding } from '../../contexts/ProductContext.tsx';
+import { supabase } from '../../lib/supabaseClient.ts';
 
 const ImageUploadControl: React.FC<{
     label: string;
@@ -60,8 +63,8 @@ const AdminSettingsPage: React.FC = () => {
     const [isSaving, setIsSaving] = useState(false);
     
     const [editableBranding, setEditableBranding] = useState<SiteBranding | null>(siteBranding);
-    const [imageFiles, setImageFiles] = useState<{ logo?: File, hero?: File, about?: File, creativeWritingLogo?: File }>({});
-    const [imagePreviews, setImagePreviews] = useState<{ logo?: string, hero?: string, about?: string, creativeWritingLogo?: string }>({});
+    const [imageFiles, setImageFiles] = useState<{ logo?: File, hero?: File, about?: File, creativeWritingLogo?: File, creativeWritingPortal?: File }>({});
+    const [imagePreviews, setImagePreviews] = useState<{ logo?: string, hero?: string, about?: string, creativeWritingLogo?: string, creativeWritingPortal?: string }>({});
 
     const [editableSocials, setEditableSocials] = useState<SocialLinks>(socialLinks);
     
@@ -73,12 +76,12 @@ const AdminSettingsPage: React.FC = () => {
         setEditableSocials(prev => ({ ...prev, [key]: value }));
     };
 
-    const handleImageSelect = (key: 'logo' | 'hero' | 'about' | 'creativeWritingLogo', file: File) => {
+    const handleImageSelect = (key: 'logo' | 'hero' | 'about' | 'creativeWritingLogo' | 'creativeWritingPortal', file: File) => {
         setImageFiles(prev => ({ ...prev, [key]: file }));
         setImagePreviews(prev => ({ ...prev, [key]: URL.createObjectURL(file) }));
     };
 
-    const handleCancelImage = (key: 'logo' | 'hero' | 'about' | 'creativeWritingLogo') => {
+    const handleCancelImage = (key: 'logo' | 'hero' | 'about' | 'creativeWritingLogo' | 'creativeWritingPortal') => {
         setImageFiles(prev => { const newFiles = {...prev}; delete newFiles[key]; return newFiles; });
         setImagePreviews(prev => { const newPreviews = {...prev}; delete newPreviews[key]; return newPreviews; });
     };
@@ -88,28 +91,39 @@ const AdminSettingsPage: React.FC = () => {
         setIsSaving(true);
 
         try {
-            const brandingChanges: Partial<SiteBranding> = {};
+            const brandingUpdates: Partial<SiteBranding> = {};
             for (const key of Object.keys(imageFiles) as Array<keyof typeof imageFiles>) {
                 const file = imageFiles[key];
                 if (!file) continue;
                 
-                // In a real scenario, we'd upload and get a URL. Here, we'll just use the preview URL for the mock.
-                const previewUrl = imagePreviews[key];
-                if (key === 'logo') brandingChanges.logoUrl = previewUrl;
-                if (key === 'hero') brandingChanges.heroImageUrl = previewUrl;
-                if (key === 'about') brandingChanges.aboutImageUrl = previewUrl;
-                if (key === 'creativeWritingLogo') brandingChanges.creativeWritingLogoUrl = previewUrl;
+                const filePath = `public/${key}-${Date.now()}-${file.name}`;
+                const { error: uploadError } = await supabase.storage
+                    .from('site_assets')
+                    .upload(filePath, file);
+
+                if (uploadError) throw new Error(`فشل رفع الصورة: ${uploadError.message}`);
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('site_assets')
+                    .getPublicUrl(filePath);
+
+                if (key === 'logo') brandingUpdates.logoUrl = publicUrl;
+                if (key === 'hero') brandingUpdates.heroImageUrl = publicUrl;
+                if (key === 'about') brandingUpdates.aboutImageUrl = publicUrl;
+                if (key === 'creativeWritingLogo') brandingUpdates.creativeWritingLogoUrl = publicUrl;
+                if (key === 'creativeWritingPortal') brandingUpdates.creativeWritingPortalImageUrl = publicUrl;
             }
 
-            if (Object.keys(brandingChanges).length > 0) {
-                await setSiteBranding(brandingChanges);
+            if (Object.keys(brandingUpdates).length > 0) {
+                await setSiteBranding(brandingUpdates);
             }
             if(JSON.stringify(editableSocials) !== JSON.stringify(socialLinks)) {
                 await updateSocialLinks(editableSocials);
             }
 
-            addToast('تم حفظ التغييرات (تجريبيًا)!', 'success');
+            addToast('تم حفظ التغييرات بنجاح!', 'success');
             setImageFiles({});
+            setImagePreviews({});
             
         } catch (error: any) {
             addToast(error.message || 'حدث خطأ أثناء حفظ التغييرات.', 'error');
@@ -151,11 +165,19 @@ const AdminSettingsPage: React.FC = () => {
                                 disabled={isSaving}
                             />
                             <ImageUploadControl 
-                                label="صورة الواجهة الرئيسية" 
+                                label="صورة بوابة 'إنها لك'" 
                                 currentImage={editableBranding.heroImageUrl || ''}
                                 newImagePreview={imagePreviews.hero || null}
                                 onFileSelect={(file) => handleImageSelect('hero', file)}
                                 onCancel={() => handleCancelImage('hero')}
+                                disabled={isSaving}
+                            />
+                            <ImageUploadControl 
+                                label="صورة بوابة 'بداية الرحلة'" 
+                                currentImage={editableBranding.creativeWritingPortalImageUrl || ''}
+                                newImagePreview={imagePreviews.creativeWritingPortal || null}
+                                onFileSelect={(file) => handleImageSelect('creativeWritingPortal', file)}
+                                onCancel={() => handleCancelImage('creativeWritingPortal')}
                                 disabled={isSaving}
                             />
                             <ImageUploadControl 

@@ -1,65 +1,84 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>منصة الرحلة</title>
-    <link rel="icon" href="https://i.ibb.co/C0bSJJT/favicon.png" type="image/png">
-    <link rel="preload" href="https://i.ibb.co/7JdC01C/Enha-Lak-Logo.png" as="image">
-    <link rel="preload" href="https://i.ibb.co/RzJzQhL/hero-image-new.jpg" as="image">
-    <link rel="preload" href="https://i.ibb.co/Xz9d9J2/creative-writing-promo.jpg" as="image">
-    <script src="https://cdn.tailwindcss.com"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alrehla</title>
+    <link rel="icon" type="image/png" href="https://i.ibb.co/C0bSJJT/favicon.png">
+    
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <script src='https://meet.jit.si/external_api.js'></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Cairo', 'sans-serif'],
+            },
+            animation: {
+              fadeIn: 'fadeIn 0.5s ease-in-out',
+              glow: 'glow 2s ease-in-out infinite alternate',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: 0, transform: 'translateY(-10px)' },
+                '100%': { opacity: 1, transform: 'translateY(0)' },
+              },
+              glow: {
+                'from': {
+                  boxShadow: '0 0 10px -5px #a855f7, 0 0 20px -10px #a855f7'
+                },
+                'to': {
+                  boxShadow: '0 0 20px 0px #a855f7, 0 0 40px 5px #a855f7'
+                }
+              }
+            }
+          }
+        }
+      }
+    </script>
+    
+    <!-- Jitsi Meet API -->
+    <script src="https://meet.jit.si/external_api.js"></script>
+
     <style>
-      body {
-        font-family: 'Tajawal', sans-serif;
+      /* Custom scrollbar for better aesthetics */
+      ::-webkit-scrollbar {
+        width: 8px;
       }
-      @keyframes pulse-slow {
-        50% {
-          transform: scale(1.05);
-        }
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
       }
-      .animate-pulse-slow {
-        animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      ::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
       }
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      .animate-fadeIn {
-        animation: fadeIn 0.5s ease-out forwards;
-      }
-      @keyframes glow {
-        0%, 100% {
-          box-shadow: 0 0 5px rgba(139, 92, 246, 0.4), 0 0 10px rgba(139, 92, 246, 0.3), 0 0 15px rgba(139, 92, 246, 0.2);
-        }
-        50% {
-          box-shadow: 0 0 10px rgba(139, 92, 246, 0.6), 0 0 20px rgba(139, 92, 246, 0.4), 0 0 30px rgba(139, 92, 246, 0.3);
-        }
-      }
-      .animate-glow {
-        animation: glow 3s ease-in-out infinite;
+      ::-webkit-scrollbar-thumb:hover {
+        background: #555;
       }
     </style>
-  <script type="importmap">
+<script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@^19.1.1",
-    "react-dom/": "https://esm.sh/react-dom@^19.1.1/",
-    "react/": "https://esm.sh/react@^19.1.1/",
-    "react-router-dom": "https://esm.sh/react-router-dom@^7.8.0",
-    "lucide-react": "https://esm.sh/lucide-react@^0.539.0",
-    "@google/genai": "https://esm.sh/@google/genai@^1.13.0",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.45.0"
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.1",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.544.0",
+    "@supabase/supabase-js": "https://aistudiocdn.com/@supabase/supabase-js@^2.57.4",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.19.0"
   }
 }
 </script>
 </head>
-  <body>
+<body class="bg-gray-50 antialiased">
+    <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
-  </body>
+</body>
 </html>

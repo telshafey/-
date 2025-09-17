@@ -1,12 +1,17 @@
 
+
 import React, { useState } from 'react';
 import { BookOpen, Plus, Edit, Trash2 } from 'lucide-react';
-import { useAdmin, BlogPost } from '../../contexts/AdminContext';
+// FIX: Added .tsx extension to the import of AdminContext to resolve module loading error.
+import { useAdmin, BlogPost } from '../../contexts/AdminContext.tsx';
 // FIX: Added .ts extension to resolve module error.
 import { formatDate } from '../../utils/helpers.ts';
-import AdminSection from '../../components/admin/AdminSection';
-import PageLoader from '../../components/ui/PageLoader';
-import BlogPostModal from '../../components/admin/BlogPostModal';
+// FIX: Added .tsx extension to AdminSection import to resolve module error.
+import AdminSection from '../../components/admin/AdminSection.tsx';
+// FIX: Added .tsx extension to PageLoader import to resolve module error.
+import PageLoader from '../../components/ui/PageLoader.tsx';
+// FIX: Added .tsx extension to BlogPostModal import to resolve module error.
+import BlogPostModal from '../../components/admin/BlogPostModal.tsx';
 
 const AdminBlogPage: React.FC = () => {
     const { blogPosts, loading, error, createBlogPost, updateBlogPost, deleteBlogPost } = useAdmin();

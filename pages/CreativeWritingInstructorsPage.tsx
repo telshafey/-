@@ -1,10 +1,8 @@
-
-
-
 import React, { useState } from 'react';
-// FIX: Replaced named imports with a namespace import for 'react-router-dom' to resolve module resolution errors.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Replaced namespace import with a named import for 'react-router-dom' to resolve module resolution errors.
+import { Link } from 'react-router-dom';
 import { Users, Loader2 } from 'lucide-react';
+// FIX: Corrected import path for useCreativeWritingAdmin.
 import { useCreativeWritingAdmin } from '../contexts/admin/CreativeWritingAdminContext';
 
 const InstructorCard: React.FC<{ instructor: any }> = ({ instructor }) => {
@@ -23,12 +21,12 @@ const InstructorCard: React.FC<{ instructor: any }> = ({ instructor }) => {
             </div>
             <h3 className="text-xl font-bold text-gray-800">{instructor.name}</h3>
             <p className="text-blue-600 font-semibold mb-4 flex-grow">{instructor.specialty}</p>
-            <ReactRouterDOM.Link 
+            <Link 
                 to={`/instructor/${instructor.slug}`}
                 className="mt-auto w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-full hover:bg-blue-700 transition-colors"
             >
                 عرض الملف الشخصي
-            </ReactRouterDOM.Link>
+            </Link>
         </div>
     );
 };

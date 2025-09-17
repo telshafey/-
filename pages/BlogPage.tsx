@@ -1,10 +1,8 @@
-
-
-
 import React, { useState } from 'react';
 // FIX: Replaced named imports with a namespace import for 'react-router-dom' to resolve module resolution errors.
-import * as ReactRouterDOM from 'react-router-dom';
-import { useAdmin } from '../contexts/AdminContext';
+import { Link } from 'react-router-dom';
+// FIX: Added .tsx extension to the import of AdminContext to resolve module loading error.
+import { useAdmin } from '../contexts/AdminContext.tsx';
 import PageLoader from '../components/ui/PageLoader';
 // FIX: Added .ts extension to resolve module error.
 import { formatDate } from '../utils/helpers.ts';
@@ -13,7 +11,7 @@ import { ArrowLeft } from 'lucide-react';
 const PostCard: React.FC<{ post: any }> = ({ post }) => {
     const [imageLoaded, setImageLoaded] = useState(false);
     return (
-        <ReactRouterDOM.Link to={`/blog/${post.slug}`} className="group bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transform hover:-translate-y-2 transition-transform duration-300 border">
+        <Link to={`/blog/${post.slug}`} className="group bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transform hover:-translate-y-2 transition-transform duration-300 border">
             <div className="h-56 bg-gray-100 flex items-center justify-center overflow-hidden relative">
                 {!imageLoaded && <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>}
                 <img 
@@ -37,7 +35,7 @@ const PostCard: React.FC<{ post: any }> = ({ post }) => {
                     <ArrowLeft size={20} className="ms-2 transition-transform group-hover:-translate-x-1 rtl:group-hover:translate-x-1" />
                 </div>
             </div>
-        </ReactRouterDOM.Link>
+        </Link>
     );
 };
 
@@ -59,7 +57,7 @@ const BlogPage: React.FC = () => {
         <div className="bg-white py-16 sm:py-20 animate-fadeIn">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
-                    <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-600">مدونة "إنها لك"</h1>
+                    <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-600">مدونة "الرحلة"</h1>
                     <p className="mt-4 max-w-3xl mx-auto text-lg text-gray-600">
                         مقالات ونصائح تربوية وإبداعية لمساعدتكم في رحلة تنمية أطفالكم.
                     </p>

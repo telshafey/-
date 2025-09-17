@@ -1,49 +1,17 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
 import { useToast } from '../ToastContext';
-// FIX: Added .ts extension to resolve module error.
+import { supabase } from '../../lib/supabaseClient.ts';
 import { Json, Instructor, CreativeWritingPackage, AdditionalService, CreativeWritingBooking, AvailableSlots, WeeklySchedule, InstructorReview } from '../../lib/database.types.ts';
-// FIX: Added .tsx extension to resolve module error.
 import { UserProfile } from '../AuthContext.tsx';
+import { formatDate } from '../../utils/helpers.ts';
 
 // --- Re-export types ---
 export type { Instructor, CreativeWritingPackage, AdditionalService, CreativeWritingBooking, AvailableSlots };
 
-// --- Mock Data ---
 const MOCK_AVAILABILITY: { [instructorId: number]: AvailableSlots } = {
     1: { '25': ['10:00 ص', '11:00 ص'], '27': ['02:00 م', '03:00 م', '04:00 م'] },
     2: { '26': ['09:00 ص', '12:00 م'], '28': ['03:00 م', '04:00 م'] },
 };
-
-const MOCK_INSTRUCTORS: Instructor[] = [
-    { id: 1, user_id: 'd1e2f3a4-b5c6-d789-e123-f456a789b0cd', name: 'أحمد المصري', specialty: 'متخصص في كتابة القصة القصيرة', slug: 'ahmed-masri', bio: 'كاتب ومحرر شغوف، متخصص في مساعدة الأطفال على اكتشاف أصواتهم الإبداعية من خلال القصص. لديه خبرة 5 سنوات في ورش عمل الكتابة الإبداعية.', avatar_url: 'https://i.ibb.co/2S4xT8w/male-avatar.png', availability: null, weekly_schedule: { monday: ['10:00 ص', '11:00 ص'], wednesday: ['02:00 م'] }, schedule_status: 'approved' },
-    { id: 2, user_id: null, name: 'نورة خالد', specialty: 'خبيرة في الشعر والنصوص الحرة', slug: 'noura-khaled', bio: 'شاعرة وفنانة، تؤمن بأن لكل طفل قصة تستحق أن تروى. تستخدم أساليب مبتكرة لإطلاق العنان لخيال الأطفال وتحويل أفكارهم إلى كلمات.', avatar_url: 'https://i.ibb.co/yYg5b1c/alrehlah-logo.png', availability: null, weekly_schedule: { tuesday: ['09:00 ص', '12:00 م'], thursday: ['03:00 م'] }, schedule_status: 'pending' },
-];
-
-const MOCK_CW_PACKAGES: CreativeWritingPackage[] = [
-    { id: 1, name: 'الباقة التأسيسية', sessions: '3 جلسات فردية', price: 1200, features: ['جلسة تعريفية', '3 جلسات فردية', 'متابعة عبر البريد'], popular: false },
-    { id: 2, name: 'الباقة التطويرية', sessions: '8 جلسات فردية', price: 2800, features: ['8 جلسات فردية', 'ملف إنجاز رقمي', 'جلسة ختامية مع ولي الأمر'], popular: true },
-    { id: 3, name: 'الباقة المتقدمة', sessions: '12 جلسة فردية', price: 4000, features: ['12 جلسات فردية', 'مشروع كتابي متكامل', 'نشر القصة في مدونة المنصة'], popular: false },
-    { id: 4, name: 'جلسة استشارية', sessions: 'جلسة واحدة', price: 500, features: ['تقييم مستوى', 'خطة تطوير شخصية', 'إجابة على الاستفسارات'], popular: false },
-];
-
-const MOCK_ADDITIONAL_SERVICES: AdditionalService[] = [
-    { id: 1, name: 'جلسة متابعة إضافية', price: 450, description: 'جلسة فردية إضافية بعد انتهاء الباقة.' },
-    { id: 2, name: 'تحرير وتدقيق لغوي', price: 200, description: 'مراجعة احترافية لنصوص الطالب.' },
-    { id: 3, name: 'نشر إلكتروني', price: 300, description: 'تصميم ونشر عمل الطالب ككتاب إلكتروني.' },
-];
-
-const MOCK_CW_BOOKINGS: (CreativeWritingBooking & { instructors: Instructor | null })[] = [
-    { id: 'BK-1', user_id: 'f1e2d3c4-b5a6-9870-4321-098765fedcba', user_name: 'فاطمة علي', instructor_id: 1, package_id: 2, package_name: 'الباقة التطويرية', booking_date: new Date('2024-07-25T10:00:00Z').toISOString(), booking_time: '10:00 ص', status: 'مكتمل', total: 2800, session_id: 'abc-123', receipt_url: 'https://example.com/receipt.jpg', admin_comment: null, progress_notes: 'أظهرت سارة تقدماً ملحوظاً في بناء الشخصيات. تحتاج للتركيز على الحوار.', instructors: MOCK_INSTRUCTORS[0] },
-    { id: 'BK-2', user_id: '12345678-abcd-efgh-ijkl-mnopqrstuvwx', user_name: 'أحمد محمود', instructor_id: 2, package_id: 1, package_name: 'الباقة التأسيسية', booking_date: '2024-07-26', booking_time: '09:00 ص', status: 'بانتظار الدفع', total: 1200, session_id: null, receipt_url: null, admin_comment: null, progress_notes: null, instructors: MOCK_INSTRUCTORS[1] },
-    { id: 'BK-3', user_id: 'student-id-123', user_name: 'الطالب عمر', instructor_id: 1, package_id: 2, package_name: 'الباقة التطويرية', booking_date: new Date().toISOString(), booking_time: '11:00 ص', status: 'مؤكد', total: 2800, session_id: 'def-456', receipt_url: 'https://example.com/receipt.jpg', admin_comment: null, progress_notes: 'الجلسة القادمة ستركز على الحبكة.', instructors: MOCK_INSTRUCTORS[0] },
-    { id: 'BK-4', user_id: 'student-id-123', user_name: 'الطالب عمر', instructor_id: 1, package_id: 2, package_name: 'الباقة التطويرية', booking_date: new Date('2024-07-20T10:00:00Z').toISOString(), booking_time: '11:00 ص', status: 'مكتمل', total: 2800, session_id: 'ghi-789', receipt_url: 'https://example.com/receipt.jpg', admin_comment: null, progress_notes: 'الجلسة كانت ممتازة.', instructors: MOCK_INSTRUCTORS[0] },
-
-];
-
-const MOCK_INSTRUCTOR_REVIEWS: InstructorReview[] = [
-    { id: 1, created_at: new Date('2024-07-26T10:00:00Z').toISOString(), user_id: 'f1e2d3c4-b5a6-9870-4321-098765fedcba', student_name: 'فاطمة علي', instructor_id: 1, rating: 5, comment: 'المدرب أحمد كان رائعاً جداً مع ابنتي! ساعدها على التعبير عن أفكارها بثقة وإبداع. شكراً جزيلاً.'},
-];
-
 
 // --- Context Definition ---
 
@@ -59,9 +27,11 @@ interface CreativeWritingAdminContextType {
 
     creativeWritingPackages: CreativeWritingPackage[];
     updateCreativeWritingPackages: (packages: CreativeWritingPackage[]) => Promise<void>;
+    addCreativeWritingPackage: (pkg: Omit<CreativeWritingPackage, 'id' | 'created_at'>) => Promise<void>;
     
     additionalServices: AdditionalService[];
     updateAdditionalServices: (services: AdditionalService[]) => Promise<void>;
+    addAdditionalService: (service: Omit<AdditionalService, 'id' | 'created_at'>) => Promise<void>;
     
     creativeWritingBookings: (CreativeWritingBooking & { instructors: Instructor | null })[];
     updateBookingStatus: (bookingId: string, newStatus: CreativeWritingBooking['status']) => Promise<void>;
@@ -69,6 +39,7 @@ interface CreativeWritingAdminContextType {
     createBooking: (payload: {
         currentUser: UserProfile;
         instructorId: number;
+        childId: number;
         selectedPackage: CreativeWritingPackage;
         selectedServices: AdditionalService[];
         bookingDate: Date;
@@ -98,177 +69,304 @@ export const CreativeWritingAdminProvider: React.FC<{children: React.ReactNode}>
 
     const fetchData = useCallback(async () => {
         setLoading(true);
-        await new Promise(res => setTimeout(res, 200)); 
-        setInstructors(MOCK_INSTRUCTORS);
-        setCreativeWritingPackages(MOCK_CW_PACKAGES);
-        setAdditionalServices(MOCK_ADDITIONAL_SERVICES);
-        setCreativeWritingBookings(MOCK_CW_BOOKINGS);
-        setReviews(MOCK_INSTRUCTOR_REVIEWS);
-        setLoading(false);
-    }, []);
+        setError(null);
+        try {
+            const [
+                instructorsRes,
+                packagesRes,
+                servicesRes,
+                bookingsRes,
+                reviewsRes
+            ] = await Promise.all([
+                supabase.from('instructors').select('*').order('created_at', { ascending: true }),
+                supabase.from('creative_writing_packages').select('*'),
+                supabase.from('additional_services').select('*'),
+                supabase.from('creative_writing_bookings').select('*, instructors(*)').order('created_at', { ascending: false }),
+                supabase.from('instructor_reviews').select('*').order('created_at', { ascending: false }),
+            ]);
+
+            if (instructorsRes.error) throw instructorsRes.error;
+            if (packagesRes.error) throw packagesRes.error;
+            if (servicesRes.error) throw servicesRes.error;
+            if (bookingsRes.error) throw bookingsRes.error;
+            if (reviewsRes.error) throw reviewsRes.error;
+
+            setInstructors(instructorsRes.data || []);
+            setCreativeWritingPackages(packagesRes.data || []);
+            setAdditionalServices(servicesRes.data || []);
+            setCreativeWritingBookings(bookingsRes.data as any || []);
+            setReviews(reviewsRes.data || []);
+
+        } catch(e: any) {
+            setError('فشل تحميل بيانات برنامج الكتابة الإبداعية.');
+            addToast(e.message, 'error');
+        } finally {
+            setLoading(false);
+        }
+    }, [addToast]);
     
     useEffect(() => {
         fetchData();
     }, [fetchData]);
+    
+    const uploadAvatar = async (file: File, instructorId?: number): Promise<string> => {
+        const filePath = `public/${instructorId || 'new'}/${Date.now()}-${file.name}`;
+        const { error: uploadError } = await supabase.storage.from('instructor_avatars').upload(filePath, file);
+        if (uploadError) throw uploadError;
+        const { data: { publicUrl } } = supabase.storage.from('instructor_avatars').getPublicUrl(filePath);
+        return publicUrl;
+    };
+
 
     const addInstructor = async (payload: { name: string; specialty: string; slug: string; bio: string; avatarFile: File | null; }) => {
-        const newId = Math.max(...instructors.map(i => i.id), 0) + 1;
-        const newInstructor: Instructor = {
-            id: newId,
-            user_id: null, // Instructors created via UI won't have a login initially
+        let avatarUrl: string | null = null;
+        if (payload.avatarFile) {
+            avatarUrl = await uploadAvatar(payload.avatarFile);
+        }
+        
+        const { error } = await supabase.from('instructors').insert([{
             name: payload.name,
             specialty: payload.specialty,
             slug: payload.slug,
             bio: payload.bio,
-            avatar_url: payload.avatarFile ? URL.createObjectURL(payload.avatarFile) : null,
-            availability: {},
-            weekly_schedule: {},
-            schedule_status: null,
-        };
-        setInstructors(prev => [...prev, newInstructor]);
-        addToast('تمت إضافة المدرب بنجاح (تجريبيًا).', 'success');
+            avatar_url: avatarUrl,
+        }]);
+
+        if (error) {
+            addToast(error.message, 'error');
+            throw error;
+        }
+        addToast('تمت إضافة المدرب بنجاح.', 'success');
+        await fetchData();
     };
 
     const updateInstructor = async (payload: { id: number; name: string; specialty: string; slug: string; bio: string; avatarFile: File | null; }) => {
-        setInstructors(prev => prev.map(i => {
-            if (i.id === payload.id) {
-                return {
-                    ...i,
-                    name: payload.name,
-                    specialty: payload.specialty,
-                    slug: payload.slug,
-                    bio: payload.bio,
-                    avatar_url: payload.avatarFile ? URL.createObjectURL(payload.avatarFile) : i.avatar_url,
-                };
-            }
-            return i;
-        }));
-        addToast('تم تحديث بيانات المدرب بنجاح (تجريبيًا).', 'success');
+        const originalInstructor = instructors.find(i => i.id === payload.id);
+        if (!originalInstructor) throw new Error("Instructor not found");
+
+        let avatarUrl = originalInstructor.avatar_url;
+        if (payload.avatarFile) {
+            avatarUrl = await uploadAvatar(payload.avatarFile, payload.id);
+            // Optionally delete old avatar
+        }
+        
+        const { error } = await supabase.from('instructors').update({
+            name: payload.name,
+            specialty: payload.specialty,
+            slug: payload.slug,
+            bio: payload.bio,
+            avatar_url: avatarUrl,
+        }).eq('id', payload.id);
+
+        if (error) {
+            addToast(error.message, 'error');
+            throw error;
+        }
+        addToast('تم تحديث بيانات المدرب بنجاح.', 'success');
+        await fetchData();
     };
 
     const updateInstructorAvailability = async (instructorId: number, availability: AvailableSlots) => {
+        const { error } = await supabase.from('instructors').update({ availability: availability as Json }).eq('id', instructorId);
+        if (error) {
+            addToast(error.message, 'error');
+            throw error;
+        }
         setInstructors(prev => prev.map(i => i.id === instructorId ? { ...i, availability: availability as Json } : i));
     };
     
     const approveInstructorSchedule = async (instructorId: number) => {
-        setInstructors(prev => prev.map(i => i.id === instructorId ? { ...i, schedule_status: 'approved' } : i));
+        const { error } = await supabase.from('instructors').update({ schedule_status: 'approved' }).eq('id', instructorId);
+        if (error) {
+            addToast(error.message, 'error'); throw error;
+        }
         addToast('تمت الموافقة على الجدول.', 'success');
+        await fetchData();
     };
 
     const rejectInstructorSchedule = async (instructorId: number) => {
-        setInstructors(prev => prev.map(i => i.id === instructorId ? { ...i, schedule_status: 'rejected' } : i));
+        const { error } = await supabase.from('instructors').update({ schedule_status: 'rejected' }).eq('id', instructorId);
+        if (error) {
+            addToast(error.message, 'error'); throw error;
+        }
         addToast('تم رفض الجدول.', 'warning');
+        await fetchData();
     };
 
     const requestScheduleChange = async (instructorId: number, schedule: WeeklySchedule) => {
-        setInstructors(prev => prev.map(i => i.id === instructorId ? { ...i, schedule_status: 'pending', weekly_schedule: schedule as Json } : i));
+        const { error } = await supabase.from('instructors').update({ weekly_schedule: schedule as Json, schedule_status: 'pending' }).eq('id', instructorId);
+         if (error) {
+            addToast(error.message, 'error'); throw error;
+        }
         addToast('تم إرسال الجدول للمراجعة.', 'info');
+        await fetchData();
     };
 
     const fetchInstructorAvailability = async (instructorId: number) => {
-        // In a real app, this would be an API call.
-        await new Promise(res => setTimeout(res, 500)); // Simulate network delay
+        // This remains a mock for now, as planned.
+        await new Promise(res => setTimeout(res, 500));
         const availability = MOCK_AVAILABILITY[instructorId];
         if (availability) {
             setInstructors(prev =>
-                prev.map(i => i.id === instructorId ? { ...i, availability: availability as Json } : i)
-            );
-        } else {
-            addToast(`لم يتم العثور على مواعيد لهذا المدرب.`, 'error');
-            // Set empty availability to avoid re-fetching
-            setInstructors(prev =>
-                prev.map(i => i.id === instructorId ? { ...i, availability: {} as Json } : i)
-            );
+                prev.map(i => i.id === instructorId ? { ...i, availability: availability as Json } : i));
         }
     };
-
-    const updateCreativeWritingPackages = async (packages: CreativeWritingPackage[]) => {
-        setCreativeWritingPackages(packages);
-        addToast('تم تحديث الباقات بنجاح (تجريبيًا).', 'success');
-    };
-
-    const updateAdditionalServices = async (services: AdditionalService[]) => {
-        setAdditionalServices(services);
-        addToast('تم تحديث الخدمات الإضافية بنجاح (تجريبيًا).', 'success');
-    };
     
-    const createBooking = async (payload: { currentUser: UserProfile; instructorId: number; selectedPackage: CreativeWritingPackage; selectedServices: AdditionalService[]; bookingDate: Date; bookingTime: string; }) => {
-        const total = payload.selectedPackage.price + payload.selectedServices.reduce((sum, s) => sum + s.price, 0);
-
-        const newBooking: CreativeWritingBooking & { instructors: Instructor | null } = {
-            id: `BK-${Date.now()}`,
-            user_id: payload.currentUser.id,
-            user_name: payload.currentUser.name,
-            instructor_id: payload.instructorId,
-            package_id: payload.selectedPackage.id,
-            package_name: payload.selectedPackage.name,
-            booking_date: payload.bookingDate.toISOString().split('T')[0],
-            booking_time: payload.bookingTime,
-            status: 'بانتظار الدفع',
-            total: total,
-            session_id: null,
-            receipt_url: null,
-            admin_comment: null,
-            progress_notes: 'تم الحجز، بانتظار الجلسة الأولى.',
-            instructors: instructors.find(i => i.id === payload.instructorId) || null,
-        };
-        setCreativeWritingBookings(prev => [newBooking, ...prev]);
-        console.log("Mock Booking Created:", newBooking);
-    };
-
-    const updateBookingStatus = async (bookingId: string, newStatus: CreativeWritingBooking['status']) => {
-        setCreativeWritingBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: newStatus } : b));
-        addToast('تم تحديث حالة الحجز (تجريبيًا).', 'success');
-    };
-    
-    const updateBookingProgressNotes = async (bookingId: string, notes: string) => {
-        setCreativeWritingBookings(prev => prev.map(b => b.id === bookingId ? { ...b, progress_notes: notes } : b));
-    };
-
-    const generateAndSetSessionId = async (bookingId: string) => {
-        const newSessionId = `mock-session-${Math.random().toString(36).substring(7)}`;
-        setCreativeWritingBookings(prev => prev.map(b => b.id === bookingId ? { ...b, session_id: newSessionId } : b));
-        return newSessionId;
-    };
-
     const addReview = async (payload: { instructorId: number; rating: number; comment: string; studentName: string; userId: string; }) => {
-        const newReview: InstructorReview = {
-            id: Date.now(),
-            created_at: new Date().toISOString(),
-            user_id: payload.userId,
-            student_name: payload.studentName,
-            instructor_id: payload.instructorId,
-            rating: payload.rating,
-            comment: payload.comment,
+        const { error } = await supabase.from('instructor_reviews').insert([
+            {
+                instructor_id: payload.instructorId,
+                rating: payload.rating,
+                comment: payload.comment,
+                student_name: payload.studentName,
+                user_id: payload.userId
+            }
+        ]);
+        if (error) {
+            addToast(`فشل إرسال التقييم: ${error.message}`, 'error');
+            throw error;
+        }
+        addToast('شكراً لتقييمك!', 'success');
+        await fetchData();
+    };
+
+    const createBooking = async (payload: {
+        currentUser: UserProfile;
+        instructorId: number;
+        childId: number;
+        selectedPackage: CreativeWritingPackage;
+        selectedServices: AdditionalService[];
+        bookingDate: Date;
+        bookingTime: string;
+    }) => {
+        const { currentUser, instructorId, childId, selectedPackage, selectedServices, bookingDate, bookingTime } = payload;
+        const total = selectedPackage.price + selectedServices.reduce((acc, s) => acc + s.price, 0);
+
+        const newBookingData = {
+            id: `BK-${Date.now()}`,
+            user_id: currentUser.id,
+            user_name: currentUser.name,
+            child_id: childId,
+            instructor_id: instructorId,
+            package_id: selectedPackage.id,
+            package_name: selectedPackage.name,
+            total: total,
+            status: 'بانتظار الدفع' as const,
+            booking_date: bookingDate.toISOString().split('T')[0],
+            booking_time: bookingTime,
         };
-        setReviews(prev => [newReview, ...prev]);
-        addToast('تم إرسال مراجعتك بنجاح! شكراً لك.', 'success');
+
+        const { error } = await supabase.from('creative_writing_bookings').insert([newBookingData]);
+        if (error) { addToast(`فشل إنشاء الحجز: ${error.message}`, 'error'); throw error; }
+
+        await fetchData(); // to get the new booking
+    };
+
+    const generateAndSetSessionId = async (bookingId: string): Promise<string | null> => {
+        const sessionId = `${bookingId}-${Math.random().toString(36).substring(2, 9)}`;
+        const { error } = await supabase.from('creative_writing_bookings').update({ session_id: sessionId }).eq('id', bookingId);
+        if (error) {
+            addToast(`فشل إنشاء رابط الجلسة: ${error.message}`, 'error');
+            return null;
+        }
+        await fetchData(); // To refresh state
+        return sessionId;
+    };
+    
+    const updateBookingStatus = async (bookingId: string, newStatus: CreativeWritingBooking['status']) => {
+        const booking = creativeWritingBookings.find(b => b.id === bookingId);
+        if (!booking) return;
+
+        const { error } = await supabase.from('creative_writing_bookings').update({ status: newStatus }).eq('id', bookingId);
+        if (error) {
+            addToast(`فشل تحديث حالة الحجز: ${error.message}`, 'error'); throw error;
+        }
+        addToast('تم تحديث حالة الحجز.', 'success');
+
+        // Send notification on confirmation
+        if (newStatus === 'مؤكد') {
+            const notificationMessage = `تم تأكيد حجزكم لباقة "${booking.package_name}" بتاريخ ${formatDate(booking.booking_date)}.`;
+            // FIX: The 'notifications' table does not exist in the provided database schema (database.types.ts).
+            // This feature is unimplemented and has been commented out to resolve the error. A console log has been added for debugging purposes.
+            console.log(`[Notification Stub] To: ${booking.user_id}, Message: ${notificationMessage}`);
+            /*
+            const { error: notificationError } = await supabase.from('notifications').insert({
+                user_id: booking.user_id,
+                message: notificationMessage,
+                link: '/account',
+                type: 'booking'
+            });
+            if (notificationError) {
+                console.error("Failed to send booking confirmation notification:", notificationError);
+            }
+            */
+        }
+        
+        await fetchData();
+    };
+
+    const updateBookingProgressNotes = async (bookingId: string, notes: string) => {
+        const { error } = await supabase.from('creative_writing_bookings').update({ progress_notes: notes }).eq('id', bookingId);
+        if (error) {
+            addToast(`فشل تحديث الملاحظات: ${error.message}`, 'error'); throw error;
+        }
+        // No toast to avoid being noisy for instructors. It's an autosave-like feature.
+        await fetchData();
+    };
+    
+     const updateCreativeWritingPackages = async (packages: CreativeWritingPackage[]) => {
+        const updates = packages.map(p => 
+            supabase
+                .from('creative_writing_packages')
+                .update({ name: p.name, sessions: p.sessions, price: p.price, features: p.features, popular: p.popular })
+                .eq('id', p.id)
+        );
+        const results = await Promise.all(updates);
+        const firstError = results.find(res => res.error);
+        if (firstError) { addToast(`فشل تحديث الباقات: ${firstError.error.message}`, 'error'); throw firstError.error; }
+        addToast('تم تحديث الباقات بنجاح.', 'success');
+        await fetchData();
+    };
+
+    const addCreativeWritingPackage = async (pkg: Omit<CreativeWritingPackage, 'id' | 'created_at'>) => {
+        const { error } = await supabase.from('creative_writing_packages').insert([pkg]);
+        if (error) { addToast(`فشل إضافة الباقة: ${error.message}`, 'error'); throw error; }
+        addToast('تمت إضافة الباقة بنجاح.', 'success');
+        await fetchData();
+    };
+    
+    const updateAdditionalServices = async (services: AdditionalService[]) => {
+        const updates = services.map(s => 
+            supabase
+                .from('additional_services')
+                .update({ name: s.name, description: s.description, price: s.price })
+                .eq('id', s.id)
+        );
+        const results = await Promise.all(updates);
+        const firstError = results.find(res => res.error);
+        if (firstError) { addToast(`فشل تحديث الخدمات: ${firstError.error.message}`, 'error'); throw firstError.error; }
+        addToast('تم تحديث الخدمات الإضافية بنجاح.', 'success');
+        await fetchData();
+    };
+
+    const addAdditionalService = async (service: Omit<AdditionalService, 'id' | 'created_at'>) => {
+        const { error } = await supabase.from('additional_services').insert([service]);
+        if (error) { addToast(`فشل إضافة الخدمة: ${error.message}`, 'error'); throw error; }
+        addToast('تمت إضافة الخدمة بنجاح.', 'success');
+        await fetchData();
+    };
+
+    const value = {
+        instructors, addInstructor, updateInstructor, updateInstructorAvailability, approveInstructorSchedule, rejectInstructorSchedule, requestScheduleChange, fetchInstructorAvailability,
+        creativeWritingPackages, updateCreativeWritingPackages, addCreativeWritingPackage,
+        additionalServices, updateAdditionalServices, addAdditionalService,
+        creativeWritingBookings, updateBookingStatus, updateBookingProgressNotes, createBooking, generateAndSetSessionId,
+        reviews, addReview,
+        loading, error
     };
 
     return (
-        <CreativeWritingAdminContext.Provider value={{
-            instructors,
-            addInstructor,
-            updateInstructor,
-            updateInstructorAvailability,
-            approveInstructorSchedule,
-            rejectInstructorSchedule,
-            requestScheduleChange,
-            fetchInstructorAvailability,
-            creativeWritingPackages,
-            updateCreativeWritingPackages,
-            additionalServices,
-            updateAdditionalServices,
-            creativeWritingBookings,
-            updateBookingStatus,
-            updateBookingProgressNotes,
-            createBooking,
-            generateAndSetSessionId,
-            reviews,
-            addReview,
-            loading,
-            error,
-        }}>
+        <CreativeWritingAdminContext.Provider value={value}>
             {children}
         </CreativeWritingAdminContext.Provider>
     );

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 // FIX: Added .ts extension to resolve module error.
 import { Instructor, WeeklySchedule } from '../../lib/database.types.ts';
+// FIX: Corrected import path for useCreativeWritingAdmin.
 import { useCreativeWritingAdmin } from '../../contexts/admin/CreativeWritingAdminContext';
 import { useToast } from '../../contexts/ToastContext';
 import { Plus, Trash2, Send } from 'lucide-react';

@@ -1,17 +1,33 @@
 import React, { useState, useMemo } from 'react';
-import * as ReactRouterDOM from 'react-router-dom';
-import { User, Heart, FileText, Plus, Edit, Trash, ChevronDown, ShoppingBag, CheckSquare, Star, Gift, Package, Frown } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { User, Heart, FileText, Plus, Edit, Trash, ChevronDown, ShoppingBag, CheckSquare, Star, Gift, Package, Frown, Activity, CalendarCheck, Bell, Sparkles, Zap } from 'lucide-react';
 // FIX: Added .tsx extension to resolve module error.
 import { useAuth, UserProfile } from '../contexts/AuthContext.tsx';
-// FIX: Import ChildProfile from its source to resolve module export error.
-import type { ChildProfile } from '../lib/database.types';
-import { useAdmin, IOrderDetails, Subscription } from '../contexts/AdminContext';
-import { useCreativeWritingAdmin, CreativeWritingBooking } from '../contexts/admin/CreativeWritingAdminContext';
+// FIX: Added .ts extension to database.types import to resolve module error.
+import type { ChildProfile } from '../lib/database.types.ts';
+// FIX: Added .tsx extension to the import of AdminContext to resolve module loading error.
+import { useAdmin, IOrderDetails, Subscription } from '../contexts/AdminContext.tsx';
+// FIX: Corrected import path for useCreativeWritingAdmin.
+import { useCreativeWritingAdmin, CreativeWritingBooking } from '../contexts/admin/CreativeWritingAdminContext.tsx';
 // FIX: Added .ts extension to resolve module error.
 import { getStatusColor, formatDate } from '../utils/helpers.ts';
-import ChildProfileModal from '../components/order/ChildProfileModal';
+import ChildProfileModal from '../components/order/ChildProfileModal.tsx';
 import AuthForm from '../components/auth/AuthForm.tsx';
 import DemoLogins from '../components/auth/DemoLogins.tsx';
+
+
+const NotificationPanel: React.FC = () => (
+    <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg flex items-start gap-4 animate-fadeIn">
+        <Bell size={24} className="text-blue-500 flex-shrink-0 mt-1" />
+        <div>
+            <h3 className="font-bold text-blue-800">تنبيهات هامة</h3>
+            <p className="text-sm text-blue-700 mt-1">
+                طلب "قصة المغامرة" لطفلك "أحمد" قيد التجهيز الآن! يمكنك متابعة حالته من خلال ملفه الشخصي. <span className="text-xs opacity-70">(هذا تنبيه تجريبي)</span>
+            </p>
+        </div>
+    </div>
+);
+
 
 // Child Card Component
 const ChildCard: React.FC<{
@@ -25,62 +41,145 @@ const ChildCard: React.FC<{
     const [isExpanded, setIsExpanded] = useState(false);
     const [imageLoaded, setImageLoaded] = useState(false);
     
-    // This is a mock filter. In a real app, orders would be linked by child_id.
-    const childOrders = orders.filter(o => {
-        const details = o.details as any;
-        return details?.childName === child.name;
-    });
+    const childOrders = useMemo(() => orders.filter(o => o.child_id === child.id), [orders, child.id]);
+    const childBookings = useMemo(() => bookings.filter(b => b.child_id === child.id), [bookings, child.id]);
+    
+    const { upcomingSession, lastActivity } = useMemo(() => {
+        const now = new Date();
+
+        const futureBookings = bookings
+            .filter(b => b.child_id === child.id && b.status === 'مؤكد' && new Date(b.booking_date) >= now)
+            .sort((a, b) => new Date(a.booking_date).getTime() - new Date(b.booking_date).getTime());
+        
+        const upcomingSession = futureBookings[0] || null;
+
+        const allItems = [
+            ...orders.filter(o => o.child_id === child.id).map(o => ({ ...o, date: o.order_date, type: 'order', summary: o.item_summary })),
+            ...bookings.filter(b => b.child_id === child.id).map(b => ({ ...b, date: b.booking_date, type: 'booking', summary: b.package_name }))
+        ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+        const lastActivity = allItems[0] || null;
+
+        return { upcomingSession, lastActivity };
+    }, [orders, bookings, child.id]);
+
 
     return (
-        <div className="bg-white rounded-2xl shadow-lg border">
-            <div className="p-6 flex justify-between items-center">
-                <div className="flex items-center gap-4">
-                    <div className="relative w-16 h-16">
-                        {!imageLoaded && <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-full"></div>}
-                        <img 
-                            src={child.avatar_url || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} 
-                            alt={child.name} 
-                            className={`w-16 h-16 rounded-full object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                            loading="lazy"
-                            onLoad={() => setImageLoaded(true)}
-                        />
+        <div className="bg-white rounded-2xl shadow-lg border transition-shadow hover:shadow-xl">
+            <div className="p-6">
+                 <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-4">
+                        <div className="relative w-16 h-16">
+                            {!imageLoaded && <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-full"></div>}
+                            <img 
+                                src={child.avatar_url || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} 
+                                alt={child.name} 
+                                className={`w-16 h-16 rounded-full object-cover ring-2 ring-white shadow-md transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                                loading="lazy"
+                                onLoad={() => setImageLoaded(true)}
+                            />
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-800">{child.name}</h3>
+                            <p className="text-sm text-gray-500">{child.age} سنوات</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 className="text-xl font-bold text-gray-800">{child.name}</h3>
-                        <p className="text-sm text-gray-500">{child.age} سنوات</p>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                        <button onClick={() => onEdit(child)} className="text-gray-500 hover:text-blue-600 p-2 rounded-full hover:bg-gray-100" aria-label={`تعديل ملف ${child.name}`}><Edit size={18}/></button>
+                        <button onClick={() => onDelete(child.id)} className="text-gray-500 hover:text-red-600 p-2 rounded-full hover:bg-gray-100" aria-label={`حذف ملف ${child.name}`}><Trash size={18}/></button>
+                        <button onClick={() => setIsExpanded(!isExpanded)} className="p-2 text-gray-500 hover:text-blue-600 rounded-full hover:bg-gray-100" aria-label={`عرض تفاصيل ${child.name}`}>
+                            <ChevronDown className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                        </button>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <button onClick={() => onEdit(child)} className="text-gray-500 hover:text-blue-600 p-2"><Edit size={18}/></button>
-                    <button onClick={() => onDelete(child.id)} className="text-gray-500 hover:text-red-600 p-2"><Trash size={18}/></button>
-                    <button onClick={() => setIsExpanded(!isExpanded)} className="p-2 text-gray-500 hover:text-blue-600">
-                        <ChevronDown className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-                    </button>
+
+                 <div className="mt-4 pt-4 border-t border-gray-100 space-y-3 text-sm">
+                    <div className="flex items-center gap-3 text-gray-600">
+                        <CalendarCheck size={16} className="text-purple-500 flex-shrink-0" />
+                        <span className="font-semibold">الجلسة القادمة:</span>
+                        {upcomingSession ? (
+                            <span className="font-bold text-gray-800">{formatDate(upcomingSession.booking_date)} مع المدرب {(upcomingSession as any).instructors?.name}</span>
+                        ) : (
+                            <span className="text-gray-500">لا يوجد جلسات قادمة محجوزة</span>
+                        )}
+                    </div>
+                    
+                    <div className="flex items-center gap-3 text-gray-600">
+                        <Activity size={16} className="text-blue-500 flex-shrink-0" />
+                        <span className="font-semibold">آخر نشاط:</span>
+                        {lastActivity ? (
+                            <span className="font-bold text-gray-800">
+                                {lastActivity.summary}
+                                (<span className={`font-mono text-xs px-1 rounded`}>{lastActivity.status}</span>)
+                            </span>
+                        ) : (
+                            <span className="text-gray-500">لا توجد أنشطة مسجلة</span>
+                        )}
+                    </div>
                 </div>
             </div>
+
             {isExpanded && (
-                <div className="border-t p-6 bg-gray-50/50 space-y-4">
-                    <h4 className="font-bold flex items-center gap-2"><ShoppingBag size={16}/> طلبات "إنها لك"</h4>
-                    {childOrders.length > 0 ? childOrders.map(o => (
-                        <div key={o.id} className="text-sm border-b pb-2 flex justify-between items-center">
+                <div className="border-t p-6 bg-gray-50/50">
+                    <div className="space-y-6">
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <p>رقم الطلب: {o.id}</p>
-                                <p>الحالة: <span className={`px-2 py-1 text-xs font-bold rounded-full ${getStatusColor(o.status)}`}>{o.status}</span></p>
+                                <h4 className="font-bold flex items-center gap-2 text-gray-700 mb-2"><Sparkles size={16}/> اهتمامات الطفل</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {(child.interests && child.interests.length > 0) ? child.interests.map(interest => (
+                                        <span key={interest} className="text-xs bg-green-100 text-green-800 font-semibold px-2 py-1 rounded-full">{interest}</span>
+                                    )) : <p className="text-sm text-gray-500">لم تضف اهتمامات بعد.</p>}
+                                </div>
                             </div>
-                            {o.status === 'بانتظار الدفع' && <button onClick={() => onPay({ id: o.id, type: 'order', total: o.total, summary: o.item_summary })} className="text-blue-600 font-bold hover:underline">إتمام الدفع</button>}
-                        </div>
-                    )) : <p className="text-sm text-gray-500">لا توجد طلبات لهذا الطفل.</p>}
-                    
-                    <h4 className="font-bold flex items-center gap-2 pt-4"><CheckSquare size={16}/> حجوزات "بداية الرحلة"</h4>
-                    {bookings.length > 0 ? bookings.map(b => (
-                        <div key={b.id} className="text-sm border-b pb-2 flex justify-between items-center">
-                            <div>
-                                <p>رقم الحجز: {b.id}</p>
-                                <p>الحالة: <span className={`px-2 py-1 text-xs font-bold rounded-full ${getStatusColor(b.status)}`}>{b.status}</span></p>
+                             <div>
+                                <h4 className="font-bold flex items-center gap-2 text-gray-700 mb-2"><Zap size={16}/> نقاط القوة</h4>
+                                 <div className="flex flex-wrap gap-2">
+                                    {(child.strengths && child.strengths.length > 0) ? child.strengths.map(strength => (
+                                        <span key={strength} className="text-xs bg-yellow-100 text-yellow-800 font-semibold px-2 py-1 rounded-full">{strength}</span>
+                                    )) : <p className="text-sm text-gray-500">لم تضف نقاط قوة بعد.</p>}
+                                </div>
                             </div>
-                            {b.status === 'بانتظار الدفع' && <button onClick={() => onPay({ id: b.id, type: 'booking', total: b.total, summary: b.package_name })} className="text-blue-600 font-bold hover:underline">إتمام الدفع</button>}
                         </div>
-                    )) : <p className="text-sm text-gray-500">لا توجد حجوزات.</p>}
+
+                        <div>
+                            <h4 className="font-bold flex items-center gap-2 text-gray-700 mb-2"><ShoppingBag size={16}/> طلبات "إنها لك"</h4>
+                            {childOrders.length > 0 ? (
+                                <div className="space-y-2">
+                                    {childOrders.map(o => (
+                                        <div key={o.id} className="text-sm p-3 bg-white rounded-lg border flex justify-between items-center">
+                                            <div>
+                                                <p className="font-semibold">{o.item_summary}</p>
+                                                <p className="text-xs text-gray-500">رقم الطلب: {o.id}</p>
+                                            </div>
+                                            <div className="text-left">
+                                                <span className={`px-2 py-1 text-xs font-bold rounded-full ${getStatusColor(o.status)}`}>{o.status}</span>
+                                                {o.status === 'بانتظار الدفع' && <button onClick={() => onPay({ id: o.id, type: 'order', total: o.total, summary: o.item_summary })} className="mt-1 text-xs text-blue-600 font-bold hover:underline block">إتمام الدفع</button>}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : <p className="text-sm text-gray-500 bg-white p-3 rounded-lg border">لا توجد طلبات لهذا الطفل.</p>}
+                        </div>
+                        <div>
+                             <h4 className="font-bold flex items-center gap-2 text-gray-700 mb-2 pt-4 border-t"><CheckSquare size={16}/> حجوزات "بداية الرحلة"</h4>
+                             {childBookings.length > 0 ? (
+                                <div className="space-y-2">
+                                    {childBookings.map(b => (
+                                        <div key={b.id} className="text-sm p-3 bg-white rounded-lg border flex justify-between items-center">
+                                            <div>
+                                                <p className="font-semibold">{b.package_name}</p>
+                                                <p className="text-xs text-gray-500">رقم الحجز: {b.id}</p>
+                                            </div>
+                                            <div className="text-left">
+                                                <span className={`px-2 py-1 text-xs font-bold rounded-full ${getStatusColor(b.status)}`}>{b.status}</span>
+                                                {b.status === 'بانتظار الدفع' && <button onClick={() => onPay({ id: b.id, type: 'booking', total: b.total, summary: b.package_name })} className="mt-1 text-xs text-blue-600 font-bold hover:underline block">إتمام الدفع</button>}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : <p className="text-sm text-gray-500 bg-white p-3 rounded-lg border">لا توجد حجوزات لهذا الطفل.</p>}
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
@@ -93,7 +192,7 @@ const AccountPage: React.FC = () => {
     const { isLoggedIn, currentUser, signOut, childProfiles, deleteChildProfile } = useAuth();
     const { orders, subscriptions } = useAdmin();
     const { creativeWritingBookings } = useCreativeWritingAdmin();
-    const navigate = ReactRouterDOM.useNavigate();
+    const navigate = useNavigate();
 
     const [activeTab, setActiveTab] = useState('family');
     const [isChildModalOpen, setIsChildModalOpen] = useState(false);
@@ -208,6 +307,7 @@ const AccountPage: React.FC = () => {
                         <div>
                             {activeTab === 'family' && (
                                 <div className="space-y-8">
+                                    <NotificationPanel />
                                     <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-md">
                                         <h2 className="text-2xl font-bold">ملفات أطفالي</h2>
                                         <button onClick={() => { setChildToEdit(null); setIsChildModalOpen(true); }} className="flex items-center gap-2 bg-blue-600 text-white font-bold py-2 px-4 rounded-full hover:bg-blue-700 transition-transform transform hover:scale-105"><Plus size={16}/> إضافة طفل</button>
@@ -267,12 +367,12 @@ const AccountPage: React.FC = () => {
                                             <h3 className="mt-4 text-lg font-semibold text-gray-800">لا يوجد شيء هنا بعد</h3>
                                             <p className="mt-1 text-gray-500">لم تقم بأي طلبات أو حجوزات حتى الآن.</p>
                                             <div className="mt-6 flex justify-center gap-4">
-                                                <a href="#/store" className="px-5 py-2 border border-blue-600 text-base font-medium rounded-full text-blue-600 bg-white hover:bg-blue-50">
+                                                <Link to="/enha-lak/store" className="px-5 py-2 border border-blue-600 text-base font-medium rounded-full text-blue-600 bg-white hover:bg-blue-50">
                                                     تصفح متجر "إنها لك"
-                                                </a>
-                                                 <a href="#/creative-writing/booking" className="px-5 py-2 border border-purple-600 text-base font-medium rounded-full text-purple-600 bg-white hover:bg-purple-50">
+                                                </Link>
+                                                 <Link to="/creative-writing/booking" className="px-5 py-2 border border-purple-600 text-base font-medium rounded-full text-purple-600 bg-white hover:bg-purple-50">
                                                     احجز جلسة "بداية الرحلة"
-                                                </a>
+                                                </Link>
                                             </div>
                                         </div>
                                     )}
@@ -298,7 +398,7 @@ const AccountPage: React.FC = () => {
                                     ) : (
                                         <div className="text-center py-12">
                                             <p className="text-gray-500 mb-4">ليس لديك أي اشتراكات نشطة حاليًا.</p>
-                                            <a href="#/subscription" className="text-blue-600 font-bold hover:underline">اكتشف صندوق الرحلة الشهري</a>
+                                            <Link to="/enha-lak/subscription" className="text-blue-600 font-bold hover:underline">اكتشف صندوق الرحلة الشهري</Link>
                                         </div>
                                     )}
                                 </div>

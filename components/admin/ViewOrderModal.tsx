@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, User, Gift, Truck, Image, MessageSquare, Receipt, Save, Loader2 } from 'lucide-react';
-import { useAdmin, IOrderDetails } from '../../contexts/AdminContext';
+// FIX: Added .tsx extension to the import of AdminContext to resolve module loading error.
+import { useAdmin, IOrderDetails } from '../../contexts/AdminContext.tsx';
 // FIX: Added .ts extension to resolve module error.
 import { OrderDetailsJson } from '../../lib/database.types.ts';
 

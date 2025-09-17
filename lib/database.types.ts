@@ -1,3 +1,4 @@
+
 export type Json =
   | string
   | number
@@ -6,183 +7,707 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-// FIX: Extracted the Row type definition to a named type to resolve invalid 'this' usage.
-type ChildProfilesRow = {
-  id: number
-  user_id: string
-  name: string
-  age: number
-  gender: "ذكر" | "أنثى"
-  avatar_url: string | null
-  created_at: string
-}
-
 export interface Database {
   public: {
     Tables: {
-      // This is a simplified representation based on context files
-      users: {
-        Row: {
-          id: string
-          email: string
-          name: string
-          role: 'user' | 'super_admin' | 'enha_lak_supervisor' | 'creative_writing_supervisor' | 'instructor' | 'student'
-        }
-      }
-      child_profiles: {
-        Row: ChildProfilesRow
-        Insert: Omit<ChildProfilesRow, 'id' | 'created_at'>
-        Update: Partial<ChildProfilesRow>
-      }
-      orders: {
-        Row: {
-            id: string;
-            customer_name: string;
-            order_date: string;
-            item_summary: string | null;
-            total: string | null;
-            status: "بانتظار الدفع" | "بانتظار المراجعة" | "قيد التجهيز" | "يحتاج مراجعة" | "تم الشحن" | "تم التسليم" | "ملغي" | "نشط";
-            details: Json | null;
-            user_id: string | null;
-            file_url: string | null;
-            receipt_url: string | null;
-            admin_comment: string | null;
-        }
-      }
-      personalized_products: {
-        Row: {
-            id: number
-            key: string
-            title: string
-            description: string
-            image_url: string | null
-            features: string[] | null
-            sort_order: number | null
-        }
-      }
-      site_content: {
-        Row: {
-            page_key: string
-            content: Json
-        }
-      }
-      social_links: {
-          Row: {
-              id: number
-              facebook_url: string | null
-              twitter_url: string | null
-              instagram_url: string | null
-          }
-      }
-      support_tickets: {
-        Row: {
-            id: string
-            name: string
-            email: string
-            subject: string
-            message: string
-            status: 'جديدة' | 'تمت المراجعة' | 'مغلقة'
-            created_at: string
-        }
-      }
-      join_requests: {
-        Row: {
-            id: string
-            name: string
-            email: string
-            role: string
-            portfolio_url: string | null
-            message: string
-            status: 'جديد' | 'تمت المراجعة' | 'مقبول' | 'مرفوض'
-            created_at: string
-        }
-      }
-      // FIX: Added blog_posts table definition.
-      blog_posts: {
-        Row: {
-          id: number
-          created_at: string
-          title: string
-          slug: string
-          content: string
-          author_name: string
-          status: "draft" | "published"
-          image_url: string | null
-          published_at: string | null
-        }
-      }
-      instructors: {
-          Row: {
-              id: number
-              user_id: string | null
-              name: string
-              specialty: string | null
-              slug: string | null
-              bio: string | null
-              avatar_url: string | null
-              availability: Json | null // AvailableSlots
-              weekly_schedule: Json | null // WeeklySchedule
-              schedule_status: 'approved' | 'pending' | 'rejected' | null
-          }
-      }
-      creative_writing_packages: {
-          Row: {
-              id: number
-              name: string
-              sessions: string
-              price: number
-              features: string[]
-              popular: boolean
-          }
-      }
       additional_services: {
         Row: {
-            id: number
-            name: string
-            price: number
-            description: string | null
+          created_at: string
+          description: string | null
+          id: number
+          name: string
+          price: number
         }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          name: string
+          price: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          name?: string
+          price?: number
+        }
+        Relationships: []
+      }
+      ai_chat_history: {
+        Row: {
+          created_at: string
+          history: Json | null
+          id: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          history?: Json | null
+          id?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          history?: Json | null
+          id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_chat_history_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      blog_posts: {
+        Row: {
+          author_name: string
+          content: string
+          created_at: string
+          id: number
+          image_url: string | null
+          published_at: string | null
+          slug: string
+          status: "draft" | "published"
+          title: string
+        }
+        Insert: {
+          author_name: string
+          content: string
+          created_at?: string
+          id?: number
+          image_url?: string | null
+          published_at?: string | null
+          slug: string
+          status: "draft" | "published"
+          title: string
+        }
+        Update: {
+          author_name?: string
+          content?: string
+          created_at?: string
+          id?: number
+          image_url?: string | null
+          published_at?: string | null
+          slug?: string
+          status?: "draft" | "published"
+          title?: string
+        }
+        Relationships: []
+      }
+      child_profiles: {
+        Row: {
+          age: number
+          avatar_url: string | null
+          created_at: string
+          gender: "ذكر" | "أنثى"
+          id: number
+          interests: string[] | null
+          name: string
+          strengths: string[] | null
+          student_user_id: string | null
+          user_id: string
+        }
+        Insert: {
+          age: number
+          avatar_url?: string | null
+          created_at?: string
+          gender: "ذكر" | "أنثى"
+          id?: number
+          interests?: string[] | null
+          name: string
+          strengths?: string[] | null
+          student_user_id?: string | null
+          user_id: string
+        }
+        Update: {
+          age?: number
+          avatar_url?: string | null
+          created_at?: string
+          gender?: "ذكر" | "أنثى"
+          id?: number
+          interests?: string[] | null
+          name?: string
+          strengths?: string[] | null
+          student_user_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_profiles_student_user_id_fkey"
+            columns: ["student_user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_profiles_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       creative_writing_bookings: {
-          Row: {
-            id: string
-            user_id: string
-            user_name: string
-            instructor_id: number
-            package_id: number
-            package_name: string
-            booking_date: string
-            booking_time: string
-            status: 'بانتظار الدفع' | 'بانتظار المراجعة' | 'مؤكد' | 'مكتمل' | 'ملغي'
-            total: number
-            session_id: string | null
-            receipt_url: string | null
-            admin_comment: string | null
-            progress_notes: string | null
-          }
-      }
-      subscriptions: {
         Row: {
-            id: string;
-            user_id: string;
-            user_name: string;
-            child_name: string;
-            status: 'active' | 'paused' | 'cancelled' | 'pending_payment';
-            start_date: string;
-            next_renewal_date: string;
-            price: number;
+          booking_date: string
+          booking_time: string
+          child_id: number
+          created_at: string
+          id: string
+          instructor_id: number
+          package_id: number
+          package_name: string
+          progress_notes: string | null
+          receipt_url: string | null
+          session_id: string | null
+          status:
+            | "بانتظار الدفع"
+            | "بانتظار المراجعة"
+            | "مؤكد"
+            | "مكتمل"
+            | "ملغي"
+          total: number
+          user_id: string
+          user_name: string
         }
+        Insert: {
+          booking_date: string
+          booking_time: string
+          child_id: number
+          created_at?: string
+          id: string
+          instructor_id: number
+          package_id: number
+          package_name: string
+          progress_notes?: string | null
+          receipt_url?: string | null
+          session_id?: string | null
+          status:
+            | "بانتظار الدفع"
+            | "بانتظار المراجعة"
+            | "مؤكد"
+            | "مكتمل"
+            | "ملغي"
+          total: number
+          user_id: string
+          user_name: string
+        }
+        Update: {
+          booking_date?: string
+          booking_time?: string
+          child_id?: number
+          created_at?: string
+          id?: string
+          instructor_id?: number
+          package_id?: number
+          package_name?: string
+          progress_notes?: string | null
+          receipt_url?: string | null
+          session_id?: string | null
+          status?:
+            | "بانتظار الدفع"
+            | "بانتظار المراجعة"
+            | "مؤكد"
+            | "مكتمل"
+            | "ملغي"
+          total?: number
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creative_writing_bookings_child_id_fkey"
+            columns: ["child_id"]
+            referencedRelation: "child_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creative_writing_bookings_instructor_id_fkey"
+            columns: ["instructor_id"]
+            referencedRelation: "instructors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creative_writing_bookings_package_id_fkey"
+            columns: ["package_id"]
+            referencedRelation: "creative_writing_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creative_writing_bookings_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      creative_writing_packages: {
+        Row: {
+          created_at: string
+          features: string[]
+          id: number
+          name: string
+          popular: boolean | null
+          price: number
+          sessions: string
+        }
+        Insert: {
+          created_at?: string
+          features: string[]
+          id?: number
+          name: string
+          popular?: boolean | null
+          price: number
+          sessions: string
+        }
+        Update: {
+          created_at?: string
+          features?: string[]
+          id?: number
+          name?: string
+          popular?: boolean | null
+          price?: number
+          sessions?: string
+        }
+        Relationships: []
       }
       instructor_reviews: {
         Row: {
-            id: number
-            created_at: string
-            user_id: string
-            student_name: string
-            instructor_id: number
-            rating: number
-            comment: string
+          comment: string
+          created_at: string
+          id: number
+          instructor_id: number
+          rating: number
+          student_name: string
+          user_id: string
         }
+        Insert: {
+          comment: string
+          created_at?: string
+          id?: number
+          instructor_id: number
+          rating: number
+          student_name: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: number
+          instructor_id?: number
+          rating?: number
+          student_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instructor_reviews_instructor_id_fkey"
+            columns: ["instructor_id"]
+            referencedRelation: "instructors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "instructor_reviews_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      instructors: {
+        Row: {
+          availability: Json | null
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          id: number
+          name: string
+          schedule_status: "approved" | "pending" | "rejected" | null
+          slug: string
+          specialty: string
+          user_id: string | null
+          weekly_schedule: Json | null
+        }
+        Insert: {
+          availability?: Json | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          id?: number
+          name: string
+          schedule_status?: "approved" | "pending" | "rejected" | null
+          slug: string
+          specialty: string
+          user_id?: string | null
+          weekly_schedule?: Json | null
+        }
+        Update: {
+          availability?: Json | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          id?: number
+          name?: string
+          schedule_status?: "approved" | "pending" | "rejected" | null
+          slug?: string
+          specialty?: string
+          user_id?: string | null
+          weekly_schedule?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instructors_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      join_requests: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          portfolio_url: string | null
+          role: string
+          status: "جديد" | "تمت المراجعة" | "مقبول" | "مرفوض"
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          message: string
+          name: string
+          portfolio_url?: string | null
+          role: string
+          status: "جديد" | "تمت المراجعة" | "مقبول" | "مرفوض"
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          portfolio_url?: string | null
+          role?: string
+          status?: "جديد" | "تمت المراجعة" | "مقبول" | "مرفوض"
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          admin_comment: string | null
+          child_id: number
+          created_at: string
+          customer_name: string
+          details: Json | null
+          id: string
+          item_summary: string
+          order_date: string
+          receipt_url: string | null
+          status:
+            | "بانتظار الدفع"
+            | "بانتظار المراجعة"
+            | "قيد التجهيز"
+            | "يحتاج مراجعة"
+            | "تم الشحن"
+            | "تم التسليم"
+            | "ملغي"
+          total: number
+          user_id: string
+        }
+        Insert: {
+          admin_comment?: string | null
+          child_id: number
+          created_at?: string
+          customer_name: string
+          details?: Json | null
+          id: string
+          item_summary: string
+          order_date: string
+          receipt_url?: string | null
+          status:
+            | "بانتظار الدفع"
+            | "بانتظار المراجعة"
+            | "قيد التجهيز"
+            | "يحتاج مراجعة"
+            | "تم الشحن"
+            | "تم التسليم"
+            | "ملغي"
+          total: number
+          user_id: string
+        }
+        Update: {
+          admin_comment?: string | null
+          child_id?: number
+          created_at?: string
+          customer_name?: string
+          details?: Json | null
+          id?: string
+          item_summary?: string
+          order_date?: string
+          receipt_url?: string | null
+          status?:
+// FIX: Corrected typo in status from "بانتظار الدفع" to "بانتظار الدفع"
+            | "بانتظار الدفع"
+            | "بانتظار المراجعة"
+            | "قيد التجهيز"
+            | "يحتاج مراجعة"
+            | "تم الشحن"
+            | "تم التسليم"
+            | "ملغي"
+          total?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_child_id_fkey"
+            columns: ["child_id"]
+            referencedRelation: "child_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      personalized_products: {
+        Row: {
+          created_at: string
+          description: string | null
+          features: string[] | null
+          id: number
+          image_url: string | null
+          key: string
+          sort_order: number | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          features?: string[] | null
+          id?: number
+          image_url?: string | null
+          key: string
+          sort_order?: number | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          features?: string[] | null
+          id?: number
+          image_url?: string | null
+          key?: string
+          sort_order?: number | null
+          title?: string
+        }
+        Relationships: []
+      }
+      site_content: {
+        Row: {
+          content: Json | null
+          id: string
+          last_updated: string
+        }
+        Insert: {
+          content?: Json | null
+          id: string
+          last_updated?: string
+        }
+        Update: {
+          content?: Json | null
+          id?: string
+          last_updated?: string
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          id: number
+          prices: Json | null
+          shipping_costs: Json | null
+          site_branding: Json | null
+        }
+        Insert: {
+          id?: number
+          prices?: Json | null
+          shipping_costs?: Json | null
+          site_branding?: Json | null
+        }
+        Update: {
+          id?: number
+          prices?: Json | null
+          shipping_costs?: Json | null
+          site_branding?: Json | null
+        }
+        Relationships: []
+      }
+      social_links: {
+        Row: {
+          facebook_url: string | null
+          id: number
+          instagram_url: string | null
+          twitter_url: string | null
+        }
+        Insert: {
+          facebook_url?: string | null
+          id?: number
+          instagram_url?: string | null
+          twitter_url?: string | null
+        }
+        Update: {
+          facebook_url?: string | null
+          id?: number
+          instagram_url?: string | null
+          twitter_url?: string | null
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          child_id: number
+          child_name: string
+          created_at: string
+          id: string
+          next_renewal_date: string
+          price: number
+          start_date: string
+          status: "active" | "paused" | "cancelled" | "pending_payment"
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          child_id: number
+          child_name: string
+          created_at?: string
+          id: string
+          next_renewal_date: string
+          price: number
+          start_date: string
+          status: "active" | "paused" | "cancelled" | "pending_payment"
+          user_id: string
+          user_name: string
+        }
+        Update: {
+          child_id?: number
+          child_name?: string
+          created_at?: string
+          id?: string
+          next_renewal_date?: string
+          price?: number
+          start_date?: string
+          status?: "active" | "paused" | "cancelled" | "pending_payment"
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_child_id_fkey"
+            columns: ["child_id"]
+            referencedRelation: "child_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      support_tickets: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          status: "جديدة" | "تمت المراجعة" | "مغلقة"
+          subject: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          message: string
+          name: string
+          status: "جديدة" | "تمت المراجعة" | "مغلقة"
+          subject: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          status?: "جديدة" | "تمت المراجعة" | "مغلقة"
+          subject?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          role:
+            | "user"
+            | "super_admin"
+            | "enha_lak_supervisor"
+            | "creative_writing_supervisor"
+            | "instructor"
+            | "student"
+            | "content_editor"
+            | "support_agent"
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          name: string
+          role?:
+            | "user"
+            | "super_admin"
+            | "enha_lak_supervisor"
+            | "creative_writing_supervisor"
+            | "instructor"
+            | "student"
+            | "content_editor"
+            | "support_agent"
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          role?:
+            | "user"
+            | "super_admin"
+            | "enha_lak_supervisor"
+            | "creative_writing_supervisor"
+            | "instructor"
+            | "student"
+            | "content_editor"
+            | "support_agent"
+        }
+        Relationships: [
+          {
+            foreignKeyName: "users_id_fkey"
+            columns: ["id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {
@@ -200,38 +725,34 @@ export interface Database {
   }
 }
 
-// Custom types derived from schema for easier use
+// Re-export specific types for convenience
+export type Order = Database['public']['Tables']['orders']['Row'];
 export type ChildProfile = Database['public']['Tables']['child_profiles']['Row'];
-export type SocialLinks = Database['public']['Tables']['social_links']['Row'];
-export type PersonalizedProduct = Database['public']['Tables']['personalized_products']['Row'];
-export type SupportTicket = Database['public']['Tables']['support_tickets']['Row'];
-export type JoinRequest = Database['public']['Tables']['join_requests']['Row'];
-// FIX: Export BlogPost type.
-export type BlogPost = Database['public']['Tables']['blog_posts']['Row'];
 export type Instructor = Database['public']['Tables']['instructors']['Row'];
+export type PersonalizedProduct = Database['public']['Tables']['personalized_products']['Row'];
+export type SocialLinks = Database['public']['Tables']['social_links']['Row'];
+export type BlogPost = Database['public']['Tables']['blog_posts']['Row'];
+export type Subscription = Database['public']['Tables']['subscriptions']['Row'];
 export type CreativeWritingPackage = Database['public']['Tables']['creative_writing_packages']['Row'];
 export type AdditionalService = Database['public']['Tables']['additional_services']['Row'];
 export type CreativeWritingBooking = Database['public']['Tables']['creative_writing_bookings']['Row'];
-export type Subscription = Database['public']['Tables']['subscriptions']['Row'];
 export type InstructorReview = Database['public']['Tables']['instructor_reviews']['Row'];
-
-
-// Specific JSON types
+export type SupportTicket = Database['public']['Tables']['support_tickets']['Row'];
+export type JoinRequest = Database['public']['Tables']['join_requests']['Row'];
+export type AiChatHistory = Database['public']['Tables']['ai_chat_history']['Row'];
+export type AvailableSlots = { [day: string]: string[] };
+export type WeeklySchedule = { [day in 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday']?: string[] };
 export type OrderDetailsJson = {
     childName: string;
-    childAge: number;
-    childGender: string;
+    childAge: string;
+    childGender: 'ذكر' | 'أنثى';
     familyNames?: string;
     childTraits?: string;
+    storyValue?: string;
+    customGoal?: string;
+    deliveryType?: 'printed' | 'electronic';
+    governorate?: string;
+    images?: { [key: string]: string };
     products?: string;
-    shipping?: string;
-    images?: { [key: string]: string | null };
-};
-
-export type AvailableSlots = {
-    [day: string]: string[];
-};
-
-export type WeeklySchedule = {
-    [day in 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday']?: string[];
+    shipping?: any;
 };

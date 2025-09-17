@@ -1,15 +1,16 @@
 
+
 import React, { useState, useEffect, useMemo } from 'react';
-import * as ReactRouterDOM from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useAdmin, PersonalizedProduct } from '../contexts/AdminContext.tsx';
+// FIX: Added .tsx extension to useProduct import to resolve module error.
 import { useProduct } from '../contexts/ProductContext.tsx';
 import { useToast } from '../contexts/ToastContext.tsx';
-import PageLoader from '../components/ui/PageLoader';
-import InteractivePreview from '../components/order/InteractivePreview';
-import { User, Heart, Image, Edit, Plus, Send, Loader2, AlertCircle, Truck, Sparkles, X } from 'lucide-react';
+import PageLoader from '../components/ui/PageLoader.tsx';
+import InteractivePreview from '../components/order/InteractivePreview.tsx';
+import { User, Heart, Image, Edit, Plus, Send, Loader2, AlertCircle, Truck, Sparkles, X, Users } from 'lucide-react';
 import { EGYPTIAN_GOVERNORATES } from '../utils/governorates.ts';
-import { GoogleGenAI, Type } from "@google/genai";
 import ImageUpload from '../components/order/ImageUpload.tsx';
 
 
@@ -23,29 +24,6 @@ const storyGoals = [
     { key: 'problem_solving', title: 'حل المشكلات' },
     { key: 'creative_thinking', title: 'التفكير الإبداعي' },
 ];
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-const responseSchema = {
-    type: Type.OBJECT,
-    properties: {
-        ideas: {
-            type: Type.ARRAY,
-            description: "An array of 3 story ideas.",
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    title: { type: Type.STRING, description: "A catchy, short title for the story in Arabic." },
-                    premise: { type: Type.STRING, description: "A 2-3 sentence premise for the story in Arabic." },
-                    goal_key: { type: Type.STRING, description: `The key for the educational goal. Must be one of: ${storyGoals.map(g => `'${g.key}'`).join(', ')}` }
-                },
-                required: ["title", "premise", "goal_key"]
-            }
-        }
-    },
-    required: ["ideas"]
-};
-const systemInstruction = `You are a creative storyteller for "Alrehla", a platform creating personalized stories for Arab children. Your task is to generate 3 short, magical, and age-appropriate story ideas based on a child's details. Each idea must be unique and directly linked to one of the provided educational goals. The response must be in Arabic and adhere strictly to the provided JSON schema.`;
-
 
 // Form Components
 const StoryIdeaGeneratorModal: React.FC<{
@@ -98,14 +76,15 @@ const StoryIdeaGeneratorModal: React.FC<{
 
 
 const OrderPage: React.FC = () => {
-    const { productKey } = ReactRouterDOM.useParams<{ productKey: string }>();
-    const navigate = ReactRouterDOM.useNavigate();
+    const { productKey } = useParams<{ productKey: string }>();
+    const navigate = useNavigate();
     const { addToast } = useToast();
     const { currentUser, childProfiles } = useAuth();
     const { personalizedProducts, loading: adminLoading, createOrder } = useAdmin();
     const { prices, shippingCosts, loading: pricesLoading } = useProduct();
 
     const [product, setProduct] = useState<PersonalizedProduct | null>(null);
+    const [selectedChildId, setSelectedChildId] = useState<string>('');
     const [formData, setFormData] = useState({
         childName: '',
         childAge: '',
@@ -149,9 +128,12 @@ const OrderPage: React.FC = () => {
     }, [productKey, personalizedProducts, adminLoading, navigate, addToast]);
     
     const handleChildProfileSelect = (childId: string) => {
+        setSelectedChildId(childId);
         const child = childProfiles.find(c => c.id.toString() === childId);
         if (child) {
             setFormData(prev => ({ ...prev, childName: child.name, childAge: child.age.toString(), childGender: child.gender }));
+        } else {
+            setFormData(prev => ({ ...prev, childName: '', childAge: '', childGender: 'ذكر' }));
         }
     };
 
@@ -173,26 +155,30 @@ const OrderPage: React.FC = () => {
         setGeneratedIdeas([]);
         setGeneratorError('');
         setShowIdeaGenerator(true);
-        
-        const userPrompt = `Generate story ideas for a child named ${formData.childName}, who is ${formData.childAge} years old and is a ${formData.childGender}. The child's traits are: "${formData.childTraits || 'not specified'}". The ideas must fulfill one of these educational goals: ${storyGoals.map(g => `"${g.title}" (key: ${g.key})`).join(', ')}.`;
 
         try {
-            const response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash',
-                contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-                config: {
-                    systemInstruction,
-                    responseMimeType: "application/json",
-                    responseSchema: responseSchema,
-                }
+            const response = await fetch('/api/generateStoryIdeas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    childName: formData.childName,
+                    childAge: formData.childAge,
+                    childGender: formData.childGender,
+                    childTraits: formData.childTraits,
+                }),
             });
 
-            const parsedJson = JSON.parse(response.text.trim());
-            setGeneratedIdeas(parsedJson.ideas || []);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to generate ideas.');
+            }
+    
+            const ideasJson = await response.json();
+            setGeneratedIdeas(ideasJson.ideas || []);
 
-        } catch (err) {
-            console.error("Gemini API Error:", err);
-            setGeneratorError('عذراً، حدث خطأ أثناء توليد الأفكار. يرجى المحاولة مرة أخرى.');
+        } catch (err: any) {
+            console.error("Story Idea Generation Error:", err);
+            setGeneratorError(err.message || 'عذراً، حدث خطأ أثناء توليد الأفكار. يرجى المحاولة مرة أخرى.');
         } finally {
             setIsGenerating(false);
         }
@@ -238,6 +224,10 @@ const OrderPage: React.FC = () => {
         if (!currentUser || !product) return;
 
         // Validation
+        if (!selectedChildId) {
+            addToast('الرجاء اختيار الطفل الذي سيحصل على هذا المنتج.', 'error');
+            return;
+        }
         if (showFullCustomization && !files.image1) {
             addToast('الرجاء رفع صورة وجه الطفل على الأقل، فهي إلزامية لتصميم الشخصية.', 'error');
             return;
@@ -249,7 +239,7 @@ const OrderPage: React.FC = () => {
 
         setIsSubmitting(true);
         try {
-            const newOrder = await createOrder({ currentUser, formData, files, totalPrice, itemSummary, shippingCost });
+            const newOrder = await createOrder({ currentUser, childId: selectedChildId, formData, files, totalPrice, itemSummary, shippingCost });
             addToast('تم استلام طلبك! سيتم توجيهك الآن لإتمام عملية الدفع.', 'success');
             navigate('/checkout', { 
                 state: { 
@@ -294,18 +284,20 @@ const OrderPage: React.FC = () => {
                     <form onSubmit={handleSubmit}>
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                             <div className="lg:col-span-2 bg-white p-8 rounded-2xl shadow-lg space-y-8">
-                                {/* Child Profiles */}
-                                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                    <h3 className="font-bold mb-2">لديك ملف محفوظ؟ اختر طفلاً لتعبئة بياناته تلقائياً.</h3>
-                                    <select onChange={e => handleChildProfileSelect(e.target.value)} className="w-full max-w-sm p-2 border rounded-lg bg-white">
+                                
+                                <section>
+                                     <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Users size={20}/> 1. لمن هذا المنتج؟*</h2>
+                                     <p className="text-sm text-gray-600 mb-4">اختر الطفل الذي سيحصل على هذا المنتج. يمكنك إضافة طفل جديد من <Link to="/account" className="text-blue-600 hover:underline">صفحة حسابك</Link>.</p>
+                                    <select onChange={e => handleChildProfileSelect(e.target.value)} value={selectedChildId} className="w-full max-w-sm p-2 border rounded-lg bg-white" required>
                                         <option value="">-- اختر من ملفات أطفالك --</option>
                                         {childProfiles.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                     </select>
-                                </div>
+                                </section>
 
                                 {/* Basic Info */}
                                 <section>
-                                    <h2 className="text-xl font-bold mb-4">1. بيانات الطفل الأساسية</h2>
+                                    <h2 className="text-xl font-bold mb-4">2. بيانات الطفل الأساسية</h2>
+                                     <p className="text-sm text-gray-600 mb-4">تم تعبئة هذه البيانات من ملف الطفل الذي اخترته. يمكنك تعديلها لهذا الطلب فقط.</p>
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                         <div>
                                             <label className="block text-sm font-bold mb-2">اسم الطفل*</label>
@@ -327,7 +319,7 @@ const OrderPage: React.FC = () => {
 
                                 {/* Image Uploads */}
                                 <section>
-                                    <h2 className="text-xl font-bold mb-4">2. صور الطفل</h2>
+                                    <h2 className="text-xl font-bold mb-4">3. صور الطفل</h2>
                                     <p className="text-sm text-gray-600 mb-4">ارفع 3 صور واضحة للطفل (وجه كامل، جانب، وجسم كامل) لنستخدمها في الرسومات. <span className="font-bold text-red-600">صورة الوجه إلزامية.</span></p>
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                                         <ImageUpload id="image1" label="صورة 1 (الوجه)*" file={files.image1} onFileChange={handleFileChange} />
@@ -339,7 +331,7 @@ const OrderPage: React.FC = () => {
                                 {/* Customization Details */}
                                 {showFullCustomization && (
                                     <section className="space-y-4">
-                                        <h2 className="text-xl font-bold mb-4">3. تفاصيل التخصيص</h2>
+                                        <h2 className="text-xl font-bold mb-4">4. تفاصيل التخصيص</h2>
                                         <div>
                                             <label className="block text-sm font-bold mb-2">صفات الطفل وهواياته</label>
                                             <textarea name="childTraits" value={formData.childTraits} onChange={handleChange} rows={3} className="w-full p-2 border rounded-lg" placeholder="مثال: يحب الرسم والقطط، شجاع، لون عينيه بني..."></textarea>
@@ -375,7 +367,7 @@ const OrderPage: React.FC = () => {
                                 
                                 {/* Delivery Options */}
                                 <section>
-                                    <h2 className="text-xl font-bold mb-4">4. خيارات الاستلام والشحن</h2>
+                                    <h2 className="text-xl font-bold mb-4">5. خيارات الاستلام والشحن</h2>
                                     {product.key === 'custom_story' && (
                                         <div className="mb-4">
                                             <label className="block text-sm font-bold mb-2">نوع النسخة</label>
@@ -398,7 +390,7 @@ const OrderPage: React.FC = () => {
                                 </section>
                             </div>
                             <div className="lg:col-span-1">
-                                <div className="sticky top-24 space-y-6">
+                                <div className="lg:sticky top-24 space-y-6">
                                     <InteractivePreview formData={formData} product={product} />
                                     <div className="bg-white p-6 rounded-2xl shadow-lg border">
                                         <div className="space-y-2 mb-4">

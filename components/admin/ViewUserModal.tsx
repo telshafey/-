@@ -1,8 +1,11 @@
 import React, { useRef, useEffect } from 'react';
 import { X, User, ShoppingBag, CheckSquare } from 'lucide-react';
-import { User as UserType, IOrderDetails } from '../../contexts/AdminContext';
-import { CreativeWritingBooking } from '../../contexts/admin/CreativeWritingAdminContext';
-import { formatDate, getStatusColor } from '../../utils/helpers';
+// FIX: Added .tsx extension to AdminContext import to resolve module error.
+import { User as UserType, IOrderDetails } from '../../contexts/AdminContext.tsx';
+// FIX: Added .tsx extension to CreativeWritingAdminContext import to resolve module error.
+import { CreativeWritingBooking } from '../../contexts/admin/CreativeWritingAdminContext.tsx';
+// FIX: Added .ts extension to helpers import to resolve module error.
+import { formatDate, getStatusColor } from '../../utils/helpers.ts';
 
 interface ViewUserModalProps {
   user: UserType | null;
@@ -53,6 +56,7 @@ const ViewUserModal: React.FC<ViewUserModalProps> = ({ user, userOrders, userBoo
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <p><span className="font-semibold text-gray-500">البريد الإلكتروني:</span> {user.email}</p>
+                    {/* FIX: user.created_at is now available on the UserProfile type */}
                     <p><span className="font-semibold text-gray-500">تاريخ التسجيل:</span> {formatDate(user.created_at)}</p>
                     <p><span className="font-semibold text-gray-500">الدور:</span> {user.role}</p>
                 </div>

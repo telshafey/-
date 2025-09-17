@@ -3,23 +3,49 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAdmin } from '../contexts/AdminContext';
 import { useToast } from '../contexts/ToastContext';
 import PageLoader from '../components/ui/PageLoader';
-import { ArrowLeft, CreditCard, Home, Loader2, Lock, Truck, Upload, Link as LinkIcon, AlertCircle } from 'lucide-react';
+import { ArrowLeft, CreditCard, Home, Loader2, Lock, Truck, Landmark, Wallet } from 'lucide-react';
 import { EGYPTIAN_GOVERNORATES } from '../utils/governorates.ts';
-import ReceiptUpload from '../components/shared/ReceiptUpload.tsx';
 
-const PAYMENT_LINK = 'https://ipn.eg/S/gm2000/instapay/0dqErO';
+const PaymentOption: React.FC<{ value: string; selected: string; onChange: (val: string) => void; title: string; icon: React.ReactNode }> = ({ value, selected, onChange, title, icon }) => (
+    <label htmlFor={value} className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${selected === value ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
+        <input type="radio" id={value} name="paymentMethod" value={value} checked={selected === value} onChange={() => onChange(value)} className="hidden" />
+        <div className={`w-10 h-10 flex items-center justify-center rounded-full mr-4 ${selected === value ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'}`}>
+            {icon}
+        </div>
+        <span className="font-bold text-gray-800">{title}</span>
+    </label>
+);
+
+const CreditCardForm: React.FC = () => (
+    <div className="p-4 border border-gray-200 rounded-lg bg-gray-50 mt-4 animate-fadeIn space-y-4">
+        <p className="text-sm text-gray-500 text-center">سيتم عرض نموذج إدخال بيانات البطاقة هنا (لأغراض العرض فقط).</p>
+        <div>
+            <label className="block text-xs font-bold text-gray-600 mb-1">رقم البطاقة</label>
+            <input type="text" placeholder="•••• •••• •••• ••••" className="w-full p-2 border rounded-md bg-white disabled:bg-gray-200" disabled />
+        </div>
+         <div className="grid grid-cols-2 gap-4">
+            <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1">تاريخ الانتهاء</label>
+                <input type="text" placeholder="MM / YY" className="w-full p-2 border rounded-md bg-white disabled:bg-gray-200" disabled />
+            </div>
+            <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1">CVV</label>
+                <input type="text" placeholder="•••" className="w-full p-2 border rounded-md bg-white disabled:bg-gray-200" disabled />
+            </div>
+        </div>
+    </div>
+);
 
 const CheckoutPage: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { addToast } = useToast();
-    const { updateReceipt } = useAdmin();
     
     const item = location.state?.item as { id: string, type: 'order' | 'booking' | 'subscription', total: string | number | null, summary: string | null } | null;
     const shippingCost = location.state?.shippingCost as number ?? 0;
 
     const [shippingInfo, setShippingInfo] = useState({ address: '', governorate: 'القاهرة', phone: '' });
-    const [receiptFile, setReceiptFile] = useState<File | null>(null);
+    const [paymentMethod, setPaymentMethod] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
@@ -33,28 +59,23 @@ const CheckoutPage: React.FC = () => {
         setShippingInfo(prev => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
-    const handleConfirmPayment = async (e: React.FormEvent) => {
+    const handleProceedToPayment = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!receiptFile) {
-            addToast('يرجى رفع إيصال الدفع أولاً.', 'warning');
-            return;
-        }
-
         setIsSubmitting(true);
-        try {
-            await updateReceipt({
-                itemId: item!.id,
-                itemType: item!.type,
-                receiptFile,
-                shippingDetails: item?.type === 'order' ? shippingInfo : null
+        addToast('جاري توجيهك إلى بوابة الدفع...', 'info');
+
+        setTimeout(() => {
+            const isPaymentSuccessful = Math.random() > 0.1;
+
+            navigate('/payment/status', {
+                replace: true,
+                state: {
+                    status: isPaymentSuccessful ? 'success' : 'failure',
+                    item: item,
+                    shippingDetails: item?.type === 'order' ? shippingInfo : null
+                }
             });
-            addToast('تم رفع الإيصال بنجاح! طلبك قيد المراجعة الآن.', 'success');
-            navigate('/account');
-        } catch (error: any) {
-            addToast(`حدث خطأ: ${error.message}`, 'error');
-        } finally {
-            setIsSubmitting(false);
-        }
+        }, 2000);
     };
 
     if (!item) {
@@ -84,11 +105,12 @@ const CheckoutPage: React.FC = () => {
             </header>
             
             <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <form onSubmit={handleConfirmPayment} className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                <form onSubmit={handleProceedToPayment} className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                     <div className="lg:col-span-2 bg-white p-8 rounded-2xl shadow-lg border space-y-8">
+                        <h1 className="text-3xl font-extrabold text-gray-800">إتمام الطلب</h1>
                         {needsShipping && (
                              <section>
-                                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3"><Truck/> معلومات الشحن</h2>
+                                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3"><Truck/> 1. معلومات الشحن</h2>
                                 <div className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-bold mb-2">العنوان بالتفصيل*</label>
@@ -113,19 +135,12 @@ const CheckoutPage: React.FC = () => {
                         )}
                        
                         <section>
-                            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3"><CreditCard/> إتمام الدفع</h2>
-                             <div className="bg-blue-50 border border-blue-200 p-6 rounded-lg space-y-4">
-                                <p className="font-semibold text-gray-700">1. قم بالدفع عبر الرابط التالي:</p>
-                                <a href={PAYMENT_LINK} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-full hover:bg-blue-700 transition-colors">
-                                    <LinkIcon size={18} />
-                                    <span>افتح رابط الدفع (Instapay)</span>
-                                </a>
-                                <div className="flex items-center gap-2 text-sm text-blue-700">
-                                    <AlertCircle size={32}/>
-                                    <span>يرجى ملاحظة أن هذا الرابط سينقلك إلى موقع خارجي لإتمام عملية الدفع.</span>
-                                </div>
-                                <p className="font-semibold text-gray-700 mt-6">2. ارفع صورة إيصال الدفع هنا:</p>
-                                <ReceiptUpload file={receiptFile} setFile={setReceiptFile} disabled={isSubmitting} />
+                            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3"><CreditCard/> 2. طريقة الدفع</h2>
+                             <div className="space-y-4">
+                                <PaymentOption value="card" selected={paymentMethod} onChange={setPaymentMethod} title="البطاقة الائتمانية" icon={<CreditCard />} />
+                                {paymentMethod === 'card' && <CreditCardForm />}
+                                <PaymentOption value="instapay" selected={paymentMethod} onChange={setPaymentMethod} title="Instapay" icon={<Landmark />} />
+                                <PaymentOption value="wallet" selected={paymentMethod} onChange={setPaymentMethod} title="المحافظ الإلكترونية (فودافون كاش، إلخ)" icon={<Wallet />} />
                             </div>
                         </section>
                     </div>
@@ -157,11 +172,11 @@ const CheckoutPage: React.FC = () => {
                             </div>
                             <button 
                                 type="submit"
-                                disabled={isSubmitting || !receiptFile || (needsShipping && (!shippingInfo.address || !shippingInfo.governorate || !shippingInfo.phone))}
+                                disabled={isSubmitting || !paymentMethod || (needsShipping && (!shippingInfo.address || !shippingInfo.governorate || !shippingInfo.phone))}
                                 className="mt-6 w-full flex items-center justify-center gap-2 bg-green-600 text-white font-bold py-3 px-4 rounded-full hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                             >
                                 {isSubmitting ? <Loader2 className="animate-spin"/> : <Lock />}
-                                <span>{isSubmitting ? 'جاري التأكيد...' : 'تأكيد الطلب والدفع'}</span>
+                                <span>{isSubmitting ? 'جاري التوجيه...' : 'الانتقال للدفع الآمن'}</span>
                             </button>
                         </div>
                     </div>

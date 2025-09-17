@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { UserPlus, Eye, Link as LinkIcon } from 'lucide-react';
-import { useCommunication, JoinRequest } from '../../contexts/admin/CommunicationContext';
+// FIX: Added .tsx extension to useCommunication import to resolve module error.
+import { useCommunication, JoinRequest } from '../../contexts/admin/CommunicationContext.tsx';
 // FIX: Added .ts extension to resolve module error.
 import { formatDate } from '../../utils/helpers.ts';
-import AdminSection from '../../components/admin/AdminSection';
-import PageLoader from '../../components/ui/PageLoader';
+// FIX: Added .tsx extension to AdminSection import to resolve module error.
+import AdminSection from '../../components/admin/AdminSection.tsx';
+// FIX: Added .tsx extension to PageLoader import to resolve module error.
+import PageLoader from '../../components/ui/PageLoader.tsx';
 import ViewJoinRequestModal from '../../components/admin/ViewJoinRequestModal.tsx';
 
 const AdminJoinRequestsPage: React.FC = () => {

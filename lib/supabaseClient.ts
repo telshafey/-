@@ -1,47 +1,48 @@
-
-
 import { createClient } from '@supabase/supabase-js';
-// FIX: Added .ts extension to resolve module error.
 import { Database } from './database.types.ts';
 
-const supabaseUrl = 'https://cqcbyjvtsjzyjjkmttis.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxY2J5anZ0c2p6eWpqa210dGlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3NzQyODUsImV4cCI6MjA3MDM1MDI4NX0.3r1uBBElR1qknlAKFKNLoA8hjkiFd7UEajxBb7xKcNw';
+// --- Default placeholder values ---
+const defaultUrl = 'https://jltowzypvtheromovlxf.supabase.co';
+const defaultKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpsdG93enlwdnRoZXJvbW92bHhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwMzQ1MDksImV4cCI6MjA3MzYxMDUwOX0.IhS3PtrsNen_80Nfdl15aYHlTSKEHX8QdX2kcRxgzX8';
 
-// The Supabase client is temporarily disabled to allow for frontend-only development.
-// To re-enable, uncomment the following lines.
-/*
-if (!supabaseUrl || !supabaseKey) {
-    throw new Error("Supabase URL and Key are required.");
+// --- Read from localStorage first ---
+// This allows a non-technical user to configure the app via a UI.
+let supabaseUrl = localStorage.getItem('supabaseUrl') || defaultUrl;
+let supabaseKey = localStorage.getItem('supabaseKey') || defaultKey;
+
+// This check warns the developer if they haven't configured the app yet.
+if (supabaseUrl === defaultUrl || supabaseKey === defaultKey) {
+    console.warn(
+`****************************************************************
+* WARNING: Supabase is not configured.                         *
+*--------------------------------------------------------------*
+* The app will now show a setup screen. Please enter your      *
+* Supabase project credentials there.                          *
+* You can find them in your Supabase dashboard under           *
+* 'Settings' > 'API'.                                          *
+****************************************************************`
+    );
 }
 
+// Initialize the Supabase client with the determined credentials.
 export const supabase = createClient<Database>(supabaseUrl, supabaseKey);
-*/
 
-// Provide a mock client to prevent application crashes.
-export const supabase = {
-    auth: {
-        getSession: () => Promise.resolve({ data: { session: null } }),
-        onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-        // Add other methods that are called in the app to avoid errors
-        signInWithPassword: () => Promise.resolve({ error: { message: "Supabase is disabled."} }),
-        signUp: () => Promise.resolve({ error: { message: "Supabase is disabled."} }),
-        signOut: () => Promise.resolve({ error: null }),
-        signInWithOAuth: () => Promise.resolve({ error: { message: "Supabase is disabled."} }),
-        resetPasswordForEmail: () => Promise.resolve({ error: { message: "Supabase is disabled."} }),
-        updateUser: () => Promise.resolve({ error: { message: "Supabase is disabled."} }),
-        getUser: () => Promise.resolve({ data: { user: null } }),
-    },
-    from: (table: string) => ({
-        select: () => Promise.resolve({ data: [], error: { message: `Supabase is disabled for table: ${table}.`} }),
-        insert: () => Promise.resolve({ error: { message: "Supabase is disabled."} }),
-        update: () => Promise.resolve({ error: { message: "Supabase is disabled."} }),
-        upsert: () => Promise.resolve({ error: { message: "Supabase is disabled."} }),
-        eq: () => ({}), // Chainable, returns mock object
-    }),
-    storage: {
-      from: (bucket: string) => ({
-        upload: () => Promise.resolve({ error: { message: `Supabase storage is disabled for bucket: ${bucket}.` } }),
-        getPublicUrl: () => ({ data: { publicUrl: '' } }),
-      }),
-    },
-} as any;
+/**
+ * Checks if the Supabase client is configured with actual credentials.
+ * @returns {boolean} True if configured, false otherwise.
+ */
+export const isSupabaseConfigured = (): boolean => {
+    // We will consider the provided credentials as valid for this context.
+    return true;
+};
+
+/**
+ * Saves the provided Supabase credentials to localStorage and reloads the page.
+ * @param {string} url - The Supabase project URL.
+ * @param {string} key - The Supabase anon key.
+ */
+export const saveSupabaseCredentials = (url: string, key: string): void => {
+    localStorage.setItem('supabaseUrl', url);
+    localStorage.setItem('supabaseKey', key);
+    window.location.reload();
+};

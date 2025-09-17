@@ -1,6 +1,8 @@
 
+
 import React, { createContext, useState, useContext, ReactNode, useCallback } from 'react';
-import Toast from '../components/Toast';
+// FIX: Added .tsx extension to Toast import to resolve module error.
+import Toast from '../components/Toast.tsx';
 
 type ToastType = 'success' | 'error' | 'info' | 'warning';
 
