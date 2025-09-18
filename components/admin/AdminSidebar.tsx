@@ -2,7 +2,7 @@ import React from 'react';
 // FIX: Replaced namespace import with a named import for 'react-router-dom' to resolve module resolution errors.
 import { NavLink } from 'react-router-dom';
 import { LayoutGrid, ShoppingBag, Settings, Home, Users, Gift, Feather, CheckSquare, FileText, MessageSquare, UserPlus, DollarSign, BookOpen, Star, Truck, X } from 'lucide-react';
-import { useCommunication } from '../../contexts/admin/CommunicationContext';
+import { useCommunication } from '../../contexts/admin/CommunicationContext.tsx';
 // FIX: Added .tsx extension to resolve module error.
 import { useAuth } from '../../contexts/AuthContext.tsx';
 
@@ -127,7 +127,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
 
       {/* Sidebar */}
       <aside 
-        className={`fixed top-0 bottom-0 rtl:right-0 ltr:left-0 w-64 bg-gray-800 text-white flex flex-col z-40 transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'rtl:translate-x-full ltr:-translate-x-full'} md:translate-x-0`}
+        className={`bg-gray-800 text-white flex flex-col w-64 flex-shrink-0 transition-transform duration-300 ease-in-out z-40
+        md:relative md:translate-x-0
+        fixed inset-y-0 rtl:right-0 ltr:left-0 
+        ${isOpen ? 'translate-x-0' : 'rtl:translate-x-full ltr:-translate-x-full'}`}
       >
         <div className="h-20 flex items-center justify-between px-4 bg-gray-900 flex-shrink-0">
           <h1 className="text-xl font-bold">لوحة التحكم</h1>

@@ -17,9 +17,9 @@ import { useAuth } from './contexts/AuthContext.tsx';
 import { isSupabaseConfigured } from './lib/supabaseClient.ts';
 // FIX: Added .tsx extension to ChatWidget import to resolve module error.
 import ChatWidget from './components/ChatWidget.tsx';
+import PortalPage from './pages/PortalPage.tsx';
 
-// Lazy load all pages
-const EnhaLakHomePage = React.lazy(() => import('./pages/HomePage.tsx'));
+// Lazy load all pages except the portal
 const AboutPage = React.lazy(() => import('./pages/AboutPage.tsx'));
 const PersonalizedStoriesPage = React.lazy(() => import('./pages/PersonalizedStoriesPage.tsx'));
 const OrderPage = React.lazy(() => import('./pages/OrderPage.tsx'));
@@ -28,7 +28,6 @@ const SupportPage = React.lazy(() => import('./pages/SupportPage.tsx'));
 const JoinUsPage = React.lazy(() => import('./pages/JoinUsPage.tsx'));
 const PrivacyPolicyPage = React.lazy(() => import('./pages/PrivacyPolicyPage.tsx'));
 const TermsOfUsePage = React.lazy(() => import('./pages/TermsOfUsePage.tsx'));
-const PortalPage = React.lazy(() => import('./pages/PortalPage.tsx'));
 const CreativeWritingPage = React.lazy(() => import('./pages/CreativeWritingPage.tsx'));
 const CreativeWritingAboutPage = React.lazy(() => import('./pages/CreativeWritingAboutPage.tsx'));
 const CreativeWritingCurriculumPage = React.lazy(() => import('./pages/CreativeWritingCurriculumPage.tsx'));
@@ -83,13 +82,12 @@ const AppContent: React.FC = () => {
     return (
         <div className="flex flex-col min-h-screen">
             {shouldShowHeaderFooter && <Header />}
-            <main className="flex-grow flex">
+            <main className="flex-grow">
                 <Suspense fallback={<PageLoader />}>
                     <Routes>
-                        <Route path="/" element={<PortalPage />} />
+                        <Route index element={<PortalPage />} />
                         
                         {/* Enha Lak */}
-                        <Route path="/enha-lak" element={<EnhaLakHomePage />} />
                         <Route path="/enha-lak/store" element={<PersonalizedStoriesPage />} />
                         <Route path="/enha-lak/order/:productKey" element={<ProtectedRoute><OrderPage /></ProtectedRoute>} />
                         <Route path="/enha-lak/join-us" element={<JoinUsPage />} />

@@ -63,11 +63,11 @@ const Footer: React.FC = () => {
                     {isCreativeWriting ? (
                         <>
                             <li><Link to="/creative-writing/booking" className="text-gray-600 hover:text-blue-500 transition-colors">الباقات والحجز</Link></li>
-                            <li><Link to="/enha-lak" className="text-gray-600 hover:text-blue-500 transition-colors">قصص "إنها لك"</Link></li>
+                            <li><Link to="/enha-lak/store" className="text-gray-600 hover:text-blue-500 transition-colors">قصص "إنها لك"</Link></li>
                         </>
                     ) : (
                          <>
-                            <li><Link to="/enha-lak" className="text-gray-600 hover:text-blue-500 transition-colors">مشروع "إنها لك"</Link></li>
+                            <li><Link to="/enha-lak/store" className="text-gray-600 hover:text-blue-500 transition-colors">مشروع "إنها لك"</Link></li>
                             <li><Link to="/creative-writing" className="text-gray-600 hover:text-blue-500 transition-colors">برنامج "بداية الرحلة"</Link></li>
                         </>
                     )}

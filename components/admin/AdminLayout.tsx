@@ -70,16 +70,16 @@ const AdminLayout: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100">
         <AdminSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-        <div className="md:rtl:mr-64 md:ltr:ml-64">
-            <header className="md:hidden sticky top-0 bg-white shadow-sm z-20 flex items-center justify-between p-4 border-b">
+        <div className="flex-1 flex flex-col overflow-hidden">
+             <header className="md:hidden sticky top-0 bg-white shadow-sm z-20 flex items-center justify-between p-4 border-b">
                 <h1 className="text-lg font-bold">لوحة التحكم</h1>
                 <button onClick={() => setIsSidebarOpen(true)} className="text-gray-700">
                     <Menu size={24} />
                 </button>
             </header>
-            <main className="p-6 sm:p-8 lg:p-10">
+            <main className="flex-1 overflow-y-auto p-6 sm:p-8 lg:p-10">
                 <Suspense fallback={<PageLoader text="جاري تحميل الصفحة..." />}>
                     {routesContent}
                 </Suspense>

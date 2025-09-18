@@ -1,43 +1,10 @@
-import React, { useState } from 'react';
-// FIX: Replaced named imports with a namespace import for 'react-router-dom' to resolve module resolution errors.
+import React from 'react';
 import { Link } from 'react-router-dom';
-// FIX: Added .tsx extension to the import of AdminContext to resolve module loading error.
 import { useAdmin } from '../contexts/AdminContext.tsx';
 import PageLoader from '../components/ui/PageLoader';
-// FIX: Added .ts extension to resolve module error.
 import { formatDate } from '../utils/helpers.ts';
-import { ArrowLeft } from 'lucide-react';
-
-const PostCard: React.FC<{ post: any }> = ({ post }) => {
-    const [imageLoaded, setImageLoaded] = useState(false);
-    return (
-        <Link to={`/blog/${post.slug}`} className="group bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transform hover:-translate-y-2 transition-transform duration-300 border">
-            <div className="h-56 bg-gray-100 flex items-center justify-center overflow-hidden relative">
-                {!imageLoaded && <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>}
-                <img 
-                    src={post.image_url || 'https://i.ibb.co/RzJzQhL/hero-image-new.jpg'} 
-                    alt={post.title} 
-                    className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 transition-opacity ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                    loading="lazy" 
-                    onLoad={() => setImageLoaded(true)}
-                />
-            </div>
-            <div className="p-6 flex flex-col flex-grow">
-                <h2 className="text-xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{post.title}</h2>
-                <p className="text-sm text-gray-500 mt-2">
-                    بواسطة {post.author_name} &bull; {formatDate(post.published_at)}
-                </p>
-                <p className="mt-4 text-gray-600 text-sm flex-grow line-clamp-3">
-                    {post.content}
-                </p>
-                <div className="mt-6 flex items-center font-semibold text-blue-600">
-                    <span>اقرأ المزيد</span>
-                    <ArrowLeft size={20} className="ms-2 transition-transform group-hover:-translate-x-1 rtl:group-hover:translate-x-1" />
-                </div>
-            </div>
-        </Link>
-    );
-};
+import { ArrowLeft, BookOpen } from 'lucide-react';
+import PostCard from '../components/shared/PostCard.tsx';
 
 
 const BlogPage: React.FC = () => {
@@ -71,7 +38,8 @@ const BlogPage: React.FC = () => {
                     </div>
                 ) : (
                     <div className="text-center py-16 text-gray-500">
-                        <h2 className="text-xl font-semibold">لا توجد مقالات منشورة حالياً</h2>
+                        <BookOpen className="mx-auto h-16 w-16 text-gray-400" />
+                        <h2 className="mt-4 text-xl font-semibold">لا توجد مقالات منشورة حالياً</h2>
                         <p>يرجى العودة قريباً للاطلاع على جديدنا.</p>
                     </div>
                 )}

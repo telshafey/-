@@ -54,7 +54,6 @@ const Header: React.FC = () => {
         }
         if (currentSection === 'enha-lak') {
             return [
-                { path: "/enha-lak", label: "رئيسية إنها لك" },
                 { path: "/enha-lak/store", label: 'المتجر' },
                 { path: "/enha-lak/subscription", label: "الاشتراك الشهري" },
                 { path: "/blog", label: "المدونة" },
@@ -63,7 +62,7 @@ const Header: React.FC = () => {
         }
         // For Portal
         return [
-            { path: "/enha-lak", label: 'قصص "إنها لك"' },
+            { path: "/enha-lak/store", label: 'قصص "إنها لك"' },
             { path: "/creative-writing", label: "برنامج 'بداية الرحلة'" },
             { path: "/about", label: "عنا" },
             { path: "/blog", label: "المدونة" },
@@ -90,7 +89,7 @@ const Header: React.FC = () => {
     );
 
     return (
-        <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-40">
+        <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 z-40">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-20">
                     <div className="flex-shrink-0">

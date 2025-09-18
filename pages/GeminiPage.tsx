@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { GoogleGenAI, Type, Content } from "@google/genai";
 import { Bot, User, Send, Loader2, Sparkles, ArrowLeft } from 'lucide-react';
@@ -18,28 +19,28 @@ const productDetails = [
     title: 'القصة المخصصة',
     description: 'قصة فريدة تجعل طفلك بطل الحكاية، مع دمج اسمه وصورته.',
     imageUrl: 'https://i.ibb.co/P9tGk1X/product-custom-story.png',
-    link: '/order/custom_story'
+    link: '/enha-lak/order/custom_story'
   },
   {
     key: 'coloring_book',
     title: 'دفتر التلوين',
     description: 'شخصيات طفلك من قصته في دفتر تلوين ممتع.',
     imageUrl: 'https://i.ibb.co/m9xG3yS/product-coloring-book.png',
-    link: '/order/coloring_book'
+    link: '/enha-lak/order/coloring_book'
   },
     { 
         key: 'dua_booklet', 
         title: 'كتيب الأذكار والأدعية', 
         description: 'رفيق يومي مصور لتعليم الأدعية والأذكار اليومية.',
         imageUrl: 'https://i.ibb.co/R4k5p1S/product-dua-booklet.png',
-        link: '/order/dua_booklet'
+        link: '/enha-lak/order/dua_booklet'
     },
     { 
         key: 'gift_box', 
         title: 'بوكس الهدية', 
         description: 'المجموعة الكاملة في بوكس أنيق، أفضل هدية متكاملة.',
         imageUrl: 'https://i.ibb.co/dK5zZ7s/product-gift-box.png',
-        link: '/order/gift_box'
+        link: '/enha-lak/order/gift_box'
     },
 ];
 

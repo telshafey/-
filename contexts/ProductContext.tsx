@@ -70,11 +70,14 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
                 setSiteBrandingState(data.site_branding as unknown as SiteBranding);
                 setShippingCostsState(data.shipping_costs as ShippingCosts);
             } else {
-                 throw new Error("لم يتم العثور على إعدادات الموقع. يرجى التأكد من تهيئة قاعدة البيانات.");
+                 const initError = new Error("لم يتم العثور على إعدادات الموقع. يرجى التأكد من تهيئة قاعدة البيانات.");
+                 setError(initError.message);
+                 addToast(initError.message, 'error');
             }
         } catch (e: any) {
             console.error("Fetch product data error:", e.message || e);
-            setError(`فشل الاتصال بقاعدة البيانات: ${e.message}`);
+            const fetchErrorMsg = `فشل الاتصال بقاعدة البيانات: ${e.message}`;
+            setError(fetchErrorMsg);
             addToast(`فشل الاتصال بقاعدة البيانات. تأكد من صحة بيانات الاتصال.`, 'error');
         } finally {
             setLoading(false);
@@ -132,6 +135,32 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         addToast('تم تحديث العلامة التجارية للموقع.', 'success');
     };
     
+    // Radical Fix: Use a dependency-free, inline-styled loading and error gate
+    // to prevent crashes from external dependencies (like lucide-react) during initial load.
+    if (loading || !prices || !siteBranding || !shippingCosts) {
+        if (error) {
+            return (
+                <div style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    height: '100vh', backgroundColor: '#fef2f2', color: '#b91c1c',
+                    fontFamily: 'sans-serif', padding: '2rem', textAlign: 'center'
+                }}>
+                    <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>خطأ في تحميل البيانات الأساسية</h1>
+                    <p>{error}</p>
+                    <p style={{ marginTop: '1rem', fontSize: '0.875rem' }}>يرجى التحقق من إعدادات الاتصال بـ Supabase وتحديث الصفحة.</p>
+                </div>
+            );
+        }
+        return (
+            <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                height: '100vh', fontFamily: 'sans-serif', fontSize: '1.25rem', color: '#4b5563'
+            }}>
+                <p>...جاري تهيئة المنصة</p>
+            </div>
+        );
+    }
+
     const value = {
         prices,
         setPrices,
