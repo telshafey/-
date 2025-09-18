@@ -43,6 +43,30 @@ interface ProductContextType {
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
+// --- Default values to prevent app from getting stuck ---
+const defaultPrices: Prices = {
+    story: { printed: 0, electronic: 0 },
+    coloringBook: 0,
+    duaBooklet: 0,
+    valuesStory: 0,
+    skillsStory: 0,
+    giftBox: 0,
+    subscriptionBox: 0,
+};
+
+const defaultBranding: SiteBranding = {
+    logoUrl: null,
+    creativeWritingLogoUrl: null,
+    heroImageUrl: null,
+    aboutImageUrl: null,
+    creativeWritingPortalImageUrl: null,
+};
+
+const defaultShippingCosts: ShippingCosts = {};
+EGYPTIAN_GOVERNORATES.forEach(gov => {
+    defaultShippingCosts[gov] = gov === "القاهرة" ? 0 : 60; // Default for Cairo is 0, others 60
+});
+
 export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [prices, setPricesState] = useState<Prices | null>(null);
     const [siteBranding, setSiteBrandingState] = useState<SiteBranding | null>(null);
@@ -64,21 +88,33 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
             if (fetchError) throw fetchError;
             
             if (data) {
-                // FIX: Cast to 'unknown' first to handle Supabase's broad 'Json' type safely.
-                setPricesState(data.prices as unknown as Prices);
-                // FIX: Cast to 'unknown' first to handle Supabase's broad 'Json' type safely.
-                setSiteBrandingState(data.site_branding as unknown as SiteBranding);
-                setShippingCostsState(data.shipping_costs as ShippingCosts);
+                const fetchedPrices = data.prices as unknown as Prices;
+                const fetchedBranding = data.site_branding as unknown as SiteBranding;
+                const fetchedShipping = data.shipping_costs as ShippingCosts;
+
+                setPricesState(fetchedPrices || defaultPrices);
+                setSiteBrandingState(fetchedBranding || defaultBranding);
+                setShippingCostsState(fetchedShipping || defaultShippingCosts);
+
+                if (!fetchedPrices || !fetchedBranding || !fetchedShipping) {
+                    addToast("بعض إعدادات الموقع الأساسية مفقودة. يرجى مراجعة لوحة التحكم.", 'warning');
+                }
             } else {
                  const initError = new Error("لم يتم العثور على إعدادات الموقع. يرجى التأكد من تهيئة قاعدة البيانات.");
                  setError(initError.message);
                  addToast(initError.message, 'error');
+                 setPricesState(defaultPrices);
+                 setSiteBrandingState(defaultBranding);
+                 setShippingCostsState(defaultShippingCosts);
             }
         } catch (e: any) {
             console.error("Fetch product data error:", e.message || e);
             const fetchErrorMsg = `فشل الاتصال بقاعدة البيانات: ${e.message}`;
             setError(fetchErrorMsg);
             addToast(`فشل الاتصال بقاعدة البيانات. تأكد من صحة بيانات الاتصال.`, 'error');
+            setPricesState(defaultPrices);
+            setSiteBrandingState(defaultBranding);
+            setShippingCostsState(defaultShippingCosts);
         } finally {
             setLoading(false);
         }

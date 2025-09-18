@@ -36,7 +36,8 @@ const RoleBasedRoute: React.FC<{ children: React.ReactElement, allowedRoles: Use
 
 const AdminLayout: React.FC = () => {
   const { currentUser } = useAuth();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // For mobile overlay
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false); // For desktop collapse
 
   let routesContent;
 
@@ -61,17 +62,22 @@ const AdminLayout: React.FC = () => {
               <Route path="instructors" element={<RoleBasedRoute allowedRoles={['super_admin', 'creative_writing_supervisor']}><AdminInstructorsPage /></RoleBasedRoute>} />
               
               {/* New granular routes */}
-              <Route path="content-management" element={<RoleBasedRoute allowedRoles={['super_admin', 'content_editor']}><AdminContentManagementPage /></Route>} />
-              <Route path="blog" element={<RoleBasedRoute allowedRoles={['super_admin', 'content_editor']}><AdminBlogPage /></Route>} />
-              <Route path="support" element={<RoleBasedRoute allowedRoles={['super_admin', 'support_agent']}><AdminSupportPage /></Route>} />
-              <Route path="join-requests" element={<RoleBasedRoute allowedRoles={['super_admin', 'support_agent']}><AdminJoinRequestsPage /></Route>} />
+              <Route path="content-management" element={<RoleBasedRoute allowedRoles={['super_admin', 'content_editor']}><AdminContentManagementPage /></RoleBasedRoute>} />
+              <Route path="blog" element={<RoleBasedRoute allowedRoles={['super_admin', 'content_editor']}><AdminBlogPage /></RoleBasedRoute>} />
+              <Route path="support" element={<RoleBasedRoute allowedRoles={['super_admin', 'support_agent']}><AdminSupportPage /></RoleBasedRoute>} />
+              <Route path="join-requests" element={<RoleBasedRoute allowedRoles={['super_admin', 'support_agent']}><AdminJoinRequestsPage /></RoleBasedRoute>} />
           </Routes>
       );
   }
 
   return (
     <div className="flex h-screen bg-gray-100">
-        <AdminSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+        <AdminSidebar 
+          isOpen={isSidebarOpen} 
+          setIsOpen={setIsSidebarOpen} 
+          isCollapsed={isSidebarCollapsed}
+          setIsCollapsed={setIsSidebarCollapsed}
+        />
         <div className="flex-1 flex flex-col overflow-hidden">
              <header className="md:hidden sticky top-0 bg-white shadow-sm z-20 flex items-center justify-between p-4 border-b">
                 <h1 className="text-lg font-bold">لوحة التحكم</h1>
