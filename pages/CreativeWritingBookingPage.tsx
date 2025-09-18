@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 // FIX: Replaced namespace import with named imports for 'react-router-dom' to resolve module resolution errors.
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useCreativeWritingAdmin, Instructor, CreativeWritingPackage, AdditionalService } from '../../contexts/admin/CreativeWritingAdminContext.tsx';
-import { useAuth } from '../../contexts/AuthContext.tsx';
-import { useToast } from '../../contexts/ToastContext.tsx';
+import { useCreativeWritingAdmin, Instructor, CreativeWritingPackage, AdditionalService } from '../contexts/admin/CreativeWritingAdminContext.tsx';
+import { useAuth } from '../contexts/AuthContext.tsx';
+import { useToast } from '../contexts/ToastContext.tsx';
 // FIX: Added .tsx extension to PageLoader import to resolve module error.
-import PageLoader from '../../components/ui/PageLoader.tsx';
-import BookingSummary from '../../components/creative-writing/BookingSummary.tsx';
+import PageLoader from '../components/ui/PageLoader.tsx';
+import BookingSummary from '../components/creative-writing/BookingSummary.tsx';
 import { CheckCircle, AlertCircle, Package, User, Calendar, Send, Loader2, ArrowLeft, ArrowRight, Users } from 'lucide-react';
-import BookingCalendar from '../../components/BookingCalendar.tsx';
+import BookingCalendar from '../components/BookingCalendar.tsx';
 // FIX: Added .tsx extension to ShareButtons import to resolve module loading error.
-import ShareButtons from '../../components/shared/ShareButtons.tsx';
+import ShareButtons from '../components/shared/ShareButtons.tsx';
 
 type BookingStep = 'package' | 'instructor' | 'child' | 'schedule' | 'confirm';
 

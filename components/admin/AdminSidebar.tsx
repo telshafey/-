@@ -133,7 +133,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen, isCollap
       {/* Sidebar */}
       <aside 
         className={`bg-gray-800 text-white flex flex-col flex-shrink-0 transition-all duration-300 ease-in-out z-40
-        md:relative md:translate-x-0
+        md:translate-x-0
         fixed inset-y-0 rtl:right-0 ltr:left-0 
         ${isOpen ? 'translate-x-0' : 'rtl:translate-x-full ltr:-translate-x-full'}
         ${isCollapsed ? 'md:w-20' : 'md:w-64'}`}

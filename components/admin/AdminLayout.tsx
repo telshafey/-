@@ -78,7 +78,7 @@ const AdminLayout: React.FC = () => {
           isCollapsed={isSidebarCollapsed}
           setIsCollapsed={setIsSidebarCollapsed}
         />
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${isSidebarCollapsed ? 'md:mr-20' : 'md:mr-64'}`}>
              <header className="md:hidden sticky top-0 bg-white shadow-sm z-20 flex items-center justify-between p-4 border-b">
                 <h1 className="text-lg font-bold">لوحة التحكم</h1>
                 <button onClick={() => setIsSidebarOpen(true)} className="text-gray-700">
