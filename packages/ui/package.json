@@ -1,0 +1,49 @@
+{
+  "name": "@alrehla/ui",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./Accordion": "./src/Accordion.tsx",
+    "./Button": "./src/Button.tsx",
+    "./Checkbox": "./src/Checkbox.tsx",
+    "./Dropdown": "./src/Dropdown.tsx",
+    "./ErrorState": "./src/ErrorState.tsx",
+    "./FormField": "./src/FormField.tsx",
+    "./Image": "./src/Image.tsx",
+    "./Input": "./src/Input.tsx",
+    "./Modal": "./src/Modal.tsx",
+    "./PageLoader": "./src/PageLoader.tsx",
+    "./Section": "./src/Section.tsx",
+    "./Select": "./src/Select.tsx",
+    "./Skeleton": "./src/Skeleton.tsx",
+    "./SkeletonCard": "./src/SkeletonCard.tsx",
+    "./Skeletons": "./src/Skeletons.tsx",
+    "./StatusBadge": "./src/StatusBadge.tsx",
+    "./Table": "./src/Table.tsx",
+    "./Tabs": "./src/Tabs.tsx",
+    "./Textarea": "./src/Textarea.tsx",
+    "./card": "./src/card.tsx",
+    "./StatCard": "./src/StatCard.tsx",
+    "./useModalAccessibility": "./src/useModalAccessibility.ts",
+    "./Toast": "./src/Toast.tsx",
+    "./IconMap": "./src/IconMap.tsx"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@alrehla/utils": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "lucide-react": "^0.462.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.3"
+  }
+}

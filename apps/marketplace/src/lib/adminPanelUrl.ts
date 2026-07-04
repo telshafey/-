@@ -1,0 +1,13 @@
+const DEFAULT_ADMIN_PANEL_URL = 'http://localhost:3001';
+
+const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '');
+
+export const getAdminPanelUrl = (path = ''): string => {
+  const base = trimTrailingSlash((import.meta as any).env?.VITE_ADMIN_PANEL_URL || DEFAULT_ADMIN_PANEL_URL);
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${base}${normalizedPath === '/' ? '' : normalizedPath}`;
+};
+
+export const redirectToAdminPanel = (path = '/') => {
+  window.location.assign(getAdminPanelUrl(path));
+};

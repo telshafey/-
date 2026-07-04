@@ -1,0 +1,49 @@
+{
+  "name": "@alrehla/api",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./services/aiService": "./src/services/aiService.ts",
+    "./services/authService": "./src/services/authService.ts",
+    "./services/bookingService": "./src/services/bookingService.ts",
+    "./services/cloudinaryService": "./src/services/cloudinaryService.ts",
+    "./services/communicationService": "./src/services/communicationService.ts",
+    "./services/contentService": "./src/services/contentService.ts",
+    "./services/financialService": "./src/services/financialService.ts",
+    "./services/gamificationService": "./src/services/gamificationService.ts",
+    "./services/mockAdapter": "./src/services/mockAdapter.ts",
+    "./services/orderService": "./src/services/orderService.ts",
+    "./services/publicService": "./src/services/publicService.ts",
+    "./services/reportingService": "./src/services/reportingService.ts",
+    "./services/settingsService": "./src/services/settingsService.ts",
+    "./services/storageService": "./src/services/storageService.ts",
+    "./services/userService": "./src/services/userService.ts",
+    "./lib/api": "./src/lib/api.ts",
+    "./lib/config": "./src/lib/config.ts",
+    "./lib/constants": "./src/lib/constants.ts",
+    "./lib/database.types": "./src/lib/database.types.ts",
+    "./lib/schemas": "./src/lib/schemas.ts",
+    "./lib/supabaseClient": "./src/lib/supabaseClient.ts",
+    "./lib/utils": "./src/lib/utils.ts",
+    "./data/mockData": "./src/data/mockData.ts",
+    "./lib/tokenManager": "./src/lib/tokenManager.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@alrehla/types": "workspace:*",
+    "@alrehla/config": "workspace:*",
+    "@alrehla/utils": "workspace:*",
+    "@supabase/supabase-js": "^2.45.0",
+    "uuid": "^11.0.0"
+  },
+  "peerDependencies": {},
+  "devDependencies": {
+    "typescript": "^5.5.3"
+  }
+}

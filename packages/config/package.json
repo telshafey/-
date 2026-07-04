@@ -1,0 +1,25 @@
+{
+  "name": "@alrehla/config",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./config": "./src/config.ts",
+    "./constants": "./src/constants.ts",
+    "./mockData": "./src/mockData.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@alrehla/types": "workspace:*",
+    "@alrehla/auth": "workspace:*"
+  },
+  "peerDependencies": {},
+  "devDependencies": {
+    "typescript": "^5.5.3"
+  }
+}

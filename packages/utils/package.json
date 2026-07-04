@@ -1,0 +1,29 @@
+{
+  "name": "@alrehla/utils",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./governorates": "./src/governorates.ts",
+    "./helpers": "./src/helpers.ts",
+    "./imageCompression": "./src/imageCompression.ts",
+    "./pricingCalculator": "./src/pricingCalculator.ts",
+    "./schemas": "./src/schemas.ts",
+    "./utils": "./src/utils.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.23.8",
+    "@alrehla/types": "workspace:*",
+    "@alrehla/config": "workspace:*"
+  },
+  "peerDependencies": {},
+  "devDependencies": {
+    "typescript": "^5.5.3"
+  }
+}

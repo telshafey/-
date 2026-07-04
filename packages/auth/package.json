@@ -1,0 +1,22 @@
+{
+  "name": "@alrehla/auth",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./roles": "./src/roles.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@alrehla/types": "workspace:*"
+  },
+  "peerDependencies": {},
+  "devDependencies": {
+    "typescript": "^5.5.3"
+  }
+}
