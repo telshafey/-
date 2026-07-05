@@ -1,3 +1,5 @@
+"use client";
+
 
 import React, { createContext, useState, useEffect, useContext, ReactNode, useMemo, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -22,8 +24,9 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [cart, setCart] = useState<CartItem[]>(() => {
+        if (typeof window === 'undefined') return [];
         try {
-            const localData = sessionStorage.getItem('alrehlaCart');
+            const localData = window.sessionStorage.getItem('alrehlaCart');
             return localData ? JSON.parse(localData) : [];
         } catch (error) {
             console.error("Could not parse cart from sessionStorage", error);
@@ -33,7 +36,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     useEffect(() => {
         try {
-            sessionStorage.setItem('alrehlaCart', JSON.stringify(cart));
+            window.sessionStorage.setItem('alrehlaCart', JSON.stringify(cart));
         } catch (error) {
             console.error("Could not save cart to sessionStorage", error);
             // If storage is full, we could alert the user, but typically we just log it.
@@ -60,7 +63,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const clearCart = useCallback(() => {
         setCart([]);
         try {
-            sessionStorage.removeItem('alrehlaCart');
+            window.sessionStorage.removeItem('alrehlaCart');
         } catch (e) {
             console.error("Failed to clear cart storage", e);
         }

@@ -78,12 +78,14 @@ web_modules/
 .env.production.local
 .env.production
 .env.development
+!.env.example
+!.env.local.example
 
 # Turborepo cache
 .turbo/
 
 # Next.js build output
-.next/``
+.next/
 out/
 
 # Vite build output
@@ -92,3 +94,5 @@ dist/
 # OS metadata
 .DS_Store
 Thumbs.db
+
+backups/

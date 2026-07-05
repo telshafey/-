@@ -1,6 +1,9 @@
+"use client";
+
 import React from 'react';
 import { Check } from 'lucide-react';
 import type { PersonalizedProduct } from '../../lib/database.types';
+import Image from '../ui/Image';
 
 interface AddonsSectionProps {
     addonProducts: PersonalizedProduct[];
@@ -19,9 +22,9 @@ const AddonsSection: React.FC<AddonsSectionProps> = React.memo(({ addonProducts,
     };
 
     return (
-        <div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-6">أضف كنوزاً إضافية لطلبك</h3>
-            <div className="space-y-4">
+        <div className="space-y-4">
+            <h3 className="text-xl font-bold text-gray-800">إضافات للقصة (اختياري)</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {addonProducts.map(product => {
                     const isSelected = selectedAddons.includes(product.key);
                     const price = getPrice(product);
@@ -34,7 +37,7 @@ const AddonsSection: React.FC<AddonsSectionProps> = React.memo(({ addonProducts,
                             <div className={`w-6 h-6 flex-shrink-0 flex items-center justify-center rounded-full border-2 ${isSelected ? 'bg-blue-600 border-blue-600' : 'border-gray-300'}`}>
                                 {isSelected && <Check size={16} className="text-white" />}
                             </div>
-                            <img src={product.image_url || 'https://i.ibb.co/C0bSJJT/favicon.png'} alt={product.title} className="w-12 h-12 rounded-md object-contain bg-gray-100" />
+                            <Image src={product.image_url || 'https://i.ibb.co/C0bSJJT/favicon.png'} alt={product.title} className="w-12 h-12 rounded-md bg-gray-100" objectFit="contain" />
                             <div className="flex-grow">
                                 <h4 className="font-bold text-gray-800">{product.title}</h4>
                                 <p className="text-sm text-gray-500">{product.description}</p>

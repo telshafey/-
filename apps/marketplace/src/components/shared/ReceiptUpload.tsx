@@ -1,8 +1,11 @@
+"use client";
+
 
 import React, { useState, useEffect } from 'react';
 import { Upload, Loader2 } from 'lucide-react';
 import { compressImage } from '../../utils/imageCompression';
 import { useToast } from '../../contexts/ToastContext';
+import Image from '../ui/Image';
 
 interface ReceiptUploadProps {
     file: File | null;
@@ -11,18 +14,23 @@ interface ReceiptUploadProps {
 }
 
 const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ file, setFile, disabled }) => {
-    const [preview, setPreview] = useState<string | null>(null);
-    const [isProcessing, setIsProcessing] = useState(false);
+    const [preview, setPreview] = useState<string>('');
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const { addToast } = useToast();
 
     useEffect(() => {
         if (!file) {
-            setPreview(null);
+            setPreview('');
             return;
         }
-        const objectUrl = URL.createObjectURL(file);
-        setPreview(objectUrl);
-        return () => URL.revokeObjectURL(objectUrl);
+
+        if (file.type.startsWith('image/')) {
+            const objectUrl = URL.createObjectURL(file);
+            setPreview(objectUrl);
+            return () => URL.revokeObjectURL(objectUrl);
+        } else {
+            setPreview('');
+        }
     }, [file]);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,7 +68,7 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ file, setFile, disabled }
                         <span className="mr-2 text-sm text-muted-foreground">جاري المعالجة...</span>
                     </div>
                 ) : preview ? (
-                     <img src={preview} alt="Preview" className="h-24 w-auto mx-auto rounded-md object-cover shadow-sm" loading="lazy" />
+                     <Image src={preview} alt="Preview" className="h-24 w-24 mx-auto rounded-md shadow-sm" loading="lazy" />
                 ) : (
                     <Upload className="mx-auto h-12 w-12 text-gray-400" />
                 )}

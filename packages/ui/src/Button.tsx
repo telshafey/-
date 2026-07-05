@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Link, LinkProps } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@alrehla/utils/utils';
 
@@ -51,7 +50,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   loading?: boolean;
   icon?: React.ReactNode;
   as?: any; // Allow passing Link component or 'a' tag
-  to?: string; // For React Router Link
+  to?: string; // Optional router destination supplied by app-level link components
   href?: string; // For anchor tags
   target?: string;
   rel?: string;
@@ -60,14 +59,10 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
-  ({ className, variant, size, loading = false, icon, children, as, ...props }, ref) => {
-    
+  ({ className, variant, size, loading = false, icon, children, as, to, href, ...props }, ref) => {
     const isDisabled = props.disabled || loading;
-
-    // Determine the component to render: 'as' prop > Link (if 'to' is present) > 'a' (if href) > 'button'
-    let Component = as || 'button';
-    if (!as && props.to) Component = Link;
-    else if (!as && props.href) Component = 'a';
+    const Component = as || (to || href ? 'a' : 'button');
+    const linkProps = !as && Component === 'a' ? { href: href || to } : { href, to };
 
     return (
       <Component
@@ -76,6 +71,7 @@ const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPro
         disabled={Component === 'button' ? isDisabled : undefined}
         aria-busy={loading ? "true" : undefined}
         aria-disabled={isDisabled ? "true" : undefined}
+        {...linkProps}
         {...props}
       >
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (

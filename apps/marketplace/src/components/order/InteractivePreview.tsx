@@ -1,8 +1,11 @@
+"use client";
+
 
 import React from 'react';
 import { Package, User, Palette, Sparkles, Image as ImageIcon } from 'lucide-react';
 import type { PersonalizedProduct } from '../../lib/database.types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import Image from '../ui/Image';
 
 interface StoryGoal {
   key: string;
@@ -63,7 +66,7 @@ const InteractivePreview: React.FC<InteractivePreviewProps> = ({ formData, produ
                     <div className="bg-muted/50 p-4 rounded-lg flex flex-col items-center gap-3">
                          <div className="w-24 h-24 rounded-full bg-background flex items-center justify-center overflow-hidden border-2 border-white shadow-md">
                             {imagePreviewUrl ? (
-                                <img src={imagePreviewUrl} alt="Preview" className="h-full w-full object-cover" />
+                                <Image src={imagePreviewUrl} alt="Preview" className="h-full w-full" />
                             ) : (
                                 <ImageIcon className="text-muted-foreground" size={40} />
                             )}

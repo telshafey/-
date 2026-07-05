@@ -2,7 +2,6 @@
 import React from 'react';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import { Button } from './Button';
-import { Link } from 'react-router-dom';
 
 interface ErrorStateProps {
     message: string;
@@ -33,7 +32,7 @@ const ErrorState: React.FC<ErrorStateProps> = ({
                         إعادة المحاولة
                     </Button>
                 )}
-                <Button as={Link} to="/" variant="ghost" className="gap-2">
+                <Button href="/" variant="ghost" className="gap-2">
                     <Home size={16} />
                     العودة للرئيسية
                 </Button>

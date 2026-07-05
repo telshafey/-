@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import { MessageCircle, Loader2 } from 'lucide-react';
 import { usePublicData } from '../hooks/queries/public/usePublicDataQuery';

@@ -1,3 +1,5 @@
+"use client";
+
 
 import React, { useState } from 'react';
 import type { Instructor, CreativeWritingPackage } from '../../../lib/database.types';
@@ -143,10 +145,10 @@ const InstructorSelection: React.FC<InstructorSelectionProps> = ({ instructors, 
                             )}
                         >
                             <div className="relative mx-auto mb-3">
-                                <img 
+                                <Image 
                                     src={instructor.avatar_url || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} 
                                     alt={instructor.name} 
-                                    className="w-20 h-20 rounded-full object-cover"
+                                    className="w-20 h-20 rounded-full"
                                 />
                                 {isSelected && (
                                     <div className="absolute -bottom-1 -right-1 bg-primary text-white rounded-full p-1 border-2 border-white">

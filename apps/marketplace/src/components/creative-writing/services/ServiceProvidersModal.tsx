@@ -1,9 +1,12 @@
+"use client";
+
 import React from 'react';
 import Modal from '../../ui/Modal';
 import { Button } from '../../ui/Button';
 import { usePublicData } from '../../../hooks/queries/public/usePublicDataQuery';
 import type { StandaloneService, Instructor } from '../../../lib/database.types';
 import PageLoader from '../../ui/PageLoader';
+import Image from '../../ui/Image';
 
 interface ServiceProvidersModalProps {
     isOpen: boolean;
@@ -15,7 +18,7 @@ interface ServiceProvidersModalProps {
 const ProviderCard: React.FC<{ instructor: Instructor, price: number, onSelect: () => void }> = ({ instructor, price, onSelect }) => (
     <div className="p-4 border rounded-lg flex items-center justify-between gap-4 bg-background">
         <div className="flex items-center gap-3">
-            <img src={instructor.avatar_url || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} alt={instructor.name} className="w-12 h-12 rounded-full object-cover"/>
+            <Image src={instructor.avatar_url || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} alt={instructor.name} className="w-12 h-12 rounded-full"/>
             <div>
                 <p className="font-bold">{instructor.name}</p>
                 <p className="text-xs text-muted-foreground">{instructor.specialty}</p>

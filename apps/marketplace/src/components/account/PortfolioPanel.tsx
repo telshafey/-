@@ -1,6 +1,8 @@
+"use client";
+
 
 import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router-compat';
 import { useUserAccountData, type EnrichedBooking, type SessionAttachment } from '../../hooks/queries/user/useUserDataQuery';
 import { useAuth } from '../../contexts/AuthContext';
 import PageLoader from '../ui/PageLoader';

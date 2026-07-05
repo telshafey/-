@@ -1,12 +1,14 @@
+"use client";
+
 
 import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate, NavLink, Outlet } from 'react-router-dom';
+import { useNavigate, NavLink, Outlet } from '@/lib/router-compat';
 import { LogOut, LayoutDashboard, GalleryVertical } from 'lucide-react';
 import { useStudentDashboardData } from '../../hooks/queries/user/useJourneyDataQuery';
 import Image from '../ui/Image';
 
-const StudentLayout: React.FC = () => {
+const StudentLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     const { currentChildProfile, currentUser, signOut } = useAuth();
     const navigate = useNavigate();
     const { data, isLoading } = useStudentDashboardData();
@@ -79,7 +81,7 @@ const StudentLayout: React.FC = () => {
             </div>
             
             <main className="flex-grow container mx-auto p-4 sm:p-6 lg:p-8">
-                <Outlet />
+                {children ?? <Outlet />}
             </main>
         </div>
     );

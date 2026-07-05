@@ -1,6 +1,8 @@
+"use client";
+
 
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from '@/lib/router-compat';
 import { useAuth } from '../../contexts/AuthContext';
 
 const ProfileCompletionGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {

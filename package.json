@@ -11,7 +11,9 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
-    "start": "turbo run start"
+    "start": "turbo run start",
+    "build:marketplace": "pnpm --filter @alrehla/marketplace build",
+    "build:admin": "pnpm --filter @alrehla/admin-panel build"
   },
   "devDependencies": {
     "@types/react": "^18.3.5",

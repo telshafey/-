@@ -1,6 +1,8 @@
+"use client";
+
 
 import React, { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router-compat';
 import { Edit, UserPlus, ShoppingBag, BookOpen, Star, ArrowLeft, Award, Lock, Mail, Key, Trash2, Link2Off, Save, X, AlertTriangle, CheckCircle } from 'lucide-react';
 import type { Order, CreativeWritingBooking, Subscription, Badge, ChildBadge } from '../../lib/database.types';
 import type { EnrichedChildProfile } from '../../hooks/queries/user/useUserDataQuery';

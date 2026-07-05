@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 
 const HowItWorksStep: React.FC<{ icon: React.ReactNode, title: string, description: string }> = ({ icon, title, description }) => (

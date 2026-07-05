@@ -1,6 +1,8 @@
+"use client";
+
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router-compat';
 import type { BlogPost } from '../../lib/database.types';
 import { formatDate } from '../../utils/helpers';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '../ui/card';

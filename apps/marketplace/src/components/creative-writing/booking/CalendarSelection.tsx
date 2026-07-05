@@ -1,3 +1,5 @@
+"use client";
+
 
 import React from 'react';
 import type { Instructor } from '../../../lib/database.types';

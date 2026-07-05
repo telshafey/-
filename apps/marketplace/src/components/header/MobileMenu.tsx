@@ -1,6 +1,8 @@
+"use client";
+
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router-compat';
 import NavItem from './NavItem';
 import { Button } from '../ui/Button';
 

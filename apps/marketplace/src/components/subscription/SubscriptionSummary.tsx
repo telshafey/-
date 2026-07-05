@@ -1,3 +1,5 @@
+"use client";
+
 
 import React from 'react';
 import { Gift, Check, Send, Truck, Puzzle, Plus } from 'lucide-react';

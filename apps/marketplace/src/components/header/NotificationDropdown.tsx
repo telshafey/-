@@ -1,6 +1,8 @@
+"use client";
+
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router-compat';
 import { Button } from '../ui/Button';
 import { Card, CardContent, CardFooter, CardHeader } from '../ui/card';
 import { formatDate } from '../../utils/helpers';

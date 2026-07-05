@@ -1,23 +1,34 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@alrehla/types";
 
-// استخدام environment variables - لا تستخدم hardcoded values
-const env = ((import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {});
-const SUPABASE_URL = env.VITE_SUPABASE_URL || "";
-const VITE_SUPABASE_PUBLISHABLE_KEY =
-  env.VITE_SUPABASE_PUBLISHABLE_KEY || "";
+declare const process: { env?: Record<string, string | undefined> } | undefined;
 
-// التحقق من وجود الـ credentials
-if (!SUPABASE_URL || !VITE_SUPABASE_PUBLISHABLE_KEY) {
+type PublicEnv = Record<string, string | undefined>;
+
+const SUPABASE_URL =
+  (typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_SUPABASE_URL : undefined) ||
+  ((import.meta as any).env?.VITE_SUPABASE_URL) ||
+  "";
+const SUPABASE_PUBLISHABLE_KEY =
+  (typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) : undefined) ||
+  ((import.meta as any).env?.VITE_SUPABASE_PUBLISHABLE_KEY) ||
+  ((import.meta as any).env?.VITE_SUPABASE_ANON_KEY) ||
+  "";
+
+  
+const hasConfiguredSupabaseCredentials = Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
+const EFFECTIVE_SUPABASE_URL = SUPABASE_URL || "https://placeholder.supabase.co";
+const EFFECTIVE_SUPABASE_PUBLISHABLE_KEY = SUPABASE_PUBLISHABLE_KEY || "placeholder-anon-key";
+
+if (!hasConfiguredSupabaseCredentials) {
   console.warn(
-    "⚠️ Supabase credentials are missing. Please set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY",
+    "⚠️ Supabase credentials are missing. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (or Vite equivalents).",
   );
 }
 
-// إنشاء العميل الرئيسي
 export const supabase = createClient<Database>(
-  SUPABASE_URL,
-  VITE_SUPABASE_PUBLISHABLE_KEY,
+  EFFECTIVE_SUPABASE_URL,
+  EFFECTIVE_SUPABASE_PUBLISHABLE_KEY,
   {
     auth: {
       persistSession: true,
@@ -27,12 +38,8 @@ export const supabase = createClient<Database>(
   },
 );
 
-/**
- * عميل مؤقت لا يحفظ الجلسة في المتصفح
- * يستخدم لإنشاء حسابات فرعية (مثل الطلاب) دون تسجيل خروج ولي الأمر
- */
 export const getTemporaryClient = () => {
-  return createClient<Database>(SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY, {
+  return createClient<Database>(EFFECTIVE_SUPABASE_URL, EFFECTIVE_SUPABASE_PUBLISHABLE_KEY, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
@@ -42,5 +49,5 @@ export const getTemporaryClient = () => {
 };
 
 export const hasSupabaseCredentials = () => {
-  return !!SUPABASE_URL && !!VITE_SUPABASE_PUBLISHABLE_KEY;
+  return hasConfiguredSupabaseCredentials;
 };

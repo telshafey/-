@@ -1,50 +1,33 @@
-import { useEffect } from 'react';
+declare const process: { env?: Record<string, string | undefined> } | undefined;
 
-// Google Analytics 4 (GA4) Integration
-const GA_TRACKING_ID = import.meta.env.VITE_GA_TRACKING_ID;
+type WindowWithGA = Window & {
+  gtag?: (...args: unknown[]) => void;
+};
+
+const env = typeof process === 'undefined' ? {} : (process.env ?? {});
+const GA_TRACKING_ID = env.NEXT_PUBLIC_GA_TRACKING_ID;
 
 export const initGA = () => {
-    if (!GA_TRACKING_ID) return;
+  if (!GA_TRACKING_ID || typeof window === 'undefined') return;
 
-    // Load Google Analytics script
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`;
-    document.head.appendChild(script);
+  const existingScript = document.querySelector(`script[src*="googletagmanager.com/gtag/js"]`);
+  if (existingScript) return;
 
-    // Initialize gtag
-    window.dataLayer = window.dataLayer || [];
-    function gtag(...args: any[]) {
-        window.dataLayer.push(args);
-    }
-    gtag('js', new Date());
-    gtag('config', GA_TRACKING_ID);
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`;
+  document.head.appendChild(script);
+
+  const win = window as WindowWithGA;
+  win.gtag = (...args: unknown[]) => {
+    (window as any).dataLayer = (window as any).dataLayer || [];
+    (window as any).dataLayer.push(args);
+  };
+  win.gtag('js', new Date());
+  win.gtag('config', GA_TRACKING_ID);
 };
 
 export const pageview = (url: string) => {
-    if (!GA_TRACKING_ID || !window.gtag) return;
-    window.gtag('config', GA_TRACKING_ID, {
-        page_path: url,
-    });
-};
-
-export const event = ({ action, category, label, value }: {
-    action: string;
-    category?: string;
-    label?: string;
-    value?: number;
-}) => {
-    if (!window.gtag) return;
-    window.gtag('event', action, {
-        event_category: category,
-        event_label: label,
-        value: value,
-    });
-};
-
-// React Hook for tracking page views
-export const usePageTracking = () => {
-    useEffect(() => {
-        initGA();
-    }, []);
+  if (!GA_TRACKING_ID || typeof window === 'undefined') return;
+  (window as WindowWithGA).gtag?.('config', GA_TRACKING_ID, { page_path: url });
 };

@@ -1,5 +1,7 @@
+"use client";
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router-compat';
 import { getAdminPanelUrl } from '../../lib/adminPanelUrl';
 import { Card, CardContent, CardFooter, CardHeader } from '../ui/card';
 import { LogOut } from 'lucide-react';

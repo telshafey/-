@@ -3,6 +3,16 @@ import tsPlugin from "@typescript-eslint/eslint-plugin";
 
 export default [
   {
+    ignores: [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/.next/**",
+      "**/.turbo/**",
+      "**/coverage/**",
+      "backups/**",
+    ],
+  },
+  {
     files: ["**/*.ts", "**/*.tsx"],
     languageOptions: {
       parser: tsParser,

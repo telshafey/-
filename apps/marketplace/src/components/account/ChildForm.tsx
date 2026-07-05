@@ -1,3 +1,5 @@
+"use client";
+
 
 import React, { useState, useEffect } from 'react';
 import { Save, Image as ImageIcon, ArrowLeft, Loader2 } from 'lucide-react';

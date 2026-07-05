@@ -1,6 +1,8 @@
+"use client";
+
 
 import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router-compat';
 import { Calendar, ShoppingBag, Star, ArrowLeft, Video, BookOpen, Users, UserPlus } from 'lucide-react';
 import { useUserAccountData } from '../../hooks/queries/user/useUserDataQuery';
 import { useAuth } from '../../contexts/AuthContext';

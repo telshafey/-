@@ -1,3 +1,5 @@
+"use client";
+
 
 import React, { useState, useEffect } from 'react';
 import { Loader2, Upload, Link as LinkIcon, AlertCircle, Copy, Check } from 'lucide-react';

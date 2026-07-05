@@ -1,7 +1,10 @@
+"use client";
+
 import React from 'react';
 import { Edit, Trash2, UserPlus } from 'lucide-react';
 import type { ChildProfile } from '../../lib/database.types';
 import { Button } from '../ui/Button';
+import Image from '../ui/Image';
 
 interface ChildCardProps {
     child: ChildProfile;
@@ -13,10 +16,10 @@ interface ChildCardProps {
 const ChildCard: React.FC<ChildCardProps> = ({ child, onEdit, onDelete, onCreateStudentAccount }) => {
     return (
         <div className="bg-white p-4 rounded-2xl shadow-md border flex flex-col sm:flex-row items-center gap-4">
-            <img 
+            <Image 
                 src={child.avatar_url || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} 
                 alt={child.name} 
-                className="w-20 h-20 rounded-full object-cover border-2 border-blue-100"
+                className="w-20 h-20 rounded-full border-2 border-blue-100"
                 loading="lazy"
             />
             <div className="flex-grow text-center sm:text-right">

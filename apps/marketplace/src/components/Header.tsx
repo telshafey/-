@@ -1,6 +1,8 @@
+"use client";
+
 
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router-compat';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { useProduct } from '../contexts/ProductContext';
@@ -104,7 +106,7 @@ const Header: React.FC = () => {
                         
                         {isLoggedIn ? (
                             <>
-                                <div ref={el => (menusRef.current['notifications'] = el)} className="relative">
+                                <div ref={(el) => { menusRef.current['notifications'] = el; }} className="relative">
                                      <Button variant="ghost" size="icon" onClick={() => toggleMenu('notifications')} aria-label="Notifications">
                                         <Bell className={`h-5 w-5 ${unreadCount > 0 ? 'text-primary' : ''}`} />
                                         {unreadCount > 0 && (
@@ -123,7 +125,7 @@ const Header: React.FC = () => {
                                     )}
                                 </div>
                                 
-                                <div ref={el => (menusRef.current['user'] = el)} className="relative">
+                                <div ref={(el) => { menusRef.current['user'] = el; }} className="relative">
                                     <Button variant="ghost" size="icon" onClick={() => toggleMenu('user')} aria-label="User Menu" className="bg-primary/5 hover:bg-primary/10 rounded-full">
                                         <User className="h-5 w-5 text-primary" />
                                     </Button>

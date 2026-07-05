@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import { Facebook, Twitter, MessageCircle, Link as LinkIcon } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';

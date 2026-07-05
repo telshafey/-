@@ -1,9 +1,12 @@
+"use client";
+
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router-compat';
 import type { ChildProfile } from '../../../lib/database.types';
 import { UserPlus } from 'lucide-react';
 import { Button } from '../../ui/Button';
+import Image from '../../ui/Image';
 
 interface ChildSelectionProps {
     childProfiles: ChildProfile[];
@@ -45,7 +48,7 @@ const ChildSelection: React.FC<ChildSelectionProps> = ({ childProfiles, onSelect
                         onClick={() => handleSelect(child)}
                         className={`p-4 border-2 rounded-2xl text-center transition-all flex flex-col items-center gap-2 hover:shadow-lg hover:border-blue-500 ${selectedId === child.id ? 'border-blue-500 ring-2 ring-blue-200 bg-blue-50' : 'border-gray-200'}`}
                     >
-                        <img src={child.avatar_url || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} alt={child.name} className="w-20 h-20 rounded-full mx-auto object-cover mb-3" />
+                        <Image src={child.avatar_url || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} alt={child.name} className="w-20 h-20 rounded-full mx-auto mb-3" />
                         <h3 className="font-bold">{child.name}</h3>
                         <p className="text-xs text-gray-500">{child.age} سنوات</p>
                     </button>

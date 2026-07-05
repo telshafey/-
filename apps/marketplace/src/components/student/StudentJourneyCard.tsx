@@ -1,6 +1,8 @@
+"use client";
+
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router-compat';
 import { BookOpen, ArrowLeft, Clock } from 'lucide-react';
 import type { CreativeWritingBooking, ScheduledSession, CreativeWritingPackage } from '../../lib/database.types';
 import { formatDate } from '../../utils/helpers';

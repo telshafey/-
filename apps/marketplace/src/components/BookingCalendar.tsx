@@ -1,3 +1,5 @@
+"use client";
+
 
 import React, { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Clock, Globe } from 'lucide-react';

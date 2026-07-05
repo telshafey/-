@@ -1,3 +1,5 @@
+"use client";
+
 
 import React, { createContext, useContext, ReactNode, useMemo } from 'react';
 import type { Prices, SiteBranding, ShippingCosts } from '../lib/database.types';

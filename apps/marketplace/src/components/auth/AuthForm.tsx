@@ -1,6 +1,8 @@
+"use client";
+
 import React, { useState } from "react";
 import { redirectToAdminPanel } from '../../lib/adminPanelUrl';
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "@/lib/router-compat";
 import { useAuth } from "../../contexts/AuthContext";
 import type { UserRole } from "../../lib/database.types";
 import { Button } from "../ui/Button";

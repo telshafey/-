@@ -1,3 +1,5 @@
+"use client";
+
 
 import React, { useState, useEffect } from 'react';
 import FormField from '../ui/FormField';
@@ -7,6 +9,7 @@ import type { ChildProfile, UserProfile } from '../../lib/database.types';
 import { UserPlus, User as UserIcon } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useFormContext } from 'react-hook-form';
+import Image from '../ui/Image';
 
 interface ChildDetailsSectionProps {
     childProfiles: ChildProfile[];
@@ -103,7 +106,7 @@ const ChildDetailsSection: React.FC<ChildDetailsSectionProps> = ({
                             onClick={() => handleProfileSelect(child)} 
                             className={`p-4 border-2 rounded-2xl text-center transition-all flex flex-col items-center gap-2 hover:shadow-md hover:border-blue-400 ${mode === 'profile' && selectedChildId === child.id ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : 'border-gray-200 bg-white'}`}
                         >
-                            <img src={child.avatar_url || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} alt={child.name} className="w-16 h-16 rounded-full object-cover border border-gray-100"/>
+                            <Image src={child.avatar_url || 'https://i.ibb.co/2S4xT8w/male-avatar.png'} alt={child.name} className="w-16 h-16 rounded-full border border-gray-100"/>
                             <span className="font-bold text-gray-800 text-sm">{child.name}</span>
                         </button>
                     ))}

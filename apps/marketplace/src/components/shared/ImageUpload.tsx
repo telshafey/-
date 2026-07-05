@@ -1,8 +1,11 @@
+"use client";
+
 
 import React, { useState, useEffect } from 'react';
 import { Image as ImageIcon, Loader2 } from 'lucide-react';
 import { compressImage } from '../../utils/imageCompression';
 import { useToast } from '../../contexts/ToastContext';
+import Image from '../ui/Image';
 
 interface ImageUploadProps {
     id: string;
@@ -12,16 +15,16 @@ interface ImageUploadProps {
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({ id, label, onFileChange, file }) => {
-    const [preview, setPreview] = useState<string | null>(null);
-    const [isProcessing, setIsProcessing] = useState(false);
+    const [preview, setPreview] = useState<string>('');
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const { addToast } = useToast();
 
     useEffect(() => {
         if (!file) {
-            setPreview(null);
+            setPreview('');
             return;
         }
-        // If file is coming back from state (already processed or raw)
+
         const objectUrl = URL.createObjectURL(file);
         setPreview(objectUrl);
         return () => URL.revokeObjectURL(objectUrl);
@@ -61,7 +64,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ id, label, onFileChange, file
                     {isProcessing ? (
                         <Loader2 className="animate-spin text-primary" />
                     ) : preview ? (
-                        <img src={preview} alt="Preview" className="h-full w-full object-cover" loading="lazy" />
+                        <Image src={preview} alt="Preview" className="h-full w-full" loading="lazy" />
                     ) : (
                         <ImageIcon className="text-gray-400" />
                     )}

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { Save, AlertCircle } from 'lucide-react';
 import { useUserMutations } from '../../hooks/mutations/useUserMutations';
