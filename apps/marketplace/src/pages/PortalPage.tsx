@@ -1,23 +1,14 @@
-import {
-  ArrowLeft,
-  BookOpen,
-  Building2,
-  Edit,
-  Feather,
-  Gift,
-  Search,
-  Target,
-} from "lucide-react";
-import React, { useMemo } from "react";
-import { Link } from "react-router-dom";
-import placeholder from "../../public/placeholder-image.jpeg";
-import PostCard from "../components/shared/PostCard";
-import TestimonialCard from "../components/shared/TestimonialCard";
-import { Button } from "../components/ui/Button";
-import Image from "../components/ui/Image";
-import PageLoader from "../components/ui/PageLoader";
-import { useProduct } from "../contexts/ProductContext";
-import { usePublicData } from "../hooks/queries/public/usePublicDataQuery";
+import { ArrowLeft, BookOpen, Building2, Edit, Feather, Gift, Search, Target } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import placeholder from '/placeholder-image.jpeg';
+import PostCard from '../components/shared/PostCard';
+import TestimonialCard from '../components/shared/TestimonialCard';
+import { Button } from '../components/ui/Button';
+import Image from '../components/ui/Image';
+import PageLoader from '../components/ui/PageLoader';
+import { useProduct } from '../contexts/ProductContext';
+import { usePublicData } from '../hooks/queries/public/usePublicDataQuery';
 const HeroSection: React.FC<{
   backgroundUrl: string | null | undefined;
   content: any;
@@ -33,18 +24,18 @@ const HeroSection: React.FC<{
     <div className="absolute inset-0 bg-gradient-to-br from-blue-900/70 via-purple-900/70 to-black/70" />
     <div className="container mx-auto px-4 text-center relative z-10">
       <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight animate-fadeIn">
-        {content?.heroTitle || "رحلة كل طفل تبدأ بقصة... وقصته تبدأ هنا"}
+        {content?.heroTitle || 'رحلة كل طفل تبدأ بقصة... وقصته تبدأ هنا'}
       </h1>
       <p
         className="mt-6 max-w-3xl mx-auto text-lg sm:text-xl text-gray-200 animate-fadeIn"
-        style={{ animationDelay: "0.2s" }}
+        style={{ animationDelay: '0.2s' }}
       >
         {content?.heroSubtitle ||
-          "منصة تربوية عربية متكاملة تصنع قصصاً مخصصة تجعل طفلك بطلاً، وتطلق مواهبه في الكتابة الإبداعية"}
+          'منصة تربوية عربية متكاملة تصنع قصصاً مخصصة تجعل طفلك بطلاً، وتطلق مواهبه في الكتابة الإبداعية'}
       </p>
       <div
         className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fadeIn"
-        style={{ animationDelay: "0.4s" }}
+        style={{ animationDelay: '0.4s' }}
       >
         <Button
           as={Link}
@@ -52,7 +43,7 @@ const HeroSection: React.FC<{
           size="lg"
           className="shadow-lg transition-transform transform hover:scale-105"
         >
-          {content?.heroButtonText1 || "اطلب قصتك المخصصة الآن"}
+          {content?.heroButtonText1 || 'اطلب قصتك المخصصة الآن'}
         </Button>
         <Button
           as={Link}
@@ -61,7 +52,7 @@ const HeroSection: React.FC<{
           variant="secondary"
           className="shadow-lg transition-transform transform hover:scale-105"
         >
-          {content?.heroButtonText2 || "اكتشف برنامج الكتابة الإبداعية"}
+          {content?.heroButtonText2 || 'اكتشف برنامج الكتابة الإبداعية'}
         </Button>
       </div>
     </div>
@@ -70,8 +61,8 @@ const HeroSection: React.FC<{
 
 // Color mapping to ensure Tailwind classes are purge-safe
 const themeClasses: Record<string, { text: string; bg: string }> = {
-  pink: { text: "text-pink-600", bg: "text-pink-600" },
-  blue: { text: "text-blue-600", bg: "text-blue-600" },
+  pink: { text: 'text-pink-600', bg: 'text-pink-600' },
+  blue: { text: 'text-blue-600', bg: 'text-blue-600' },
 };
 
 const ProjectCard: React.FC<{
@@ -81,9 +72,9 @@ const ProjectCard: React.FC<{
   imageUrl: string | null | undefined;
   icon: React.ReactNode;
   btnText: string;
-  themeColor: "pink" | "blue";
+  themeColor: 'pink' | 'blue';
 }> = ({ title, description, link, imageUrl, icon, btnText, themeColor }) => {
-  const colorClass = themeClasses[themeColor]?.text || "text-primary";
+  const colorClass = themeClasses[themeColor]?.text || 'text-primary';
 
   return (
     <Link
@@ -93,7 +84,7 @@ const ProjectCard: React.FC<{
       {/* Image Container */}
       <div className="relative h-64 sm:h-72 overflow-hidden">
         <Image
-          src={imageUrl || "https://placehold.co/600x400?text=No+Image"}
+          src={imageUrl || 'https://placehold.co/600x400?text=No+Image'}
           alt={title}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
@@ -114,9 +105,7 @@ const ProjectCard: React.FC<{
           {description}
         </p>
 
-        <div
-          className={`flex items-center font-bold ${colorClass} mt-auto group-hover:underline`}
-        >
+        <div className={`flex items-center font-bold ${colorClass} mt-auto group-hover:underline`}>
           <span>{btnText}</span>
           <ArrowLeft
             size={20}
@@ -145,21 +134,15 @@ const HowItWorksStep: React.FC<{
 const PortalPage: React.FC = () => {
   const { siteBranding, loading: productLoading } = useProduct();
   const { data, isLoading: publicDataLoading } = usePublicData();
-  const {
-    blogPosts,
-    siteContent,
-    personalizedProducts = [],
-    publishers = [],
-  } = data || {};
+  const { blogPosts, siteContent, personalizedProducts = [], publishers = [] } = data || {};
 
   // الحصول على صور المشاريع من المنتجات المخصصة لضمان المزامنة
   const customStoryImg = useMemo(
-    () => personalizedProducts.find((p) => p.key === "custom_story")?.image_url,
+    () => personalizedProducts.find((p) => p.key === 'custom_story')?.image_url,
     [personalizedProducts],
   );
   const subBoxImg = useMemo(
-    () =>
-      personalizedProducts.find((p) => p.key === "subscription_box")?.image_url,
+    () => personalizedProducts.find((p) => p.key === 'subscription_box')?.image_url,
     [personalizedProducts],
   );
 
@@ -172,45 +155,41 @@ const PortalPage: React.FC = () => {
 
   return (
     <div className="bg-background animate-fadeIn">
-      <HeroSection
-        backgroundUrl={siteBranding?.heroImageUrl}
-        content={content}
-      />
+      <HeroSection backgroundUrl={siteBranding?.heroImageUrl} content={content} />
 
       {content?.showProjectsSection !== false && (
         <section className="bg-muted/30 py-20 sm:py-24">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-4">
-                {content?.projectsTitle || "أقسامنا الرئيسية"}
+                {content?.projectsTitle || 'أقسامنا الرئيسية'}
               </h2>
               <p className="max-w-2xl mx-auto text-lg text-muted-foreground">
-                {content?.projectsSubtitle || "بوابتان لعالم من الإبداع والنمو"}
+                {content?.projectsSubtitle || 'بوابتان لعالم من الإبداع والنمو'}
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto">
               <ProjectCard
-                title={content?.enhaLakTitle || "إنها لك"}
+                title={content?.enhaLakTitle || 'إنها لك'}
                 description={
-                  content?.enhaLakDescription ||
-                  "قصص مخصصة ومنتجات تربوية فريدة تجعل طفلك بطلاً."
+                  content?.enhaLakDescription || 'قصص مخصصة ومنتجات تربوية فريدة تجعل طفلك بطلاً.'
                 }
                 link="/enha-lak"
                 imageUrl={customStoryImg || siteBranding?.enhaLakPortalImageUrl}
                 icon={<BookOpen size={32} />}
-                btnText={content?.enhaLakBtnText || "اكتشف القصص"}
+                btnText={content?.enhaLakBtnText || 'اكتشف القصص'}
                 themeColor="pink"
               />
               <ProjectCard
-                title={content?.creativeWritingTitle || "بداية الرحلة"}
+                title={content?.creativeWritingTitle || 'بداية الرحلة'}
                 description={
                   content?.creativeWritingDescription ||
-                  "برنامج متكامل لتنمية مهارات الكتابة الإبداعية."
+                  'برنامج متكامل لتنمية مهارات الكتابة الإبداعية.'
                 }
                 link="/creative-writing"
                 imageUrl={siteBranding?.creativeWritingPortalImageUrl}
                 icon={<Feather size={32} />}
-                btnText={content?.creativeWritingBtnText || "ابدأ الرحلة"}
+                btnText={content?.creativeWritingBtnText || 'ابدأ الرحلة'}
                 themeColor="blue"
               />
             </div>
@@ -225,8 +204,7 @@ const PortalPage: React.FC = () => {
           <div
             className="absolute inset-0 opacity-5 pointer-events-none"
             style={{
-              backgroundImage:
-                "url('https://www.transparenttextures.com/patterns/cubes.png')",
+              backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')",
             }}
           ></div>
 
@@ -235,8 +213,7 @@ const PortalPage: React.FC = () => {
               <Building2 className="text-blue-600" /> شركاؤنا في النجاح
             </h2>
             <p className="max-w-2xl mx-auto text-lg text-muted-foreground mb-16 leading-relaxed">
-              نفخر بالتعاون مع نخبة من دور النشر العربية لتقديم أفضل محتوى
-              لأطفالكم.
+              نفخر بالتعاون مع نخبة من دور النشر العربية لتقديم أفضل محتوى لأطفالكم.
             </p>
 
             <div className="flex flex-wrap justify-center gap-10 md:gap-16 items-center">
@@ -248,10 +225,7 @@ const PortalPage: React.FC = () => {
                 >
                   <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-full border-4 border-white shadow-lg group-hover:shadow-xl bg-white flex items-center justify-center p-3 overflow-hidden ring-1 ring-gray-100 group-hover:ring-blue-200">
                     <Image
-                      src={
-                        publisher.logo_url ||
-                        "https://i.ibb.co/2S4xT8w/male-avatar.png"
-                      }
+                      src={publisher.logo_url || 'https://i.ibb.co/2S4xT8w/male-avatar.png'}
                       alt={publisher.store_name}
                       className="w-full h-full"
                       objectFit="contain"
@@ -272,7 +246,7 @@ const PortalPage: React.FC = () => {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground">
-                {content?.stepsTitle || "رحلتنا في 3 خطوات"}
+                {content?.stepsTitle || 'رحلتنا في 3 خطوات'}
               </h2>
             </div>
             {content?.steps ? (
@@ -323,12 +297,12 @@ const PortalPage: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center max-w-6xl mx-auto">
               <div className="order-last lg:order-first">
                 <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-6 flex items-center gap-3">
-                  <Target className="text-primary" />{" "}
-                  {content?.aboutSectionTitle || "قصتنا: من فكرة إلى رحلة"}
+                  <Target className="text-primary" />{' '}
+                  {content?.aboutSectionTitle || 'قصتنا: من فكرة إلى رحلة'}
                 </h2>
                 <p className="text-lg text-muted-foreground leading-relaxed mb-8">
                   {content?.aboutSectionContent ||
-                    "نحن منصة تسعى لتمكين الأطفال من خلال القصص والكتابة..."}
+                    'نحن منصة تسعى لتمكين الأطفال من خلال القصص والكتابة...'}
                 </p>
                 <Button
                   as={Link}
@@ -336,15 +310,12 @@ const PortalPage: React.FC = () => {
                   size="lg"
                   className="shadow-lg transition-transform transform hover:scale-105"
                 >
-                  {content?.aboutBtnText || "تعرف علينا أكثر"}
+                  {content?.aboutBtnText || 'تعرف علينا أكثر'}
                 </Button>
               </div>
               <div className="relative px-4 sm:px-8">
                 <Image
-                  src={
-                    siteBranding?.aboutPortalImageUrl ||
-                    "https://placehold.co/600x600"
-                  }
+                  src={siteBranding?.aboutPortalImageUrl || 'https://placehold.co/600x600'}
                   alt="عن منصة الرحلة"
                   className="rounded-3xl shadow-2xl aspect-square rotate-3 hover:rotate-0 transition-transform duration-500"
                 />
@@ -359,10 +330,10 @@ const PortalPage: React.FC = () => {
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground">
-                {content?.testimonialsTitle || "ماذا تقول عائلاتنا؟"}
+                {content?.testimonialsTitle || 'ماذا تقول عائلاتنا؟'}
               </h2>
               <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-                {content?.testimonialsSubtitle || "آراء نفخر بها"}
+                {content?.testimonialsSubtitle || 'آراء نفخر بها'}
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
@@ -391,10 +362,10 @@ const PortalPage: React.FC = () => {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground">
-                {content?.blogTitle || "من مدونتنا"}
+                {content?.blogTitle || 'من مدونتنا'}
               </h2>
               <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-                {content?.blogSubtitle || "مقالات ونصائح تربوية"}
+                {content?.blogSubtitle || 'مقالات ونصائح تربوية'}
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
@@ -422,10 +393,10 @@ const PortalPage: React.FC = () => {
         <section className="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground">
-              {content?.finalCtaTitle || "هل أنت جاهز لبدء الرحلة؟"}
+              {content?.finalCtaTitle || 'هل أنت جاهز لبدء الرحلة؟'}
             </h2>
             <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-              {content?.finalCtaSubtitle || "اختر المسار الذي يناسب طفلك اليوم"}
+              {content?.finalCtaSubtitle || 'اختر المسار الذي يناسب طفلك اليوم'}
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button
